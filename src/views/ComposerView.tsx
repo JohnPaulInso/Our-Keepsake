@@ -1,5 +1,7 @@
 // (2026-07-13) Build New Date Memory Composer view per Stitch & SKILL.md
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+// (2026-07-13) Import createPortal for modal stacking; was trapped in main
+import { createPortal } from 'react-dom';
 import {
   CoupleProfile,
   DotIndicator,
@@ -126,15 +128,51 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
   );
   const videoInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Meta editor modal state
+  // (2026-07-13) Add manual audio uploader ref & body scroll lock; was mic only
+  const audioFileInputRef = useRef<HTMLInputElement | null>(null);
   const [metaModalOpen, setMetaModalOpen] = useState(false);
   const [sealingAnim, setSealingAnim] = useState(false);
 
   useEffect(() => {
+    if (metaModalOpen || Boolean(pendingCropSrc)) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
     return () => {
+      document.body.classList.remove('overflow-hidden');
       if (recordTimerRef.current) clearInterval(recordTimerRef.current);
     };
-  }, []);
+  }, [metaModalOpen, pendingCropSrc]);
+
+  const handleSelectAudioFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('audio/') && !/\.(mp3|wav|m4a|aac|ogg|opus|weba)$/i.test(file.name)) {
+      onToast('Please upload an audio recording file (.wav, .mp3, etc.)', 'warning');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      setVoiceDataUrl(dataUrl);
+
+      const tempAudio = new Audio();
+      tempAudio.src = dataUrl;
+      tempAudio.onloadedmetadata = () => {
+        const sec = Math.round(tempAudio.duration) || 42;
+        setVoiceDurationSec(sec);
+      };
+
+      const cleanFileName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+      setVoiceTitle(cleanFileName || `Voice note for ${profile.partner2Name}`);
+      onToast(`Audio file attached: ${file.name}`, 'success');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
@@ -649,6 +687,38 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                 <span className="material-symbols-outlined text-[18px]">play_arrow</span>
               </button>
             </div>
+
+            {/* (2026-07-13) Add manual audio upload for wav/mp3/m4a; was mic recording only */}
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => audioFileInputRef.current?.click()}
+                className="flex-1 py-2 px-3 rounded-lg bg-surface-container-lowest hover:bg-surface-container text-primary font-label-md text-xs font-semibold flex items-center justify-center gap-1.5 border border-outline-variant/35 shadow-2xs active:scale-95 transition-all"
+              >
+                <span className="material-symbols-outlined text-[16px] text-secondary">upload_file</span>
+                <span>{voiceDataUrl ? 'Replace Audio File' : 'Upload Audio (.wav, .mp3, .m4a)'}</span>
+              </button>
+              {voiceDataUrl && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setVoiceDataUrl(undefined);
+                    onToast('Voice note removed', 'info');
+                  }}
+                  title="Remove sound recording"
+                  className="w-8 h-8 rounded-lg bg-surface-container-lowest text-error hover:bg-error-container/30 border border-outline-variant/30 flex items-center justify-center transition-colors shrink-0"
+                >
+                  <span className="material-symbols-outlined text-[15px]">delete</span>
+                </button>
+              )}
+            </div>
+            <input
+              ref={audioFileInputRef}
+              type="file"
+              accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.opus,.weba"
+              onChange={handleSelectAudioFile}
+              className="hidden"
+            />
           </div>
 
           {/* 2. Photo Polaroids Scrapbook Section */}
@@ -667,17 +737,34 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
               </span>
             </div>
 
+            {/* (2026-07-13) Add big upload placeholder for polaroids; was small button */}
+            <div
+              onClick={() => photoInputRef.current?.click()}
+              className="border-2 border-dashed border-outline-variant/60 hover:border-primary/60 bg-surface-container-lowest/80 rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-2 group hover:bg-surface-container-lowest shadow-xs"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-secondary-container/60 text-secondary group-hover:scale-105 group-hover:text-primary transition-all flex items-center justify-center shadow-xs">
+                <span className="material-symbols-outlined text-[32px]">add_photo_alternate</span>
+              </div>
+              <span className="font-label-lg text-sm sm:text-base font-bold text-primary">
+                Upload Images to Turn into Polaroids
+              </span>
+              <span className="font-body-sm text-xs text-on-surface-variant max-w-xs">
+                Tap to choose photos from your phone or desktop (1600px high-resolution cropper)
+              </span>
+            </div>
+
+            {/* 1 polaroid each in a vertical scrollable list */}
             {photos.length > 0 && (
-              <div className="grid grid-cols-2 gap-space-sm">
+              <div className="flex flex-col gap-4 w-full mt-2">
                 {photos.map((photo, index) => (
                   <div
                     key={photo.id}
-                    className="bg-surface-container-lowest p-2 rounded-lg shadow-sm flex flex-col gap-2"
+                    className="bg-[#ffffff] p-3.5 sm:p-4 rounded-xl shadow-md border border-[#e2dcd5] flex flex-col items-center gap-2.5 w-full max-w-sm mx-auto"
                   >
-                    <div className="w-full aspect-square rounded overflow-hidden bg-surface-container relative">
+                    <div className="w-full aspect-square rounded-lg overflow-hidden bg-surface-container relative shadow-inner">
                       <img
                         className="w-full h-full object-cover"
-                        alt={photo.caption}
+                        alt={photo.caption || 'Polaroid Memory'}
                         src={photo.url}
                       />
                       <button
@@ -685,38 +772,34 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                         onClick={() =>
                           setPhotos((prev) => prev.filter((item) => item.id !== photo.id))
                         }
-                        className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-primary/70 text-on-primary flex items-center justify-center text-xs backdrop-blur-sm"
+                        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-primary/80 text-on-primary flex items-center justify-center text-xs backdrop-blur-sm shadow-sm active:scale-95"
                       >
-                        <span className="material-symbols-outlined text-[14px]">close</span>
+                        <span className="material-symbols-outlined text-[15px]">close</span>
                       </button>
                     </div>
-                    <input
-                      type="text"
-                      value={photo.caption}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setPhotos((prev) =>
-                          prev.map((p, i) => (i === index ? { ...p, caption: val } : p))
-                        );
-                      }}
-                      placeholder="Add cute caption..."
-                      className="w-full bg-transparent font-body-sm text-body-sm text-primary placeholder:text-outline-variant focus:outline-none px-1"
-                    />
+                    <div className="w-full flex flex-col gap-1 px-1">
+                      <input
+                        type="text"
+                        value={photo.caption}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setPhotos((prev) =>
+                            prev.map((p, i) => (i === index ? { ...p, caption: val } : p))
+                          );
+                        }}
+                        placeholder="Add handwritten caption for Zea..."
+                        className="w-full bg-transparent font-serif italic text-sm text-primary placeholder:text-outline/60 focus:outline-none border-b border-outline-variant/30 pb-0.5 text-center"
+                      />
+                      <div className="flex items-center justify-between text-[10px] text-secondary font-label-md uppercase tracking-wider">
+                        <span>Polaroid #{index + 1}</span>
+                        <span>{photo.tag || 'MEMO'}</span>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={() => photoInputRef.current?.click()}
-              className="w-full py-space-sm bg-surface-container-lowest hover:bg-surface-container-high rounded-lg text-primary font-label-lg text-label-lg flex items-center justify-center gap-space-xs transition-colors shadow-sm border border-outline-variant/30"
-            >
-              <span className="material-symbols-outlined text-[18px] text-secondary">
-                add_photo_alternate
-              </span>
-              <span>Add Another Polaroid (1600px Cropper)</span>
-            </button>
             <input
               ref={photoInputRef}
               type="file"
@@ -821,83 +904,87 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
         </div>
       </div>
 
-      {/* High-Res Image Cropper Modal */}
-      {pendingCropSrc && (
-        <ImageCropperModal
-          imageSrc={pendingCropSrc}
-          onCancel={() => setPendingCropSrc(null)}
-          onComplete={(finalUrl, caption, tag) => {
-            setPhotos((prev) => [
-              ...prev,
-              {
-                id: `ph-${Date.now()}`,
-                url: finalUrl,
-                caption,
-                tag,
-              },
-            ]);
-            setPendingCropSrc(null);
-            onToast('High-resolution Polaroid developed & attached!', 'success');
-          }}
-        />
-      )}
+      {/* (2026-07-13) Render modals with createPortal to escape navbar z-index */}
+      {pendingCropSrc &&
+        createPortal(
+          <ImageCropperModal
+            imageSrc={pendingCropSrc}
+            onCancel={() => setPendingCropSrc(null)}
+            onComplete={(finalUrl, caption, tag) => {
+              setPhotos((prev) => [
+                ...prev,
+                {
+                  id: `ph-${Date.now()}`,
+                  url: finalUrl,
+                  caption,
+                  tag,
+                },
+              ]);
+              setPendingCropSrc(null);
+              onToast('High-resolution Polaroid developed & attached!', 'success');
+            }}
+          />,
+          document.body
+        )}
 
       {/* Date, Location & Weather Metadata Modal */}
-      {metaModalOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setMetaModalOpen(false)}
-        >
+      {metaModalOpen &&
+        createPortal(
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-5 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col gap-3.5"
+            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setMetaModalOpen(false)}
           >
-            <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2.5">
-              <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
-                Date &amp; Location
-              </h3>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-5 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col gap-3.5"
+            >
+              <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2.5">
+                <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                  Date &amp; Location
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setMetaModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary"
+                >
+                  <span className="material-symbols-outlined text-[18px]">close</span>
+                </button>
+              </div>
+              <div>
+                <label className="font-label-md text-label-md uppercase text-outline block mb-1">
+                  Date (Whole Day Note)
+                </label>
+                <input
+                  type="date"
+                  value={dateISO}
+                  onChange={(e) => setDateISO(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                />
+              </div>
+              <div>
+                <label className="font-label-md text-label-md uppercase text-outline block mb-1">
+                  Location Geotag
+                </label>
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Bogo City, Cebu"
+                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                />
+              </div>
+              {/* (2026-07-13) Remove temperature, sky weather & mood badge; was present */}
               <button
                 type="button"
                 onClick={() => setMetaModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary"
+                className="w-full py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase shadow-md mt-1"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                Done
               </button>
             </div>
-            <div>
-              <label className="font-label-md text-label-md uppercase text-outline block mb-1">
-                Date (Whole Day Note)
-              </label>
-              <input
-                type="date"
-                value={dateISO}
-                onChange={(e) => setDateISO(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
-              />
-            </div>
-            <div>
-              <label className="font-label-md text-label-md uppercase text-outline block mb-1">
-                Location Geotag
-              </label>
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="Bogo City, Cebu"
-                className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
-              />
-            </div>
-            {/* (2026-07-13) Remove temperature, sky weather & mood badge; was present */}
-            <button
-              type="button"
-              onClick={() => setMetaModalOpen(false)}
-              className="w-full py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase shadow-md mt-1"
-            >
-              Done
-            </button>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

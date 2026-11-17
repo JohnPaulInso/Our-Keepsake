@@ -20,11 +20,14 @@ import {
   DigitalLoveLetter,
   DotIndicator,
   KeepsakeMemory,
+  PolaroidPhoto,
   SecretYearNote,
 } from '../types';
 import { calculateDaysTogether, formatDuration, formatStandardDate } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 import { CustomDropdown } from '../components/CustomDropdown';
+// (2026-07-13) Import DB in TimelineView for date queries; was unimported
+import { DB } from '../db/localDb';
 
 // (2026-07-13) Add digitalLoveLetters to TimelineViewProps vs secretNotes only
 interface TimelineViewProps {
@@ -384,7 +387,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     const mStr = String(calendarMonth + 1).padStart(2, '0');
     const dStr = String(selectedDay).padStart(2, '0');
     const targetIso = `${calendarYear}-${mStr}-${dStr}`;
-    return memories.filter((m) => m.dateISO === targetIso);
+    // (2026-07-13) Load date memory directly via date index; was scan all dates
+    return DB.getMemoriesByDateSync(targetIso);
   }, [calendarYear, calendarMonth, selectedDay, memories]);
 
   const primaryDateMemory = selectedDayMemories[0] || null;
@@ -1376,7 +1380,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             {/* Photos if any */}
             {primaryDateMemory?.photos && primaryDateMemory.photos.length > 0 && (
               <div className="mt-5 grid grid-cols-2 gap-2">
-                {primaryDateMemory.photos.map((p, idx) => (
+                {/* (2026-07-13) Type map params for PolaroidPhoto; was implicit any */}
+                {primaryDateMemory.photos.map((p: PolaroidPhoto, idx: number) => (
                   <div key={idx} className="relative rounded-xl overflow-hidden h-40">
                     <img src={p.url} alt={p.caption || ''} className="w-full h-full object-cover" />
                   </div>

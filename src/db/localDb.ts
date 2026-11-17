@@ -350,6 +350,19 @@ class LocalDatabase {
     return memCache.memories;
   }
 
+  // (2026-07-13) Add date-indexed memory retrieval; was loading full list
+  getMemoriesByDateSync(dateISO: string): KeepsakeMemory[] {
+    return (memCache.memories || []).filter((m) => m.dateISO === dateISO);
+  }
+
+  async getMemoriesByDate(dateISO: string): Promise<KeepsakeMemory[]> {
+    if (memCache.memories && memCache.memories.length > 0) {
+      return memCache.memories.filter((m) => m.dateISO === dateISO);
+    }
+    const all = await idbGet<KeepsakeMemory[]>('memories');
+    return (all || []).filter((m) => m.dateISO === dateISO);
+  }
+
   async setMemories(memories: KeepsakeMemory[], fromRemote = false): Promise<void> {
     memCache.memories = memories;
     await idbSet('memories', memories);
