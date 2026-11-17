@@ -377,6 +377,80 @@ export const App: React.FC = () => {
       {/* Subtle Paper Dot Texture Background */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.035] bg-[radial-gradient(#4a3b32_1px,transparent_1px)] [background-size:20px_20px] z-0" />
 
+      {/* (2026-07-13) Add subtle pet doodle background; was dot pattern only */}
+      <div id="subtle-pet-drawings-bg" className="fixed inset-0 pointer-events-none overflow-hidden select-none z-0">
+        {/* Subtle decorative pet doodles */}
+        {/* Sleeping curled cat */}
+        <svg aria-hidden="true" className="absolute top-10 right-4 md:right-16 w-32 h-32 md:w-44 md:h-44 text-primary opacity-[0.04] rotate-6" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <ellipse cx="50" cy="58" rx="28" ry="22" />
+          <circle cx="68" cy="42" r="14" />
+          <path d="M62 30 L66 22 L72 30" />
+          <path d="M74 31 L80 25 L82 35" />
+          <path d="M64 42 Q68 45 72 42" />
+          <path d="M72 46 Q74 48 76 46" />
+          <path d="M58 43 L48 41 M58 46 L46 47 M76 43 L86 42 M76 46 L86 48" />
+          <path d="M22 62 Q18 42 32 36 Q38 34 36 44" />
+        </svg>
+
+        {/* Happy floppy-eared puppy */}
+        <svg aria-hidden="true" className="absolute bottom-24 left-4 md:left-80 w-36 h-36 md:w-48 md:h-48 text-primary opacity-[0.04] -rotate-6" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <ellipse cx="50" cy="62" rx="24" ry="20" />
+          <circle cx="50" cy="38" r="16" />
+          <path d="M36 32 C28 34 26 46 32 50 C36 52 38 46 36 38" />
+          <path d="M64 32 C72 34 74 46 68 50 C64 52 62 46 64 38" />
+          <circle cx="44" cy="36" r="1.5" fill="currentColor" />
+          <circle cx="56" cy="36" r="1.5" fill="currentColor" />
+          <ellipse cx="50" cy="42" rx="3.5" ry="2.5" fill="currentColor" />
+          <path d="M47 44 Q50 48 53 44" />
+          <path d="M72 66 Q84 62 82 50" />
+          <path d="M40 78 Q42 84 46 84 M54 84 Q58 84 60 78" />
+        </svg>
+
+        {/* Playful stretching cat on tablet & desktop */}
+        <svg aria-hidden="true" className="hidden md:block absolute top-1/2 right-12 w-40 h-40 text-primary opacity-[0.035] -rotate-12" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 75 Q35 70 48 55 Q58 42 75 42" />
+          <circle cx="78" cy="40" r="10" />
+          <path d="M74 31 L77 24 L82 32 M82 33 L88 26 L88 35" />
+          <path d="M20 75 L14 77 M24 75 L20 80 M52 75 L54 82 M60 72 L64 80" />
+          <path d="M18 75 Q12 50 16 38 Q20 30 26 34" />
+        </svg>
+
+        {/* Delicate paw prints trail */}
+        <div className="absolute top-28 left-6 md:left-88 flex flex-col gap-4 text-primary opacity-[0.035] rotate-12">
+          <svg aria-hidden="true" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <ellipse cx="12" cy="15" rx="5" ry="4" />
+            <circle cx="6" cy="9" r="2" />
+            <circle cx="10" cy="6" r="2" />
+            <circle cx="14" cy="6" r="2" />
+            <circle cx="18" cy="9" r="2" />
+          </svg>
+          <svg aria-hidden="true" className="w-4 h-4 ml-3" viewBox="0 0 24 24" fill="currentColor">
+            <ellipse cx="12" cy="15" rx="5" ry="4" />
+            <circle cx="6" cy="9" r="2" />
+            <circle cx="10" cy="6" r="2" />
+            <circle cx="14" cy="6" r="2" />
+            <circle cx="18" cy="9" r="2" />
+          </svg>
+        </div>
+
+        <div className="absolute bottom-40 right-8 md:right-32 flex flex-col gap-4 text-primary opacity-[0.03] -rotate-45">
+          <svg aria-hidden="true" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <ellipse cx="12" cy="15" rx="5" ry="4" />
+            <circle cx="6" cy="9" r="2" />
+            <circle cx="10" cy="6" r="2" />
+            <circle cx="14" cy="6" r="2" />
+            <circle cx="18" cy="9" r="2" />
+          </svg>
+          <svg aria-hidden="true" className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+            <ellipse cx="12" cy="15" rx="5" ry="4" />
+            <circle cx="6" cy="9" r="2" />
+            <circle cx="10" cy="6" r="2" />
+            <circle cx="14" cy="6" r="2" />
+            <circle cx="18" cy="9" r="2" />
+          </svg>
+        </div>
+      </div>
+
       {/* Custom In-App Pull-to-Refresh Indicator */}
       {pullOffset > 8 && (
         <div
