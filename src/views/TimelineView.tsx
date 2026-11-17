@@ -310,9 +310,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   >('ALL');
   const [dotFilter, setDotFilter] = useState<'ALL' | DotIndicator>('ALL');
   const [sortBy, setSortBy] = useState<'custom' | 'newest' | 'oldest'>('custom');
-  const [calendarYear, setCalendarYear] = useState<number>(2026);
-  const [calendarMonth, setCalendarMonth] = useState<number>(9); // 0-indexed: 9 = October
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  // (2026-07-13) Default calendar to current month and date; was fixed Oct 2026
+  const [calendarYear, setCalendarYear] = useState<number>(() => new Date().getFullYear());
+  const [calendarMonth, setCalendarMonth] = useState<number>(() => new Date().getMonth());
+  const [selectedDay, setSelectedDay] = useState<number | null>(() => new Date().getDate());
   // (2026-07-13) Add fullscreen date state without navbars; was standard view only
   const [isFullscreenDateOpen, setIsFullscreenDateOpen] = useState<boolean>(false);
   const [audioState, setAudioState] = useState(audioEngine.getState());
@@ -871,8 +872,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           <button
             type="button"
             onClick={() => {
-              setCalendarYear(2026);
-              setCalendarMonth(9);
+              // (2026-07-13) Reset view to current month on clear; was fixed Oct 2026
+              setCalendarYear(new Date().getFullYear());
+              setCalendarMonth(new Date().getMonth());
               setSelectedDay(null);
             }}
             className="flex items-center gap-1 text-secondary font-label-md text-label-md tracking-wider uppercase hover:text-primary transition-colors"
