@@ -1,5 +1,5 @@
 // (2026-07-13) Build New Date Memory Composer view per Stitch & SKILL.md
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   CoupleProfile,
   DotIndicator,
@@ -54,21 +54,36 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
   onToast,
 }) => {
   const [dateISO, setDateISO] = useState(editingMemory?.dateISO || '2026-11-16');
+  // (2026-07-13) Set default location to Bogo City, Cebu & all-day; was Soho
   const [timeFormatted, setTimeFormatted] = useState(
-    editingMemory?.timeFormatted || '7:30 PM PST'
+    editingMemory?.timeFormatted || 'All Day'
   );
   const [location, setLocation] = useState(
-    editingMemory?.location || 'Little French Bistro, Soho'
+    editingMemory?.location || 'Bogo City, Cebu'
   );
-  const [weatherTemp, setWeatherTemp] = useState(editingMemory?.weatherTemp || 'Crisp 60°');
+  const [weatherTemp, setWeatherTemp] = useState(editingMemory?.weatherTemp || '');
   const [weatherConditions, setWeatherConditions] = useState(
-    editingMemory?.weatherConditions || 'Soft Evening Glow'
+    editingMemory?.weatherConditions || ''
   );
-  const [moodVibe, setMoodVibe] = useState(editingMemory?.moodVibe || 'Tender & Unhurried');
+  const [moodVibe, setMoodVibe] = useState(editingMemory?.moodVibe || '');
   const [title, setTitle] = useState(editingMemory?.title || '');
   const [letterHeading, setLetterHeading] = useState(editingMemory?.letterHeading || '');
   const [storyBody, setStoryBody] = useState(editingMemory?.storyBody || '');
   const [quoteHighlight, setQuoteHighlight] = useState(editingMemory?.quoteHighlight || '');
+
+  // (2026-07-13) Suggest title from heartfelt note if not entered; was none
+  const suggestedTitle = useMemo(() => {
+    if (!storyBody || !storyBody.trim()) return '';
+    const cleaned = storyBody.replace(/^["'“‘\s]+|["'”’\s]+$/g, '').trim();
+    if (!cleaned) return '';
+    const firstSentence = cleaned.split(/[\r\n.!?]+/)[0]?.trim() || '';
+    if (!firstSentence) return '';
+    if (firstSentence.length <= 40) {
+      return firstSentence.charAt(0).toUpperCase() + firstSentence.slice(1);
+    }
+    const words = firstSentence.split(/\s+/).slice(0, 6).join(' ');
+    return (words.charAt(0).toUpperCase() + words.slice(1)).replace(/[,;:]+$/, '') + '...';
+  }, [storyBody]);
   const [selectedTags, setSelectedTags] = useState<string[]>(
     editingMemory?.vibeTags || ['First Time', 'Cozy Rainy Day']
   );
@@ -203,11 +218,15 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     onToast('Video Capsule attached & optimized for storage!', 'success');
   };
 
+  // (2026-07-13) Use suggested title if empty & optional quote; was required
   const buildMemoryPayload = (isDraft: boolean): KeepsakeMemory => {
-    const cleanTitle = title.trim() || `Evening at ${location.split(',')[0]}`;
+    const cleanTitle =
+      title.trim() ||
+      suggestedTitle ||
+      `A Keepsake for ${formatStandardDate(dateISO)}`;
     const cleanBody =
       storyBody.trim() ||
-      `Another unforgettable day with ${profile.partner2Name} at ${location}. I wrote this down so we never forget how warm and peaceful this moment felt.`;
+      `Another unforgettable day with ${profile.partner2Name} in ${location}. I wrote this down so we never forget how warm and peaceful this moment felt.`;
     const categories: MemoryCategory[] = ['EVENT'];
     if (photos.length > 0) categories.push('PHOTO');
     if (voiceTitle.trim()) categories.push('VOICE_MEMO');
@@ -221,19 +240,17 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       keepsakeNumber: editingMemory?.keepsakeNumber || 85 + totalMemoriesCount,
       volumeNumber: editingMemory?.volumeNumber || 15,
       dateISO,
-      timeFormatted,
+      timeFormatted: timeFormatted.trim() || 'All Day',
       title: cleanTitle,
       letterHeading: letterHeading.trim() || cleanTitle,
       snippet: cleanBody.slice(0, 175) + (cleanBody.length > 175 ? '...' : ''),
       storyBody: cleanBody,
-      quoteHighlight:
-        quoteHighlight.trim() ||
-        `Every little moment with ${profile.partner2Name} is worth remembering forever.`,
+      quoteHighlight: quoteHighlight.trim(),
       signOffAuthor: `${profile.partner1Name} • St. ${editingMemory?.volumeNumber || 15}`,
-      location: location.trim() || 'Our Favorite Corner',
-      weatherTemp,
-      weatherConditions,
-      moodVibe,
+      location: location.trim() || 'Bogo City, Cebu',
+      weatherTemp: '',
+      weatherConditions: '',
+      moodVibe: '',
       vibeTags: selectedTags,
       categories,
       dotIndicators: selectedDots,
@@ -335,10 +352,10 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
               </span>
               <div className="flex flex-col min-w-0">
                 <span className="font-label-md text-label-md uppercase tracking-wider text-outline">
-                  Date &amp; Time
+                  Date
                 </span>
                 <span className="font-body-md text-body-md font-medium text-primary truncate-single">
-                  {formatStandardDate(dateISO)} • {timeFormatted}
+                  {formatStandardDate(dateISO)} • Whole Day Note
                 </span>
               </div>
             </div>
@@ -358,7 +375,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
               </span>
               <div className="flex flex-col min-w-0">
                 <span className="font-label-md text-label-md uppercase tracking-wider text-outline">
-                  Location &amp; Vibe
+                  Location
                 </span>
                 <span className="font-body-md text-body-md font-medium text-primary truncate-single">
                   {location}
@@ -383,40 +400,37 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
             </svg>
           </div>
 
-          {/* Title Input */}
+          {/* (2026-07-13) Suggest title from note if none entered; was static placeholder */}
           <div className="mb-space-md relative">
-            <label
-              className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-space-xs"
-              htmlFor="memory-title"
-            >
-              Title of this moment
-            </label>
+            <div className="flex items-center justify-between mb-space-xs flex-wrap gap-1">
+              <label
+                className="font-label-md text-label-md uppercase tracking-wider text-outline block"
+                htmlFor="memory-title"
+              >
+                Title of this moment
+              </label>
+              {suggestedTitle && !title.trim() && (
+                <button
+                  type="button"
+                  onClick={() => setTitle(suggestedTitle)}
+                  className="flex items-center gap-1 text-[11px] font-semibold text-primary bg-secondary-container/70 hover:bg-secondary-container px-2.5 py-0.5 rounded-full transition-all shadow-xs"
+                >
+                  <span className="material-symbols-outlined text-[13px]">auto_awesome</span>
+                  <span>Suggest title: “{suggestedTitle}”</span>
+                </button>
+              )}
+            </div>
             <input
               id="memory-title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="E.g., Sunday morning pastries and warm coffee..."
+              placeholder={
+                suggestedTitle
+                  ? `Suggested: "${suggestedTitle}"`
+                  : 'E.g., Sunday morning pastries and warm coffee...'
+              }
               className="w-full bg-transparent font-headline-sm text-headline-sm text-primary placeholder:text-outline-variant focus:outline-none pb-space-xs font-serif"
-            />
-            <div className="w-full h-px bg-surface-container-high" />
-          </div>
-
-          {/* Favorite Quote Input */}
-          <div className="mb-space-md relative">
-            <label
-              className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-space-xs"
-              htmlFor="memory-quote"
-            >
-              What {profile.partner2Name} Said (Highlighted Quote)
-            </label>
-            <input
-              id="memory-quote"
-              type="text"
-              value={quoteHighlight}
-              onChange={(e) => setQuoteHighlight(e.target.value)}
-              placeholder={`E.g., "You whispered that this felt like forever..."`}
-              className="w-full bg-transparent font-italic-quote text-body-md italic text-secondary placeholder:text-outline-variant/80 focus:outline-none pb-space-xs font-serif"
             />
             <div className="w-full h-px bg-surface-container-high" />
           </div>
@@ -441,16 +455,40 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
             </div>
           </div>
 
-          {/* Calendar Dot Status Selector */}
+          {/* (2026-07-13) Move quote to bottom as optional; was required & placed above note */}
+          <div className="mt-space-md pt-space-sm border-t border-outline-variant/20 relative">
+            <div className="flex items-center justify-between mb-space-xs">
+              <label
+                className="font-label-md text-label-md uppercase tracking-wider text-outline block"
+                htmlFor="memory-quote"
+              >
+                What {profile.partner2Name} Said (Highlighted Quote)
+              </label>
+              <span className="text-[11px] font-medium text-outline uppercase tracking-wider">
+                Optional
+              </span>
+            </div>
+            <input
+              id="memory-quote"
+              type="text"
+              value={quoteHighlight}
+              onChange={(e) => setQuoteHighlight(e.target.value)}
+              placeholder={`E.g., "You whispered that this felt like forever..." (Optional)`}
+              className="w-full bg-transparent font-italic-quote text-body-md italic text-secondary placeholder:text-outline-variant/80 focus:outline-none pb-space-xs font-serif"
+            />
+            <div className="w-full h-px bg-surface-container-high" />
+          </div>
+
+          {/* (2026-07-13) Update dots to Events / Date / Milestone; was Photos & Voice */}
           <div className="mt-space-md pt-space-sm border-t border-outline-variant/20">
             <span className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-space-xs">
               Calendar Ribbon Dots
             </span>
             <div className="flex flex-wrap gap-2">
               {[
-                { id: 'GOLD' as DotIndicator, label: 'Big Event', color: '#E5A93C' },
-                { id: 'MOCHA' as DotIndicator, label: 'Photos & Voice', color: '#5C4033' },
-                { id: 'ROSE' as DotIndicator, label: 'Milestone / Anniversary', color: '#C96B78' },
+                { id: 'GOLD' as DotIndicator, label: 'Events', color: '#E5A93C' },
+                { id: 'MOCHA' as DotIndicator, label: 'Date', color: '#5C4033' },
+                { id: 'ROSE' as DotIndicator, label: 'Milestone', color: '#C96B78' },
               ].map((d) => {
                 const active = selectedDots.includes(d.id);
                 return (
@@ -812,7 +850,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
           >
             <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2.5">
               <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
-                Date, Location &amp; Atmosphere
+                Date &amp; Location
               </h3>
               <button
                 type="button"
@@ -822,29 +860,16 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-2.5">
-              <div>
-                <label className="font-label-md text-label-md uppercase text-outline block mb-1">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  value={dateISO}
-                  onChange={(e) => setDateISO(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
-                />
-              </div>
-              <div>
-                <label className="font-label-md text-label-md uppercase text-outline block mb-1">
-                  Time
-                </label>
-                <input
-                  type="text"
-                  value={timeFormatted}
-                  onChange={(e) => setTimeFormatted(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
-                />
-              </div>
+            <div>
+              <label className="font-label-md text-label-md uppercase text-outline block mb-1">
+                Date (Whole Day Note)
+              </label>
+              <input
+                type="date"
+                value={dateISO}
+                onChange={(e) => setDateISO(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
+              />
             </div>
             <div>
               <label className="font-label-md text-label-md uppercase text-outline block mb-1">
@@ -854,44 +879,11 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
+                placeholder="Bogo City, Cebu"
                 className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
               />
             </div>
-            <div className="grid grid-cols-2 gap-2.5">
-              <div>
-                <label className="font-label-md text-label-md uppercase text-outline block mb-1">
-                  Temperature
-                </label>
-                <input
-                  type="text"
-                  value={weatherTemp}
-                  onChange={(e) => setWeatherTemp(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
-                />
-              </div>
-              <div>
-                <label className="font-label-md text-label-md uppercase text-outline block mb-1">
-                  Sky / Weather
-                </label>
-                <input
-                  type="text"
-                  value={weatherConditions}
-                  onChange={(e) => setWeatherConditions(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="font-label-md text-label-md uppercase text-outline block mb-1">
-                Emotional Vibe Badge
-              </label>
-              <input
-                type="text"
-                value={moodVibe}
-                onChange={(e) => setMoodVibe(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
-              />
-            </div>
+            {/* (2026-07-13) Remove temperature, sky weather & mood badge; was present */}
             <button
               type="button"
               onClick={() => setMetaModalOpen(false)}

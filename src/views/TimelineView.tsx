@@ -620,12 +620,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             value={sortBy}
             onChange={(val) => setSortBy(val as 'custom' | 'newest' | 'oldest')}
           />
+          {/* (2026-07-13) Update dropdown dots to Events, Date, Milestone; was Media */}
           <CustomDropdown
             options={[
               { value: 'ALL', label: 'All Dot Colors', icon: 'palette' },
-              { value: 'GOLD', label: 'Gold • Big Events', icon: 'event' },
-              { value: 'MOCHA', label: 'Mocha • Media', icon: 'photo_camera' },
-              { value: 'ROSE', label: 'Rose • Milestones', icon: 'favorite' },
+              { value: 'GOLD', label: 'Gold • Events', icon: 'event' },
+              { value: 'MOCHA', label: 'Mocha • Date', icon: 'calendar_month' },
+              { value: 'ROSE', label: 'Rose • Milestone', icon: 'stars' },
             ]}
             value={dotFilter}
             onChange={(val) => setDotFilter(val as 'ALL' | DotIndicator)}
@@ -821,25 +822,25 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           })}
         </div>
 
-        {/* Dot Status Taxonomy Legend with Google Font Cormorant Garamond + Plus Jakarta Sans */}
+        {/* (2026-07-13) Update calendar legend to Events, Date, Milestone; was media */}
         <div className="flex items-center justify-between pt-space-sm mt-space-sm border-t border-outline-variant/30">
           <div className="flex flex-wrap items-center justify-between gap-y-1.5 gap-x-3 w-full pt-1">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#E5A93C' }} />
               <span className="text-on-surface-variant calendar-legend-font text-[14px]">
-                Big Events
+                Events
               </span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#5C4033' }} />
               <span className="text-on-surface-variant calendar-legend-font text-[14px]">
-                Photos &amp; Voice Memos
+                Date
               </span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#C96B78' }} />
               <span className="text-on-surface-variant calendar-legend-font text-[14px]">
-                Anniversaries &amp; Milestones
+                Milestone
               </span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -1060,16 +1061,16 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   keepsakeNumber: memories.length + 1,
                   volumeNumber: 1,
                   dateISO: targetIso,
-                  timeFormatted: '12:00 PM',
+                  timeFormatted: 'All Day',
                   title: '',
                   snippet: '',
                   storyBody: '',
                   quoteHighlight: '',
                   signOffAuthor: profile.partner1Name,
-                  location: '',
-                  weatherTemp: '72°F',
-                  weatherConditions: 'Sunny',
-                  moodVibe: 'Romantic',
+                  location: 'Bogo City, Cebu',
+                  weatherTemp: '',
+                  weatherConditions: '',
+                  moodVibe: '',
                   vibeTags: [],
                   categories: ['PHOTO'],
                   dotIndicators: ['GOLD'],
@@ -1251,10 +1252,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 </span>
                 <div className="flex flex-col min-w-0">
                   <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
-                    Date &amp; Time
+                    Date
                   </span>
                   <span className="text-sm font-medium text-primary truncate-single">
-                    {selectedDayFormatted} • {primaryDateMemory?.timeFormatted || '7:30 PM PST'}
+                    {selectedDayFormatted} • Whole Day Note
                   </span>
                 </div>
               </div>
@@ -1267,10 +1268,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 </span>
                 <div className="flex flex-col min-w-0">
                   <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
-                    Location &amp; Vibe
+                    Location
                   </span>
                   <span className="text-sm font-medium text-primary truncate-single">
-                    {primaryDateMemory?.location || 'Little French Bistro, Soho'}
+                    {primaryDateMemory?.location || 'Bogo City, Cebu'}
                   </span>
                 </div>
               </div>
@@ -1298,16 +1299,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               </h3>
             </div>
 
-            {/* What Zea Said */}
-            <div className="mb-5 pb-3 border-b border-surface-container-high">
-              <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
-                What {profile.partner2Name} Said (Highlighted Quote)
-              </span>
-              <p className="font-serif italic text-secondary text-base">
-                “{primaryDateMemory?.quoteHighlight || "You whispered that this felt like forever..."}”
-              </p>
-            </div>
-
             {/* The Heartfelt Note with stationery lines */}
             <div>
               <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-2">
@@ -1319,6 +1310,18 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 </p>
               </div>
             </div>
+
+            {/* What Zea Said (Optional and placed at the bottom) */}
+            {primaryDateMemory?.quoteHighlight && (
+              <div className="mt-5 pt-3 border-t border-surface-container-high">
+                <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
+                  What {profile.partner2Name} Said (Highlighted Quote)
+                </span>
+                <p className="font-serif italic text-secondary text-base">
+                  “{primaryDateMemory.quoteHighlight}”
+                </p>
+              </div>
+            )}
 
             {/* Photos if any */}
             {primaryDateMemory?.photos && primaryDateMemory.photos.length > 0 && (
@@ -1348,16 +1351,16 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                       keepsakeNumber: memories.length + 1,
                       volumeNumber: 1,
                       dateISO: targetIso,
-                      timeFormatted: '12:00 PM',
+                      timeFormatted: 'All Day',
                       title: '',
                       snippet: '',
                       storyBody: '',
                       quoteHighlight: '',
                       signOffAuthor: profile.partner1Name,
-                      location: '',
-                      weatherTemp: '72°F',
-                      weatherConditions: 'Sunny',
-                      moodVibe: 'Romantic',
+                      location: 'Bogo City, Cebu',
+                      weatherTemp: '',
+                      weatherConditions: '',
+                      moodVibe: '',
                       vibeTags: [],
                       categories: ['PHOTO'],
                       dotIndicators: ['GOLD'],
