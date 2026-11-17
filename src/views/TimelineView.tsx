@@ -320,6 +320,52 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const [selectedDay, setSelectedDay] = useState<number | null>(() => new Date().getDate());
   // (2026-07-13) Add fullscreen date state without navbars; was standard view only
   const [isFullscreenDateOpen, setIsFullscreenDateOpen] = useState<boolean>(false);
+  // (2026-07-13) Add overlay swipe left/right date switching; was static overlay
+  const [overlayTouchStartX, setOverlayTouchStartX] = useState<number | null>(null);
+  const [overlayTouchStartY, setOverlayTouchStartY] = useState<number | null>(null);
+  const [overlaySwipeDeltaX, setOverlaySwipeDeltaX] = useState(0);
+  const [isOverlaySwiping, setIsOverlaySwiping] = useState(false);
+  const [overlaySlideAnim, setOverlaySlideAnim] = useState<'left' | 'right' | null>(null);
+
+  const handleNextOverlayDate = () => {
+    if (selectedDay === null) return;
+    setOverlaySlideAnim('left');
+    setTimeout(() => {
+      const daysInCurrentMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+      if (selectedDay < daysInCurrentMonth) {
+        setSelectedDay((d) => (d ? d + 1 : 1));
+      } else {
+        if (calendarMonth === 11) {
+          setCalendarMonth(0);
+          setCalendarYear((y) => y + 1);
+        } else {
+          setCalendarMonth((m) => m + 1);
+        }
+        setSelectedDay(1);
+      }
+      setOverlaySlideAnim(null);
+    }, 140);
+  };
+
+  const handlePrevOverlayDate = () => {
+    if (selectedDay === null) return;
+    setOverlaySlideAnim('right');
+    setTimeout(() => {
+      if (selectedDay > 1) {
+        setSelectedDay((d) => (d ? d - 1 : 1));
+      } else {
+        const prevMonthDays = new Date(calendarYear, calendarMonth, 0).getDate();
+        if (calendarMonth === 0) {
+          setCalendarMonth(11);
+          setCalendarYear((y) => y - 1);
+        } else {
+          setCalendarMonth((m) => m - 1);
+        }
+        setSelectedDay(prevMonthDays);
+      }
+      setOverlaySlideAnim(null);
+    }, 140);
+  };
   const [audioState, setAudioState] = useState(audioEngine.getState());
 
   const selectedDayFormatted = useMemo(() => {
@@ -1133,28 +1179,95 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         </p>
       </div>
 
-      {/* (2026-07-13) Add fullscreen date view matching chapter page without navbars */}
+      {/* (2026-07-13) Add touch swipe left/right date switching in overlay; was none */}
       {isFullscreenDateOpen && selectedDay !== null && (
         <div
           id="specific-date-fullscreen-view"
-          className="fixed inset-0 z-[60] bg-background text-on-surface overflow-y-auto px-4 py-8 md:px-8 md:py-12 flex flex-col items-center select-text no-print"
+          onTouchStart={(e) => {
+            if (e.touches.length === 1) {
+              setOverlayTouchStartX(e.touches[0].clientX);
+              setOverlayTouchStartY(e.touches[0].clientY);
+              setIsOverlaySwiping(true);
+            }
+          }}
+          onTouchMove={(e) => {
+            if (overlayTouchStartX === null || overlayTouchStartY === null) return;
+            const currentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
+            const deltaX = currentX - overlayTouchStartX;
+            const deltaY = currentY - overlayTouchStartY;
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 15) {
+              setOverlaySwipeDeltaX(deltaX);
+            }
+          }}
+          onTouchEnd={() => {
+            setIsOverlaySwiping(false);
+            if (overlaySwipeDeltaX < -50) {
+              handleNextOverlayDate();
+            } else if (overlaySwipeDeltaX > 50) {
+              handlePrevOverlayDate();
+            }
+            setOverlaySwipeDeltaX(0);
+            setOverlayTouchStartX(null);
+            setOverlayTouchStartY(null);
+          }}
+          style={{
+            transform:
+              isOverlaySwiping && overlaySwipeDeltaX !== 0
+                ? `translateX(${overlaySwipeDeltaX * 0.45}px)`
+                : undefined,
+            transition: isOverlaySwiping
+              ? 'none'
+              : 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease',
+          }}
+          className={`fixed inset-0 z-[60] bg-background text-on-surface overflow-y-auto px-4 py-8 md:px-8 md:py-12 flex flex-col items-center select-text no-print ${
+            overlaySlideAnim === 'left'
+              ? '-translate-x-8 opacity-40'
+              : overlaySlideAnim === 'right'
+              ? 'translate-x-8 opacity-40'
+              : 'translate-x-0 opacity-100'
+          }`}
         >
           {/* Subtle paper dot background texture */}
           <div className="fixed inset-0 pointer-events-none opacity-[0.035] bg-[radial-gradient(#4a3b32_1px,transparent_1px)] [background-size:20px_20px] -z-10" />
 
-          {/* Top discreet bar without navbars */}
+          {/* Top discreet bar with date switcher without navbars */}
           <div className="w-full max-w-xl flex items-center justify-between mb-6">
             <button
               type="button"
               onClick={() => setIsFullscreenDateOpen(false)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high/90 text-primary border border-outline-variant/30 text-[13px] font-medium shadow-sm hover:bg-surface-variant transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high/90 text-primary border border-outline-variant/30 text-[13px] font-medium shadow-sm hover:bg-surface-variant transition-colors active:scale-95"
             >
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>
               <span>Back to Timeline</span>
             </button>
-            <span className="text-[11px] uppercase font-bold tracking-widest text-secondary bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant/30">
-              Fullscreen Chapter
-            </span>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={handlePrevOverlayDate}
+                title="Previous Date"
+                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90"
+              >
+                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+              </button>
+              <span className="text-[11px] uppercase font-bold tracking-widest text-secondary bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant/30">
+                {selectedDayFormatted}
+              </span>
+              <button
+                type="button"
+                onClick={handleNextOverlayDate}
+                title="Next Date"
+                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90"
+              >
+                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+              </button>
+            </div>
+          </div>
+
+          {/* (2026-07-13) Add swipe hint in date overlay; was missing guidance */}
+          <div className="flex items-center gap-1.5 text-[11px] text-secondary/80 font-medium mb-4 select-none">
+            <span className="material-symbols-outlined text-[14px]">swipe</span>
+            <span>Swipe left or right to switch dates</span>
           </div>
 
           {/* Romantic Header from Screenshot */}
