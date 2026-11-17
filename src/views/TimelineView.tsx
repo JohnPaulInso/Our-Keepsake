@@ -313,6 +313,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const [calendarYear, setCalendarYear] = useState<number>(2026);
   const [calendarMonth, setCalendarMonth] = useState<number>(9); // 0-indexed: 9 = October
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  // (2026-07-13) Add fullscreen date state without navbars; was standard view only
+  const [isFullscreenDateOpen, setIsFullscreenDateOpen] = useState<boolean>(false);
   const [audioState, setAudioState] = useState(audioEngine.getState());
 
   const selectedDayFormatted = useMemo(() => {
@@ -333,6 +335,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     const targetIso = `${calendarYear}-${mStr}-${dStr}`;
     return memories.filter((m) => m.dateISO === targetIso);
   }, [calendarYear, calendarMonth, selectedDay, memories]);
+
+  const primaryDateMemory = selectedDayMemories[0] || null;
 
   useEffect(() => {
     return audioEngine.subscribe(() => {
@@ -1084,6 +1088,15 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               <span className="material-symbols-outlined text-[16px]">add_circle</span>
               <span>Add Keepsake for this Date</span>
             </button>
+            {/* (2026-07-13) Add fullscreen trigger for specific date; was none */}
+            <button
+              type="button"
+              onClick={() => setIsFullscreenDateOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-high text-primary hover:bg-surface-variant font-label-md text-label-md uppercase tracking-wider transition-colors shadow-xs"
+            >
+              <span className="material-symbols-outlined text-[16px]">fullscreen</span>
+              <span>View Fullscreen</span>
+            </button>
             <button
               type="button"
               onClick={() => setSelectedDay(null)}
@@ -1123,28 +1136,49 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           )}
         </div>
       ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={filteredMemories.map((m) => m.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="flex flex-col gap-space-lg">
-              {filteredMemories.map((memory) => (
-                <SortableMemoryCard
-                  key={memory.id}
-                  memory={memory}
-                  audioState={audioState}
-                  onOpenMemory={onOpenMemory}
-                  onEditMemory={onEditMemory}
-                />
-              ))}
+        <>
+          {/* (2026-07-13) Add fullscreen trigger for specific date; was none */}
+          {selectedDay !== null && (
+            <div className="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-lowest border border-outline-variant/30 mb-space-md shadow-xs">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-secondary text-[18px]">calendar_today</span>
+                <span className="text-secondary text-xs uppercase tracking-wider font-semibold">
+                  Viewing {selectedDayFormatted}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsFullscreenDateOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-on-primary text-xs font-semibold uppercase tracking-wider shadow-xs hover:opacity-90 transition-opacity"
+              >
+                <span className="material-symbols-outlined text-[15px]">fullscreen</span>
+                <span>View Fullscreen</span>
+              </button>
             </div>
-          </SortableContext>
-        </DndContext>
+          )}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={filteredMemories.map((m) => m.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="flex flex-col gap-space-lg">
+                {filteredMemories.map((memory) => (
+                  <SortableMemoryCard
+                    key={memory.id}
+                    memory={memory}
+                    audioState={audioState}
+                    onOpenMemory={onOpenMemory}
+                    onEditMemory={onEditMemory}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        </>
       )}
 
       {/* End of Feed Gentle Romantic Capybara Vignette */}
@@ -1160,6 +1194,202 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           together.
         </p>
       </div>
+
+      {/* (2026-07-13) Add fullscreen date view matching chapter page without navbars */}
+      {isFullscreenDateOpen && selectedDay !== null && (
+        <div
+          id="specific-date-fullscreen-view"
+          className="fixed inset-0 z-[60] bg-background text-on-surface overflow-y-auto px-4 py-8 md:px-8 md:py-12 flex flex-col items-center select-text no-print"
+        >
+          {/* Subtle paper dot background texture */}
+          <div className="fixed inset-0 pointer-events-none opacity-[0.035] bg-[radial-gradient(#4a3b32_1px,transparent_1px)] [background-size:20px_20px] -z-10" />
+
+          {/* Top discreet bar without navbars */}
+          <div className="w-full max-w-xl flex items-center justify-between mb-6">
+            <button
+              type="button"
+              onClick={() => setIsFullscreenDateOpen(false)}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high/90 text-primary border border-outline-variant/30 text-[13px] font-medium shadow-sm hover:bg-surface-variant transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+              <span>Back to Timeline</span>
+            </button>
+            <span className="text-[11px] uppercase font-bold tracking-widest text-secondary bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant/30">
+              Fullscreen Chapter
+            </span>
+          </div>
+
+          {/* Romantic Header from Screenshot */}
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="relative mb-3 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-secondary-container/50 flex items-center justify-center text-primary shadow-inner">
+                <svg className="w-9 h-9" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 48 48">
+                  <path d="M14 34c0-7 4-13 12-13 5 0 9 3 11 8 .5 1.5 1.5 3 3 3h1c1.5 0 2.5 1 2.5 2.5s-1 2.5-2.5 2.5h-5c-2 0-3 1-4 2" />
+                  <path d="M14 26c-2 0-4-1.5-4-4 0-3 2-6 5-6h5c3 0 5 2 5 5v5" />
+                  <circle cx="17" cy="20" fill="currentColor" r="1.2" />
+                  <circle cx="39" cy="18" fill="#cca440" r="1.5" />
+                </svg>
+              </div>
+              <span className="absolute -top-1 -right-2 text-tertiary-fixed-dim material-symbols-outlined text-[18px]">
+                auto_awesome
+              </span>
+            </div>
+            <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight font-serif text-2xl md:text-3xl">
+              {primaryDateMemory ? primaryDateMemory.title || "Preserve Today's Chapter" : "Preserve Today's Chapter"}
+            </h2>
+            <p className="text-secondary mt-1 max-w-xs leading-relaxed font-serif italic text-sm">
+              Every little moment with {profile.partner2Name} is worth remembering forever.
+            </p>
+          </div>
+
+          {/* Context Pills: Date & Time and Location & Vibe matching screenshot */}
+          <div className="w-full max-w-xl grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+            <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low text-primary rounded-full shadow-sm border border-outline-variant/30">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="material-symbols-outlined text-[20px] text-secondary">
+                  calendar_today
+                </span>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
+                    Date &amp; Time
+                  </span>
+                  <span className="text-sm font-medium text-primary truncate-single">
+                    {selectedDayFormatted} • {primaryDateMemory?.timeFormatted || '7:30 PM PST'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low text-primary rounded-full shadow-sm border border-outline-variant/30">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="material-symbols-outlined text-[20px] text-tertiary-container">
+                  location_on
+                </span>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
+                    Location &amp; Vibe
+                  </span>
+                  <span className="text-sm font-medium text-primary truncate-single">
+                    {primaryDateMemory?.location || 'Little French Bistro, Soho'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Editorial Title & Ruled Note Card matching screenshot */}
+          <div className="w-full max-w-xl bg-surface-container-lowest rounded-2xl p-6 sm:p-7 shadow-md relative overflow-hidden flex flex-col border border-outline-variant/30 mb-8">
+            {/* Watermark in corner */}
+            <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-[0.05] pointer-events-none text-primary">
+              <svg fill="currentColor" viewBox="0 0 100 100">
+                <path d="M20 70c0-18 12-32 30-32 15 0 26 8 30 20 2 4 4 8 8 8h4c4 0 6 3 6 7s-3 7-6 7h-12c-5 0-8 3-10 6H20z" />
+                <circle cx="32" cy="48" r="4" />
+                <circle cx="56" cy="24" r="8" />
+              </svg>
+            </div>
+
+            {/* Title of this moment */}
+            <div className="mb-5 pb-3 border-b border-surface-container-high">
+              <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
+                Title of this moment
+              </span>
+              <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                {primaryDateMemory?.title || "Sunday morning pastries and warm coffee..."}
+              </h3>
+            </div>
+
+            {/* What Zea Said */}
+            <div className="mb-5 pb-3 border-b border-surface-container-high">
+              <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
+                What {profile.partner2Name} Said (Highlighted Quote)
+              </span>
+              <p className="font-serif italic text-secondary text-base">
+                “{primaryDateMemory?.quoteHighlight || "You whispered that this felt like forever..."}”
+              </p>
+            </div>
+
+            {/* The Heartfelt Note with stationery lines */}
+            <div>
+              <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-2">
+                The Heartfelt Note
+              </span>
+              <div className="min-h-[160px] text-on-surface-variant font-serif text-base leading-[2rem] bg-[linear-gradient(transparent_31px,#e5ded8_32px)] bg-[size:100%_32px]">
+                <p className="whitespace-pre-wrap">
+                  {primaryDateMemory?.storyBody || primaryDateMemory?.snippet || "Write down how Zea smiled, what she said, the quiet moments you never want to forget..."}
+                </p>
+              </div>
+            </div>
+
+            {/* Photos if any */}
+            {primaryDateMemory?.photos && primaryDateMemory.photos.length > 0 && (
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                {primaryDateMemory.photos.map((p, idx) => (
+                  <div key={idx} className="relative rounded-xl overflow-hidden h-40">
+                    <img src={p.url} alt={p.caption || ''} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div className="mt-6 pt-4 border-t border-outline-variant/20 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsFullscreenDateOpen(false);
+                  if (primaryDateMemory) {
+                    onEditMemory(primaryDateMemory);
+                  } else {
+                    const mStr = String(calendarMonth + 1).padStart(2, '0');
+                    const dStr = String(selectedDay).padStart(2, '0');
+                    const targetIso = `${calendarYear}-${mStr}-${dStr}`;
+                    onEditMemory({
+                      id: `mem-${Date.now()}`,
+                      keepsakeNumber: memories.length + 1,
+                      volumeNumber: 1,
+                      dateISO: targetIso,
+                      timeFormatted: '12:00 PM',
+                      title: '',
+                      snippet: '',
+                      storyBody: '',
+                      quoteHighlight: '',
+                      signOffAuthor: profile.partner1Name,
+                      location: '',
+                      weatherTemp: '72°F',
+                      weatherConditions: 'Sunny',
+                      moodVibe: 'Romantic',
+                      vibeTags: [],
+                      categories: ['PHOTO'],
+                      dotIndicators: ['GOLD'],
+                      photos: [],
+                      partnerNotes: [],
+                      isSealed: false,
+                      isDraft: false,
+                      sealLabel: 'Capybara Wax Seal',
+                      sealIcon: 'verified',
+                      updatedAt: Date.now(),
+                      sortOrder: 0,
+                    });
+                  }
+                }}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider font-semibold shadow-xs"
+              >
+                <span className="material-symbols-outlined text-[16px]">
+                  {primaryDateMemory ? 'edit' : 'add_circle'}
+                </span>
+                <span>{primaryDateMemory ? 'Edit in Composer' : 'Write in Composer'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsFullscreenDateOpen(false)}
+                className="text-secondary hover:text-primary text-xs uppercase tracking-wider font-medium"
+              >
+                Exit Fullscreen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
