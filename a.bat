@@ -1,18 +1,28 @@
 @echo off
 :: =============================================
 :: a.bat - Quick Android APK Generator Script
-:: Created: 2026-11-17
 :: Usage:
 ::   .\a
 :: Function: Builds Vite production bundle, syncs Capacitor Android,
 ::           compiles the debug APK with Gradle, and copies it to root.
 :: =============================================
+setlocal enabledelayedexpansion
 
 echo.
 echo ============================================
 echo  Our Keepsake - Android APK Builder
 echo ============================================
 echo.
+
+:: Auto-generate local.properties if missing
+if not exist "android\local.properties" (
+    if exist "%LOCALAPPDATA%\Android\Sdk" (
+        echo [*] Configuring Android SDK path in android\local.properties...
+        set "SDK_PATH=%LOCALAPPDATA%\Android\Sdk"
+        set "SDK_PATH=!SDK_PATH:\=\\!"
+        echo sdk.dir=!SDK_PATH!> "android\local.properties"
+    )
+)
 
 echo [1/4] Building TypeScript ^& Vite production web bundle...
 call npm run build
@@ -46,7 +56,7 @@ set GRADLE_STATUS=%ERRORLEVEL%
 popd
 
 if %GRADLE_STATUS% NEQ 0 (
-    echo [ERROR] Gradle APK build failed. Ensure ANDROID_HOME and JAVA_HOME are set.
+    echo [ERROR] Gradle APK build failed. Ensure Android SDK Platform 34/35 is installed.
     pause
     exit /b %GRADLE_STATUS%
 )
