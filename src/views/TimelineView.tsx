@@ -807,7 +807,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               <button
                 key={idx}
                 type="button"
-                onClick={() => setSelectedDay(isSelected ? null : cell.day)}
+                // (2026-07-13) Open date overlay on select; was setting filter only
+                onClick={() => {
+                  setSelectedDay(cell.day);
+                  setIsFullscreenDateOpen(true);
+                }}
                 className={`flex flex-col items-center justify-center h-10 mx-auto w-10 rounded-xl transition-all relative ${
                   isSelected
                     ? 'bg-primary text-on-primary font-bold shadow-sm active:scale-95'
@@ -920,7 +924,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               <button
                 key={item.day}
                 type="button"
-                onClick={() => setSelectedDay(isSelected ? null : item.day)}
+                // (2026-07-13) Open date overlay from week strip; was filter only
+                onClick={() => {
+                  setSelectedDay(item.day);
+                  setIsFullscreenDateOpen(true);
+                }}
                 className={`flex flex-col items-center justify-center min-w-[52px] h-[74px] rounded-xl flex-shrink-0 relative transition-transform active:scale-95 ${
                   isSelected
                     ? 'bg-primary text-on-primary shadow-md'
@@ -1054,97 +1062,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         })}
       </section>
 
-      {/* (2026-07-13) Add date card matching all-dates design; was overlay modal */}
-      {selectedDay !== null && filteredMemories.length === 0 ? (
-        <article
-          id="specific-date-keepsake-card"
-          className="relative bg-surface-container-lowest rounded-xl shadow-md p-space-md overflow-hidden transition-all duration-300 border border-outline-variant/25"
-        >
-          {/* Specific date empty keepsake card */}
-          <div className="flex items-center justify-between mb-space-sm gap-2">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="material-symbols-outlined text-[16px] text-secondary shrink-0">
-                location_on
-              </span>
-              <span className="font-label-md text-label-md uppercase tracking-widest text-secondary truncate-single">
-                Our Keepsake Journal
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="font-body-sm text-body-sm text-on-surface-variant font-serif">
-                {selectedDayFormatted}
-              </span>
-            </div>
-          </div>
-
-          <div className="my-space-sm">
-            <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-primary font-serif leading-snug mb-space-xs">
-              A Keepsake for {selectedDayFormatted}
-            </h2>
-            <p className="font-body-md text-body-md text-on-surface-variant mb-space-md font-serif italic leading-relaxed">
-              “No memories recorded for this specific date yet. Every moment with {profile.partner2Name} is a keepsake waiting to be written.”
-            </p>
-          </div>
-
-          <div className="flex items-center justify-between pt-space-xs border-t border-outline-variant/20 flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                const mStr = String(calendarMonth + 1).padStart(2, '0');
-                const dStr = String(selectedDay).padStart(2, '0');
-                const targetIso = `${calendarYear}-${mStr}-${dStr}`;
-                onEditMemory({
-                  id: `mem-${Date.now()}`,
-                  keepsakeNumber: memories.length + 1,
-                  volumeNumber: 1,
-                  dateISO: targetIso,
-                  timeFormatted: 'All Day',
-                  title: '',
-                  snippet: '',
-                  storyBody: '',
-                  quoteHighlight: '',
-                  signOffAuthor: profile.partner1Name,
-                  location: 'Bogo City, Cebu',
-                  weatherTemp: '',
-                  weatherConditions: '',
-                  moodVibe: '',
-                  vibeTags: [],
-                  categories: ['PHOTO'],
-                  dotIndicators: ['GOLD'],
-                  photos: [],
-                  partnerNotes: [],
-                  isSealed: false,
-                  isDraft: false,
-                  sealLabel: 'Capybara Wax Seal',
-                  sealIcon: 'verified',
-                  updatedAt: Date.now(),
-                  sortOrder: 0,
-                });
-              }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider font-semibold shadow-xs hover:opacity-95 transition-opacity"
-            >
-              <span className="material-symbols-outlined text-[16px]">add_circle</span>
-              <span>Add Keepsake for this Date</span>
-            </button>
-            {/* (2026-07-13) Add fullscreen trigger for specific date; was none */}
-            <button
-              type="button"
-              onClick={() => setIsFullscreenDateOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-high text-primary hover:bg-surface-variant font-label-md text-label-md uppercase tracking-wider transition-colors shadow-xs"
-            >
-              <span className="material-symbols-outlined text-[16px]">fullscreen</span>
-              <span>View Fullscreen</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedDay(null)}
-              className="text-secondary hover:text-primary font-label-md text-label-md uppercase tracking-wider transition-colors"
-            >
-              Show Entire Dates
-            </button>
-          </div>
-        </article>
-      ) : filteredMemories.length === 0 ? (
+      {/* (2026-07-13) Open overlay directly on date select; was bottom card */}
+      {filteredMemories.length === 0 ? (
         <div
           id="clean-slate-empty-card" // Clean slate stationery empty state card
           className="bg-surface-container-lowest rounded-2xl p-8 text-center shadow-sm border border-outline-variant/35 flex flex-col items-center gap-3"
@@ -1175,25 +1094,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         </div>
       ) : (
         <>
-          {/* (2026-07-13) Add fullscreen trigger for specific date; was none */}
-          {selectedDay !== null && (
-            <div className="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-lowest border border-outline-variant/30 mb-space-md shadow-xs">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-secondary text-[18px]">calendar_today</span>
-                <span className="text-secondary text-xs uppercase tracking-wider font-semibold">
-                  Viewing {selectedDayFormatted}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsFullscreenDateOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-on-primary text-xs font-semibold uppercase tracking-wider shadow-xs hover:opacity-90 transition-opacity"
-              >
-                <span className="material-symbols-outlined text-[15px]">fullscreen</span>
-                <span>View Fullscreen</span>
-              </button>
-            </div>
-          )}
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
