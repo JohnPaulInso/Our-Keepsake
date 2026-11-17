@@ -1488,13 +1488,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         </p>
       </div>
 
-      {/* (2026-07-13) Slide animation and vertical scroll support; was instant fade */}
+      {/* (2026-07-13) Inset for Samsung 3-button navbar; was unpadded bottom */}
       {isFullscreenDateOpen && selectedDay !== null && typeof document !== 'undefined' && createPortal(
         <div
           id="specific-date-fullscreen-view"
           style={{
             touchAction: 'pan-y',
             WebkitOverflowScrolling: 'touch',
+            paddingBottom: 'max(24px, env(safe-area-inset-bottom, 36px))',
           }}
           className={`fixed inset-0 z-[100] bg-background text-on-surface overflow-y-auto overscroll-y-contain px-4 py-4 md:px-8 md:py-6 select-text no-print transition-transform duration-300 ease-out ${
             !isOverlayVisible || isOverlayClosing
@@ -1506,7 +1507,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           <div className="fixed inset-0 pointer-events-none opacity-[0.035] bg-[radial-gradient(#4a3b32_1px,transparent_1px)] [background-size:20px_20px] -z-10" />
 
           {/* Centered Column Wrapper for robust vertical scrolling */}
-          <div className="w-full max-w-xl mx-auto flex flex-col items-center min-h-full pb-24">
+          <div className="w-full max-w-xl mx-auto flex flex-col items-center min-h-full pb-36">
             {/* Top discreet bar with date switcher without navbars */}
             <div className="w-full flex items-center justify-between mb-3 sticky top-0 z-30 pt-2 pb-2 bg-background/95 backdrop-blur-md">
               <button
@@ -2042,24 +2043,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   )}
                 </div>
 
-                {/* Form Action Buttons: Save Keepsake and Cancel */}
-                <div className="flex items-center justify-end gap-2.5 mt-5 pt-4 border-t border-outline-variant/20 w-full">
-                  <button
-                    type="button"
-                    onClick={handleCancelInlineEdit}
-                    className="px-5 py-2.5 rounded-full border border-outline-variant/40 text-secondary hover:text-primary text-xs uppercase tracking-wider font-semibold hover:bg-surface-container transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveInlineDate}
-                    className="flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-primary text-on-primary text-xs uppercase tracking-wider font-semibold shadow-sm hover:bg-primary/95 transition-all active:scale-95"
-                  >
-                    <span className="material-symbols-outlined text-[17px]">check</span>
-                    <span>Save Keepsake</span>
-                  </button>
-                </div>
               </div>
             ) : (
               <>
@@ -2245,6 +2228,32 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           </div>
           {/* End Date Content Card */}
         </div>
+
+        {/* (2026-07-13) Sticky Save & Cancel bar with Samsung 3-button inset; was static */}
+        {isEditingDate && (
+          <div
+            style={{
+              paddingBottom: 'max(16px, env(safe-area-inset-bottom, 32px))',
+            }}
+            className="sticky bottom-0 inset-x-0 w-full max-w-xl mx-auto z-40 bg-surface-container-lowest/95 backdrop-blur-md border-t border-outline-variant/30 px-5 py-3.5 flex items-center justify-end gap-3 shadow-lg rounded-t-2xl mt-auto"
+          >
+            <button
+              type="button"
+              onClick={handleCancelInlineEdit}
+              className="px-5 py-2.5 rounded-full border border-outline-variant/40 text-secondary hover:text-primary text-xs uppercase tracking-wider font-semibold hover:bg-surface-container transition-colors active:scale-95"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveInlineDate}
+              className="flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-primary text-on-primary text-xs uppercase tracking-wider font-semibold shadow-md hover:bg-primary/95 transition-all active:scale-95"
+            >
+              <span className="material-symbols-outlined text-[17px]">check</span>
+              <span>Save Keepsake</span>
+            </button>
+          </div>
+        )}
         {/* End Centered Column Wrapper */}
       </div>
     </div>,
