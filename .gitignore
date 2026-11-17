@@ -1,0 +1,17 @@
+# Dependencies & build output
+node_modules/
+dist/
+android/app/build/
+android/.gradle/
+android/build/
+android/local.properties
+
+# OS & Editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temp / backup files
+*.bak
+*.tmp

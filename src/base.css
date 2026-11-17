@@ -1,0 +1,131 @@
+/* (2026-07-13) Define global CSS variables & tokens per SKILL.md vs raw CSS */
+:root {
+  /* JP Universal App Blueprint Tokens */
+  --navy: #102b46;
+  --navy-deep: #0a1e32;
+  --teal: #159b9b;
+  --teal-dark: #0d7f82;
+  --ink: #172b3d;
+  --muted: #667789;
+  --paper: #ffffff;
+  --mist: #f4f7fa;
+  --line: #e3eaf0;
+
+  /* Warm Linen & Capybara Keepsake Theme Tokens */
+  --surface: #fbf9f5;
+  --surface-dim: #dbdad6;
+  --surface-bright: #fbf9f5;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f5f3ef;
+  --surface-container: #efeeea;
+  --surface-container-high: #eae8e4;
+  --surface-container-highest: #e4e2de;
+  --surface-variant: #e4e2de;
+  --on-surface: #1b1c1a;
+  --on-surface-variant: #4e4540;
+  --outline: #80756f;
+  --outline-variant: #d2c4bd;
+  --primary: #33251d;
+  --on-primary: #ffffff;
+  --primary-container: #4a3b32;
+  --secondary: #755844;
+  --secondary-container: #ffd8bf;
+  --background: #fbf9f5;
+  --on-background: #1b1c1a;
+
+  /* Dot Taxonomy Colors */
+  --dot-gold: #e5a93c;
+  --dot-mocha: #5c4033;
+  --dot-rose: #c96b78;
+
+  /* Semantic Status Tokens */
+  --success: #10b981;
+  --success-bg: #ecfdf5;
+  --warning: #f59e0b;
+  --warning-bg: #fffbeb;
+  --danger: #ef4444;
+  --danger-bg: #fef2f2;
+  --info: #3b82f6;
+  --info-bg: #eff6ff;
+
+  /* Layout, Geometry & Elevation */
+  --max: 760px;
+  --radius-sm: 10px;
+  --radius: 18px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 4px 14px rgba(74, 59, 50, 0.06);
+  --shadow: 0 18px 50px rgba(74, 59, 50, 0.09);
+  --shadow-lg: 0 24px 64px rgba(51, 37, 29, 0.18);
+
+  /* Typography */
+  --font-sans: "Plus Jakarta Sans", "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Playfair Display", "Instrument Serif", Georgia, serif;
+}
+
+[data-theme="dark"] {
+  --paper: #1e1815;
+  --mist: #261f1b;
+  --ink: #f5ebe4;
+  --muted: #b5a397;
+  --line: #3b2f28;
+
+  --surface: #181310;
+  --surface-dim: #120e0c;
+  --surface-bright: #221b17;
+  --surface-container-lowest: #211a16;
+  --surface-container-low: #271f1a;
+  --surface-container: #2e241f;
+  --surface-container-high: #382c26;
+  --surface-container-highest: #42352e;
+  --surface-variant: #3b2f28;
+  --on-surface: #f6ede8;
+  --on-surface-variant: #d1bfb4;
+  --outline: #9e8c81;
+  --outline-variant: #4a3b32;
+  --primary: #f6ded1;
+  --on-primary: #251911;
+  --primary-container: #5c4538;
+  --secondary: #e5bfa7;
+  --secondary-container: #5b412f;
+  --background: #181310;
+  --on-background: #f6ede8;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overscroll-behavior: none;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--background);
+  color: var(--on-surface);
+}
+
+body.overflow-hidden {
+  overflow: hidden !important;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

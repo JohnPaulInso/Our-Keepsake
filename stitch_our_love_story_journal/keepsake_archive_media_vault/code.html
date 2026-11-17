@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-primary-fixed-variant": "#53443a", "error-container": "#ffdad6", "on-tertiary-fixed-variant": "#5a4300", "inverse-primary": "#d9c2b6", "on-secondary-container": "#7a5c48", "outline": "#80756f", "surface-container-highest": "#e4e2de", "secondary-container": "#ffd8bf", "surface-tint": "#6c5b51", "surface-container-lowest": "#ffffff", "surface-container-low": "#f5f3ef", "surface-dim": "#dbdad6", "on-primary-container": "#baa599", "surface-bright": "#fbf9f5", "error": "#ba1a1a", "on-tertiary-fixed": "#251a00", "surface-variant": "#e4e2de", "tertiary-fixed-dim": "#ecc15a", "surface": "#fbf9f5", "primary-fixed": "#f6ded1", "tertiary-container": "#503b00", "secondary": "#755844", "on-error": "#ffffff", "tertiary": "#352600", "on-tertiary": "#ffffff", "outline-variant": "#d2c4bd", "inverse-surface": "#30312e", "on-tertiary-container": "#cca440", "on-surface-variant": "#4e4540", "tertiary-fixed": "#ffdf99", "inverse-on-surface": "#f2f0ed", "surface-container": "#efeeea", "secondary-fixed-dim": "#e5bfa7", "secondary-fixed": "#ffdcc5", "primary": "#33251d", "on-primary-fixed": "#251911", "on-error-container": "#93000a", "on-secondary-fixed": "#2b1707", "on-surface": "#1b1c1a", "on-secondary-fixed-variant": "#5b412f", "on-secondary": "#ffffff", "on-background": "#1b1c1a", "primary-fixed-dim": "#d9c2b6", "background": "#fbf9f5", "surface-container-high": "#eae8e4", "on-primary": "#ffffff", "primary-container": "#4a3b32" }, borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, spacing: { "margin": "1.25rem", "margin-md": "2rem", "margin-lg": "3.5rem", "space-lg": "1.5rem", "gutter": "1rem", "space-xs": "0.25rem", "gutter-md": "1.5rem", "space-xl": "2.5rem", "space-sm": "0.5rem", "space-md": "1rem" }, fontFamily: { "display-lg-mobile": ["Playfair Display"], "italic-quote": ["Playfair Display"], "headline-lg": ["Playfair Display"], "headline-sm": ["Playfair Display"], "headline-lg-mobile": ["Playfair Display"], "display-lg": ["Playfair Display"], "headline-md": ["Playfair Display"], "label-lg": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"] }, fontSize: { "display-lg-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "0em", "fontWeight": "400" }], "italic-quote": ["17px", { "lineHeight": "28px", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "0em", "fontWeight": "500" }], "headline-sm": ["18px", { "lineHeight": "26px", "fontWeight": "600" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "0em", "fontWeight": "500" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "400" }], "headline-md": ["22px", { "lineHeight": "30px", "fontWeight": "400" }], "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.08em", "fontWeight": "600" }], "label-md": ["11px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-background font-body-md text-on-surface antialiased min-h-screen relative flex flex-col selection:bg-secondary-container selection:text-on-secondary-container"><div class="fixed inset-0 pointer-events-none opacity-[0.035] bg-[radial-gradient(#4a3b32_1px,transparent_1px)] [background-size:20px_20px] z-0"></div><header class="fixed top-0 w-full z-50 pt-safe bg-surface-bright/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(74,59,50,0.04)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="Capybara Wax Seal Monogram" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ALJJyrD34HtA0M1b1pSjw3h4VTAS0-O1pblcCJjpuvvtstU4p0d3yo5Lf7z-nabHEkhE7q9J3Uz6NmOll5eU4S_sqY35Jdp3p1mhnUZcKAs7XoRpGrC6PSpttT_1LbRMFWXaO0yJp_sj_p0W3HyuJywzvTTKMkcuq2Vg_f4ZM2tQjf7MYVTo3dhlsJXlazMDBvWM3r8QVQy8x8HkbNqakXrxXSci9kZBtpnPeW1Y9jgnnCK_"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-primary tracking-normal leading-tight">Our Keepsake</span><span class="font-label-md text-label-md uppercase tracking-wider text-secondary">Capsule</span></div></div><div class="flex items-center gap-space-sm"><button aria-label="Loving Couple Profile" class="p-0.5 rounded-full ring-1 ring-tertiary-fixed-dim/70 shadow-sm transition-transform active:scale-95"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGIAAQquVsdqqaTe5Zsfwa9O621DX8FMiLbNzodi9yYpF-30GVabRFuaqKJ5f3X7IUQbNUe7QlBnyhFmN_lbFG8vMVR89V-Umh1qBn9LDHijkyZmgvTCs1Vyh3h7-oX5VbKpb5ot7d-x5IzkruII557r8CExCLbPWvR5IaLLcIL1rVvBfWT0n3XDLSycnpbQIRqsoLT7aywpb03JhNefpa7Eqny29JVLPRwxpjIAYw"/></button></div></div></header><main class="flex flex-col relative w-full pt-16 pb-28 bg-transparent z-10"><div class="flex flex-col w-full pb-12 selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- Vault Intro Header -->
+<section class="px-margin pt-2 pb-space-lg flex flex-col items-center text-center relative overflow-hidden">
+<!-- Subtle sleeping capybara vignette watermark -->
+<div class="absolute -top-3 right-2 opacity-[0.07] pointer-events-none w-32 h-24">
+<svg class="text-primary w-full h-full stroke-[1.5]" fill="none" stroke="currentColor" viewbox="0 0 120 90">
+<path d="M20,60 C20,40 38,25 65,26 C85,26 102,36 105,52 C108,66 98,78 75,78 C52,78 20,78 20,60 Z"></path>
+<ellipse cx="94" cy="46" rx="8" ry="7"></ellipse>
+<path d="M96,48 C93,48 91,46 91,44"></path>
+<path d="M102,40 C106,37 108,32 105,28"></path>
+<path d="M35,32 Q40,20 48,28" stroke-dasharray="1 2"></path>
+<path d="M25,65 Q18,70 12,68"></path>
+<path d="M72,20 C72,20 76,14 82,18 C86,22 81,25 81,25"></path>
+</svg>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container/60 text-on-secondary-container mb-space-sm shadow-sm">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">lock_clock</span>
+<span class="font-label-md text-label-md tracking-widest uppercase">Vault No. 024 • Private</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight mb-space-xs">
+      The Archive of Us
+    </h1>
+<p class="font-italic-quote text-italic-quote text-secondary max-w-xs mb-space-md italic">
+      "Every soft whisper, unhurried afternoon, and sweet laughter kept safe for all our tomorrows."
+    </p>
+<!-- Vault Metric Capsule -->
+<div class="w-full bg-surface-container-low rounded-xl p-space-md shadow-sm relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-20 h-20 rounded-full bg-secondary-fixed/30 pointer-events-none"></div>
+<div class="grid grid-cols-2 gap-y-3 gap-x-2 text-left">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+</div>
+<div class="min-w-0">
+<p class="font-headline-sm text-headline-sm text-primary leading-tight">38</p>
+<p class="font-label-md text-label-md text-on-surface-variant truncate">Dates Preserved</p>
+</div>
+</div>
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">photo_library</span>
+</div>
+<div class="min-w-0">
+<p class="font-headline-sm text-headline-sm text-primary leading-tight">142</p>
+<p class="font-label-md text-label-md text-on-surface-variant truncate">Film Photos</p>
+</div>
+</div>
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">mic</span>
+</div>
+<div class="min-w-0">
+<p class="font-headline-sm text-headline-sm text-primary leading-tight">24</p>
+<p class="font-label-md text-label-md text-on-surface-variant truncate">Voice Notes</p>
+</div>
+</div>
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">movie</span>
+</div>
+<div class="min-w-0">
+<p class="font-headline-sm text-headline-sm text-primary leading-tight">12</p>
+<p class="font-label-md text-label-md text-on-surface-variant truncate">Video Reels</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Segmented Navigation Chips -->
+<section class="px-margin mb-space-lg">
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+<button class="px-4 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md whitespace-nowrap shadow-sm transition-transform active:scale-95">
+        All Memories
+      </button>
+<button class="px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant hover:text-primary font-label-md text-label-md whitespace-nowrap transition-transform active:scale-95">
+        Photo Polaroids
+      </button>
+<button class="px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant hover:text-primary font-label-md text-label-md whitespace-nowrap transition-transform active:scale-95">
+        Voice Vault
+      </button>
+<button class="px-4 py-2 rounded-full bg-surface-container-high text-on-surface-variant hover:text-primary font-label-md text-label-md whitespace-nowrap transition-transform active:scale-95">
+        Video Reels
+      </button>
+</div>
+</section>
+<!-- Voice Vault Highlight Section -->
+<section class="px-margin mb-space-xl">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">graphic_eq</span>
+<h2 class="font-headline-sm text-headline-sm text-primary">Hear Her Voice Again</h2>
+</div>
+<span class="font-label-md text-label-md text-secondary uppercase tracking-widest">3 Tracks</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">
+      Unfiltered candid voice messages recorded in fleeting, magical moments.
+    </p>
+<div class="flex flex-col gap-space-sm" id="voice-playlist">
+<!-- Audio Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden group">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2 min-w-0 pr-2">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim shrink-0"></span>
+<span class="font-label-lg text-label-lg text-primary truncate">Singing in the Car on Highway 1</span>
+</div>
+<span class="font-label-md text-label-md text-secondary shrink-0">Aug 22 • 01:15</span>
+</div>
+<div class="flex items-center gap-3">
+<button aria-label="Play recording" class="audio-toggle-btn w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0 shadow-sm transition-transform active:scale-90">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<!-- Tactile Waveform Bars -->
+<div class="flex-1 flex items-center gap-[3px] h-7 px-2 bg-surface-container-low rounded-lg">
+<span class="w-1 bg-secondary/40 rounded-full h-2 transition-all group-hover:h-3"></span>
+<span class="w-1 bg-secondary/60 rounded-full h-4 transition-all group-hover:h-5"></span>
+<span class="w-1 bg-primary rounded-full h-6"></span>
+<span class="w-1 bg-secondary rounded-full h-3"></span>
+<span class="w-1 bg-secondary/80 rounded-full h-5"></span>
+<span class="w-1 bg-secondary/50 rounded-full h-2"></span>
+<span class="w-1 bg-primary/70 rounded-full h-5"></span>
+<span class="w-1 bg-secondary/60 rounded-full h-6"></span>
+<span class="w-1 bg-secondary/40 rounded-full h-3"></span>
+<span class="w-1 bg-secondary/70 rounded-full h-4"></span>
+<span class="w-1 bg-primary rounded-full h-5"></span>
+<span class="w-1 bg-secondary/50 rounded-full h-2"></span>
+<span class="w-1 bg-secondary/40 rounded-full h-3"></span>
+<span class="w-1 bg-secondary/30 rounded-full h-1"></span>
+<span class="w-1 bg-secondary/20 rounded-full h-2"></span>
+</div>
+<button aria-label="Add note to voice memo" class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined text-[19px]">favorite</span>
+</button>
+</div>
+</div>
+<!-- Audio Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden group">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2 min-w-0 pr-2">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed-dim shrink-0"></span>
+<span class="font-label-lg text-label-lg text-primary truncate">Whispering Goodnight from Paris</span>
+</div>
+<span class="font-label-md text-label-md text-secondary shrink-0">May 14 • 00:42</span>
+</div>
+<div class="flex items-center gap-3">
+<button aria-label="Play recording" class="audio-toggle-btn w-9 h-9 rounded-full bg-surface-container-high text-primary flex items-center justify-center shrink-0 shadow-sm transition-transform active:scale-90">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<div class="flex-1 flex items-center gap-[3px] h-7 px-2 bg-surface-container-low rounded-lg">
+<span class="w-1 bg-secondary/30 rounded-full h-2"></span>
+<span class="w-1 bg-secondary/40 rounded-full h-3"></span>
+<span class="w-1 bg-secondary/50 rounded-full h-4"></span>
+<span class="w-1 bg-secondary/30 rounded-full h-2"></span>
+<span class="w-1 bg-primary/70 rounded-full h-5"></span>
+<span class="w-1 bg-secondary/60 rounded-full h-3"></span>
+<span class="w-1 bg-secondary/40 rounded-full h-2"></span>
+<span class="w-1 bg-secondary/50 rounded-full h-4"></span>
+<span class="w-1 bg-secondary/30 rounded-full h-2"></span>
+<span class="w-1 bg-secondary/20 rounded-full h-1"></span>
+<span class="w-1 bg-secondary/30 rounded-full h-2"></span>
+<span class="w-1 bg-secondary/40 rounded-full h-3"></span>
+<span class="w-1 bg-secondary/30 rounded-full h-2"></span>
+<span class="w-1 bg-secondary/20 rounded-full h-1"></span>
+</div>
+<button aria-label="Add note to voice memo" class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined text-[19px]">favorite_border</span>
+</button>
+</div>
+</div>
+<!-- Audio Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm relative overflow-hidden group">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2 min-w-0 pr-2">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim shrink-0"></span>
+<span class="font-label-lg text-label-lg text-primary truncate">Her laughing hysterically at the bakery</span>
+</div>
+<span class="font-label-md text-label-md text-secondary shrink-0">Oct 03 • 02:08</span>
+</div>
+<div class="flex items-center gap-3">
+<button aria-label="Play recording" class="audio-toggle-btn w-9 h-9 rounded-full bg-surface-container-high text-primary flex items-center justify-center shrink-0 shadow-sm transition-transform active:scale-90">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<div class="flex-1 flex items-center gap-[3px] h-7 px-2 bg-surface-container-low rounded-lg">
+<span class="w-1 bg-secondary/50 rounded-full h-3"></span>
+<span class="w-1 bg-primary rounded-full h-6"></span>
+<span class="w-1 bg-secondary rounded-full h-5"></span>
+<span class="w-1 bg-primary rounded-full h-6"></span>
+<span class="w-1 bg-secondary/80 rounded-full h-4"></span>
+<span class="w-1 bg-primary/90 rounded-full h-6"></span>
+<span class="w-1 bg-secondary rounded-full h-5"></span>
+<span class="w-1 bg-secondary/60 rounded-full h-3"></span>
+<span class="w-1 bg-primary/70 rounded-full h-5"></span>
+<span class="w-1 bg-secondary/40 rounded-full h-2"></span>
+<span class="w-1 bg-secondary/60 rounded-full h-4"></span>
+<span class="w-1 bg-secondary/30 rounded-full h-2"></span>
+<span class="w-1 bg-secondary/20 rounded-full h-1"></span>
+</div>
+<button aria-label="Add note to voice memo" class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined text-[19px]">favorite_border</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Curated Polaroid Photo Wall -->
+<section class="px-margin mb-space-xl relative">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">filter_frames</span>
+<h2 class="font-headline-sm text-headline-sm text-primary">Polaroid Scrapbook</h2>
+</div>
+<button class="font-label-md text-label-md text-secondary hover:text-primary transition-colors uppercase tracking-wider">
+        Expand All
+      </button>
+</div>
+<!-- Masonry Polaroid Stack -->
+<div class="grid grid-cols-2 gap-4 pt-2">
+<!-- Polaroid 1 (Tilted Left -1deg) -->
+<div class="bg-surface-container-lowest p-2 pb-3.5 rounded-lg shadow-md -rotate-1 transition-transform hover:rotate-0 duration-300 relative group">
+<!-- Masking tape sticker accent -->
+<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 w-10 h-3 bg-secondary-fixed/50 backdrop-blur-xs rounded-xs shadow-xs pointer-events-none rotate-2"></div>
+<div class="w-full aspect-[4/5] overflow-hidden rounded-xs bg-surface-container-high mb-2 relative">
+<img class="w-full h-full object-cover" data-alt="Warm sepia vintage candid polaroid of a happy couple sharing strawberry gelato at an outdoor café in Rome with golden hour sunbeam streaming through ivy leaves." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJRcdxEwAzU8m4Chlj7khqtAICIxqkmy4Elo8eQFVPmp_0HP58pg-2RWEFw8bXOhXJIlj8689c38NgcOWWB98-RXyKlJSZaZIH_-FYlDg7iW4jwlgZnyYhSBz2Wxy_oIdWt8EALF15rqz973cGSfa57mDhRj0RWFxr6XAi9AgGX2wPMMQ3Lx9k3e6USPCdixBFyXnUCtpPC9Y3ak_3j1cJXCGvkk_OAS69YZmOa2_j"/>
+<span class="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-xs bg-primary/70 text-on-primary font-label-md text-[9px] tracking-wider backdrop-blur-xs">
+            ROME
+          </span>
+</div>
+<p class="font-italic-quote text-[13px] text-center text-primary leading-tight px-1 italic">
+          "Pistachio all over your nose"
+        </p>
+<span class="block text-center font-label-md text-[10px] text-on-surface-variant mt-0.5">Jun 18, 2023</span>
+</div>
+<!-- Polaroid 2 (Tilted Right 2deg) -->
+<div class="bg-surface-container-lowest p-2 pb-3.5 rounded-lg shadow-md rotate-2 transition-transform hover:rotate-0 duration-300 relative group mt-3">
+<!-- Masking tape sticker accent -->
+<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 w-10 h-3 bg-secondary-fixed/50 backdrop-blur-xs rounded-xs shadow-xs pointer-events-none -rotate-1"></div>
+<div class="w-full aspect-[4/5] overflow-hidden rounded-xs bg-surface-container-high mb-2 relative">
+<img class="w-full h-full object-cover" data-alt="Intimate cozy polaroid photograph of intertwined hands under a knitted cashmere wool blanket with warm morning coffee cups nearby and gentle sunlit shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdayI-82MKB9uc5Quc_GQGcMx3azgK06nD-is0HsfwQQZcNaj0mNSz9-3h1HGdX_5mRfcP-fcDpw7Ee012dL3S9Di2TzQReYDOOFKi-JmqsSYaik1FRy2aSH-8Dmcn8aU3eKCQHdgtw73xmv9riBCDff8CaIGLxyw52j2ELHekKbPGHyCVz85qTMQwJQMcv2eAvWyYSVP6c8RZVzliwxflQtLKXYXCApz6tl7yVGs0"/>
+<span class="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-xs bg-primary/70 text-on-primary font-label-md text-[9px] tracking-wider backdrop-blur-xs">
+            RAINY SUN
+          </span>
+</div>
+<p class="font-italic-quote text-[13px] text-center text-primary leading-tight px-1 italic">
+          "Cold toes &amp; warm coffee"
+        </p>
+<span class="block text-center font-label-md text-[10px] text-on-surface-variant mt-0.5">Nov 04, 2023</span>
+</div>
+<!-- Polaroid 3 (Tilted Right 1.5deg) -->
+<div class="bg-surface-container-lowest p-2 pb-3.5 rounded-lg shadow-md rotate-1 transition-transform hover:rotate-0 duration-300 relative group -mt-1">
+<div class="w-full aspect-[4/5] overflow-hidden rounded-xs bg-surface-container-high mb-2 relative">
+<img class="w-full h-full object-cover" data-alt="Dreamy warm film portrait of a laughing woman wearing a linen sun hat standing in a golden meadow filled with wildflowers at twilight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpDn2aDjxW2vb-i5-EyBb_ebbgyZT-XkTXPmKkaMlUMzTmdl3e09-khyulHb0UZCEPg_qgNjh_G7h6DFwHvTmMl01kO8_5wY937WsYY3sAg_uKc2k4bCwoZ2CBC2VblbP9s7LMfKTGxvyx1t4NZi1USCIVBocp2rnju4AREQVMa4Y882K-YQ5jImxYhV2yYPY15qvvdoehNUkRfRyMpMBBpM_Kk90ki2kNz_Vka-Ra"/>
+<span class="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-xs bg-primary/70 text-on-primary font-label-md text-[9px] tracking-wider backdrop-blur-xs">
+            MEADOW
+          </span>
+</div>
+<p class="font-italic-quote text-[13px] text-center text-primary leading-tight px-1 italic">
+          "Before the summer storm"
+        </p>
+<span class="block text-center font-label-md text-[10px] text-on-surface-variant mt-0.5">Jul 29, 2023</span>
+</div>
+<!-- Polaroid 4 (Tilted Left -2deg) -->
+<div class="bg-surface-container-lowest p-2 pb-3.5 rounded-lg shadow-md -rotate-2 transition-transform hover:rotate-0 duration-300 relative group mt-2">
+<div class="w-full aspect-[4/5] overflow-hidden rounded-xs bg-surface-container-high mb-2 relative">
+<img class="w-full h-full object-cover" data-alt="Artisanal medium format film capture of two bicycles leaned against an antique wooden bridge in Kyoto surrounded by falling cherry blossom petals." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBv4i_U_yJ4MXB1U7YD1a5EebXthQhXXzrisYt1WTfENBNDshev4_bmFREAc0Vi0_P4_fsv865uz9PnrL7gwlEQtHXX-EYWoGlZk0q8tpHlmwYa8T7dEWAupBmDcJUpLaP-oSOJuJSabBtqr_aJMNJYTiZ1YdzpgLXjEokyReTbOUOZq6WT64tE4bJ48p30rOiaHrvKDwJTZRZvZ8BeB0pxGCEe6ag2y55_RKCEBjQF"/>
+<span class="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-xs bg-primary/70 text-on-primary font-label-md text-[9px] tracking-wider backdrop-blur-xs">
+            KYOTO
+          </span>
+</div>
+<p class="font-italic-quote text-[13px] text-center text-primary leading-tight px-1 italic">
+          "Getting lost in Gion"
+        </p>
+<span class="block text-center font-label-md text-[10px] text-on-surface-variant mt-0.5">Apr 12, 2024</span>
+</div>
+</div>
+</section>
+<!-- Video Memories Reel Strip -->
+<section class="mb-space-xl">
+<div class="px-margin flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">videocam</span>
+<h2 class="font-headline-sm text-headline-sm text-primary">Film Reel Vignettes</h2>
+</div>
+<span class="font-label-md text-label-md text-secondary uppercase tracking-widest">12 Clips</span>
+</div>
+<!-- Horizontal Filmstrip Roll -->
+<div class="flex items-center gap-3 overflow-x-auto no-scrollbar px-margin py-1">
+<!-- Reel Capsule 1 -->
+<div class="w-36 shrink-0 bg-surface-container-low rounded-xl p-1.5 shadow-sm group">
+<div class="w-full h-52 rounded-lg overflow-hidden relative bg-primary-container">
+<img class="w-full h-full object-cover" data-alt="Candid vertical warm tone video still of a couple twirling under string lights during a seaside summer dinner with laughter and blurred candlelight bokeh." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDA5pyX2Wv5H9GJg4tRmBwcg2Sp_yzAzCTFtWiNWJvFlBbyD6TQfOa_a1zc3_d8IWiOLv7gmNVT2AcX0ZXDN7I60ryxTZBbWootzYOroXkJIm80QxFDPipcJvPfd6vHfrFV6MJAMmXT842Xm2jBiIB8gG-2OPzzIYN3dppgmGdEzU_tKXCaz5Hb3bI1q3BZrYn-jhlRfI-yEbU5wXsR63r1NbFXMSpJMW_ACMhaKJNh"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-black/20 flex flex-col justify-between p-2">
+<div class="self-end px-1.5 py-0.5 rounded-full bg-primary/60 backdrop-blur-xs text-on-primary font-label-md text-[10px]">
+              0:15
+            </div>
+<div class="flex items-center gap-1.5 text-on-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+<span class="font-label-md text-[11px] truncate">Beach Dance</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Reel Capsule 2 -->
+<div class="w-36 shrink-0 bg-surface-container-low rounded-xl p-1.5 shadow-sm group">
+<div class="w-full h-52 rounded-lg overflow-hidden relative bg-primary-container">
+<img class="w-full h-full object-cover" data-alt="Vertical vintage film capture of waves crashing gently against seaside cliffs with sunset reflections and peaceful evening sky." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGoedxKtqET8sE4KCnZfgrxy3sK8NN4zbwQ1o1NaN63XF1zTG3h6ecd7SLny3V_Q0t5FPwHqD1PPlMNakdFLMozM5aEFfe91p3gDylvMT3xb34H9ehANUH1kqBJI60BgkjWRjz2juFomf17HAG9gU_monh2R1yaSwlhOj3FWjyawVjuExuPsw4jlYqIRLWKTAoEItyr9KZi8rBTEUMNTX0XsMrQmb2n6M5IPRobnZO"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-black/20 flex flex-col justify-between p-2">
+<div class="self-end px-1.5 py-0.5 rounded-full bg-primary/60 backdrop-blur-xs text-on-primary font-label-md text-[10px]">
+              0:32
+            </div>
+<div class="flex items-center gap-1.5 text-on-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+<span class="font-label-md text-[11px] truncate">Big Sur Sunset</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Reel Capsule 3 -->
+<div class="w-36 shrink-0 bg-surface-container-low rounded-xl p-1.5 shadow-sm group">
+<div class="w-full h-52 rounded-lg overflow-hidden relative bg-primary-container">
+<img class="w-full h-full object-cover" data-alt="Vertical warm cinematic clip thumbnail of making homemade pasta together in a cozy flour-dusted rustic kitchen with smiling faces." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSZFBONCDbeRyLQpAlCkwImgDMssvo2G5EKp1N3m2srb51cNUqt60rJ90t90zTYWXsQb-lEHBOVV3nljvSGZpDT4bgr-bGnMiRGlMX0BQvmcg67xPyTJX7L9nS21J4fj_sfWUG0XrJN7FTqMkpAUekEQp-uRCpPiSXRT1PLRcis3it4lue6QXOXxsZ205W9aGLoa5JNRgmthaJ7i5HMeTCpmuNJ0ZYhGdBziM0_kOg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-black/20 flex flex-col justify-between p-2">
+<div class="self-end px-1.5 py-0.5 rounded-full bg-primary/60 backdrop-blur-xs text-on-primary font-label-md text-[10px]">
+              0:45
+            </div>
+<div class="flex items-center gap-1.5 text-on-primary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+<span class="font-label-md text-[11px] truncate">Pasta Sunday</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Special Keepsake Feature: Anniversary Time Capsule -->
+<section class="px-margin">
+<div class="bg-surface-container rounded-xl p-space-md shadow-md relative overflow-hidden">
+<!-- Watermark Capybara Bathing with Yuzu Fruit -->
+<div class="absolute -right-4 -bottom-4 opacity-[0.06] pointer-events-none w-36 h-36">
+<svg class="text-primary w-full h-full stroke-[1.5]" fill="none" stroke="currentColor" viewbox="0 0 100 100">
+<ellipse cx="50" cy="65" rx="35" ry="20"></ellipse>
+<path d="M30,55 C30,38 42,28 62,28 C74,28 85,35 88,48 C90,56 82,65 65,65"></path>
+<circle cx="78" cy="40" r="3"></circle>
+<!-- Yuzu floating on top -->
+<circle cx="48" cy="22" r="7" stroke="currentColor"></circle>
+<path d="M48,15 L50,12"></path>
+<!-- Water waves -->
+<path d="M10,75 Q25,70 40,75 T70,75 T95,75"></path>
+</svg>
+</div>
+<div class="flex items-start justify-between mb-space-sm">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-secondary uppercase tracking-widest mb-0.5">Ceremonial Keepsake</span>
+<h3 class="font-headline-sm text-headline-sm text-primary">Anniversary Time Capsule</h3>
+</div>
+<!-- Wax Seal Medallion Padlock -->
+<div class="w-11 h-11 rounded-full bg-gradient-to-tr from-secondary to-primary-container text-tertiary-fixed flex items-center justify-center shadow-md ring-2 ring-tertiary-fixed/60 shrink-0">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md leading-relaxed">
+        Sealed on our trip to the coast. This digital vault cannot be unlocked until midnight of our milestone day.
+      </p>
+<!-- Lock Countdown Banner -->
+<div class="bg-surface-container-lowest rounded-lg p-space-sm flex items-center justify-between mb-space-md shadow-xs">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">event_upcoming</span>
+<div>
+<p class="font-label-lg text-label-lg text-primary">Locked until Dec 25, 2024</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Our 2nd Anniversary</p>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-secondary-container/50 font-label-md text-label-md text-on-secondary-container font-semibold">
+          194 Days
+        </span>
+</div>
+<!-- Sealed Payload Inventory Tags -->
+<div class="flex items-center gap-2 flex-wrap">
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high text-primary font-label-md text-label-md shadow-xs">
+<span class="material-symbols-outlined text-[15px]">mark_email_unread</span>
+<span>2 Sealed Letters</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high text-primary font-label-md text-label-md shadow-xs">
+<span class="material-symbols-outlined text-[15px]">videocam</span>
+<span>1 Secret Video</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high text-primary font-label-md text-label-md shadow-xs">
+<span class="material-symbols-outlined text-[15px]">fingerprint</span>
+<span>Dual Biometrics</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<script>
+  (function () {
+    // Interactive audio button toggling for delight
+    const audioButtons = document.querySelectorAll('.audio-toggle-btn');
+    audioButtons.forEach(btn => {
+      btn.addEventListener('click', function () {
+        const icon = this.querySelector('.material-symbols-outlined');
+        const isPlaying = icon.textContent.trim() === 'pause';
+        
+        // Reset all buttons
+        audioButtons.forEach(b => {
+          b.querySelector('.material-symbols-outlined').textContent = 'play_arrow';
+          b.classList.remove('bg-primary', 'text-on-primary');
+          b.classList.add('bg-surface-container-high', 'text-primary');
+        });
+
+        if (!isPlaying) {
+          icon.textContent = 'pause';
+          this.classList.remove('bg-surface-container-high', 'text-primary');
+          this.classList.add('bg-primary', 'text-on-primary');
+        }
+      });
+    });
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-low/95 backdrop-blur-xl shadow-[0_-4px_24px_rgba(74,59,50,0.06)] rounded-t-full" data-active-classes="text-primary font-semibold"><div class="h-20 px-gutter flex items-center justify-around"><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" data-path="timeline" href="#"><span class="material-symbols-outlined text-[22px]">auto_stories</span><span class="font-label-md text-label-md tracking-wider">Timeline</span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" data-path="story" href="#"><span class="material-symbols-outlined text-[22px]">menu_book</span><span class="font-label-md text-label-md tracking-wider">Story</span></a><div class="flex items-center justify-center -mt-6"><a aria-label="Record New Date Memory" class="w-12 h-12 rounded-full bg-gradient-to-tr from-secondary to-primary-container text-surface-bright flex items-center justify-center shadow-[0_6px_14px_-3px_rgba(74,59,50,0.28)] ring-2 ring-tertiary-fixed/80 active:scale-95 transition-transform" data-path="new-date" href="#"><span class="material-symbols-outlined text-[26px]">add</span></a></div><a aria-current="page" class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 transition-colors text-primary font-semibold" data-path="capsule" href="#"><span class="material-symbols-outlined text-[22px]">inventory_2</span><span class="font-label-md text-label-md tracking-wider">Capsule</span></a><a class="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" data-path="letters" href="#"><span class="material-symbols-outlined text-[22px]">mail</span><span class="font-label-md text-label-md tracking-wider">Letters</span></a></div></nav></body></html>

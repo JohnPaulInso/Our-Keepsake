@@ -1,0 +1,867 @@
+// (2026-07-13) Build full-page /backup Settings & Daily Firestore Backups view
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  BackupSnapshot,
+  CoupleProfile,
+  DailyBackupRecord,
+  DigitalLoveLetter,
+  FirebaseRuntimeConfig,
+  KeepsakeMemory,
+  SecretYearNote,
+  TimeCapsuleItem,
+} from '../types';
+import {
+  CAPYBARA_SEAL_LOGO,
+  INITIAL_DIGITAL_LOVE_LETTERS,
+  INITIAL_MEMORIES,
+  INITIAL_SECRET_YEAR_NOTES,
+} from '../data/seedMemories';
+import {
+  DB,
+  exportBothJSONandCSV,
+  exportCSVSnapshot,
+  exportJSONSnapshot,
+} from '../db/localDb';
+import { syncManager } from '../db/firebaseSync';
+import { formatStandardDate } from '../utils/dateFormat';
+
+interface BackupVaultPageProps {
+  profile: CoupleProfile;
+  memories: KeepsakeMemory[];
+  secretNotes: SecretYearNote[];
+  digitalLoveLetters: DigitalLoveLetter[];
+  timeCapsule: TimeCapsuleItem;
+  dailyBackups: DailyBackupRecord[];
+  onUpdateProfile: (next: CoupleProfile) => Promise<void>;
+  onResetToCleanSlate: () => Promise<void>;
+  onRestoreShowcaseArchive: () => Promise<void>;
+  onTriggerSkeletonReload: () => void;
+  onToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
+}
+
+export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
+  profile,
+  memories,
+  secretNotes,
+  digitalLoveLetters,
+  timeCapsule,
+  dailyBackups,
+  onUpdateProfile,
+  onResetToCleanSlate,
+  onRestoreShowcaseArchive,
+  onTriggerSkeletonReload,
+  onToast,
+}) => {
+  const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Couple Sanctuary Settings Form State
+  const [form, setForm] = useState<CoupleProfile>(profile);
+  const [syncInfo, setSyncInfo] = useState(syncManager.getStatus());
+  const [fbConfig, setFbConfig] = useState<FirebaseRuntimeConfig>(() =>
+    syncManager.getRuntimeConfig()
+  );
+  const [showFbConfigDrawer, setShowFbConfigDrawer] = useState(false);
+
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isBusy, setIsBusy] = useState(false);
+  const [previewSection, setPreviewSection] = useState<
+    'DAILY_BACKUPS' | 'MEMORIES' | 'LETTERS' | 'SECRET_NOTES'
+  >('DAILY_BACKUPS');
+
+  useEffect(() => {
+    setForm(profile);
+  }, [profile]);
+
+  useEffect(() => {
+    return syncManager.subscribe(() => {
+      setSyncInfo(syncManager.getStatus());
+    });
+  }, []);
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const updated: CoupleProfile = {
+      ...form,
+      partner1Name: form.partner1Name.trim() || 'JP',
+      partner2Name: form.partner2Name.trim() || 'Zea',
+      updatedAt: Date.now(),
+    };
+    await onUpdateProfile(updated);
+    onToast('Sanctuary settings saved to IndexedDB & Firestore.', 'success');
+  };
+
+  const handleSaveFirebaseConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsBusy(true);
+    const connected = await syncManager.saveRuntimeConfig(fbConfig);
+    setIsBusy(false);
+    setShowFbConfigDrawer(false);
+    if (connected) {
+      onToast(`Connected to Firebase Firestore project "${fbConfig.projectId}"!`, 'success');
+    } else {
+      onToast('Saved config locally. Add valid API Key & Project ID to connect cloud.', 'info');
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (isSigningIn) return;
+    setIsSigningIn(true);
+    const res = await syncManager.signInWithGoogle();
+    setIsSigningIn(false);
+    if (res.ok) {
+      onToast(`Signed in as ${res.email || 'jp.and.zea@keepsake.love'}`, 'success');
+      onTriggerSkeletonReload();
+    } else if (res.cancelled) {
+      onToast('Sign-in popup closed. You can retry anytime.', 'info');
+    }
+  };
+
+  const handleSignOut = async () => {
+    setIsLoggingOut(true);
+    await new Promise((r) => setTimeout(r, 600));
+    await syncManager.signOut();
+    setIsLoggingOut(false);
+    onToast('Signed out cleanly. Local keepsake vault remains safe.', 'info');
+  };
+
+  const handleCreateManualDailyBackup = async () => {
+    setIsBusy(true);
+    const snap = DB.createSnapshot();
+    const record = await DB.saveBackup(snap);
+    const pushed = await syncManager.pushDailyBackupToFirestore(record);
+    setIsBusy(false);
+    onToast(
+      pushed
+        ? 'Daily backup snapshot saved to Firestore & Local Vault!'
+        : 'Daily backup snapshot saved to Local Vault (ready for Firestore sync)!',
+      'success'
+    );
+  };
+
+  const handleImportBackup = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    // Reset input value per SKILL.md Part 6 Rule 7
+    e.target.value = '';
+    if (!file) return;
+    setIsBusy(true);
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text) as BackupSnapshot;
+      if (!parsed || (!Array.isArray(parsed.memories) && !parsed.coupleProfile)) {
+        throw new Error('Invalid backup file');
+      }
+      await DB.restoreSnapshot(parsed);
+      await DB.saveBackup(parsed);
+      syncManager.schedulePush();
+      onToast('Backup file imported and restored into your live journal!', 'success');
+    } catch {
+      onToast('Invalid JSON backup file.', 'danger');
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const isCurrentlyBlankSlate =
+    memories.length === 0 && secretNotes.length === 0 && digitalLoveLetters.length === 0;
+
+  return (
+    <div
+      id="dedicated-backup-settings-page" // Full-page Settings & Firestore Daily Backups
+      className="min-h-screen bg-background text-on-surface pb-24"
+    >
+      {/* Dedicated Logging-Out Spinner Modal per SKILL.md Rule 9 */}
+      {isLoggingOut && (
+        <div className="fixed inset-0 z-[110] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-2xl flex flex-col items-center gap-3 max-w-xs w-full text-center modal-animate-in">
+            <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            <h4 className="font-headline-sm text-headline-sm text-primary font-serif">
+              Sealing Vault &amp; Logging Out...
+            </h4>
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              Preserving offline IndexedDB snapshots safely.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Top Sticky Header */}
+      <header className="sticky top-0 w-full z-40 bg-surface-bright/95 backdrop-blur-xl border-b border-outline-variant/30">
+        <div className="h-16 px-margin max-w-[760px] mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <img
+              src={CAPYBARA_SEAL_LOGO}
+              alt="Capybara Wax Seal"
+              className="h-8 w-auto object-contain"
+            />
+            <div>
+              <h1 className="font-headline-sm text-headline-sm text-primary font-serif leading-tight">
+                {form.partner1Name} &amp; {form.partner2Name} • Keepsake Sanctuary
+              </h1>
+              <span className="font-label-md text-[10px] uppercase tracking-widest text-secondary">
+                Since {formatStandardDate(form.relationshipStartDateISO)} • Settings &amp; Firestore
+                Backups
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="px-3.5 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform"
+          >
+            <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+            <span>Back to Journal</span>
+          </button>
+        </div>
+      </header>
+
+      <div className="max-w-[760px] mx-auto px-margin pt-6 flex flex-col gap-6">
+        {/* SECTION 1: COUPLE SANCTUARY SETTINGS & GOOGLE AUTH */}
+        <section className="bg-surface-container-lowest rounded-2xl p-5 sm:p-6 shadow-md border border-outline-variant/35 flex flex-col gap-5">
+          <div className="flex items-center justify-between border-b border-outline-variant/25 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-xs">
+                <span
+                  className="material-symbols-outlined text-[19px]"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  favorite
+                </span>
+              </div>
+              <div>
+                <h2 className="font-headline-sm text-headline-sm text-primary font-serif">
+                  Sanctuary Settings &amp; Cloud Sync
+                </h2>
+                <p className="font-label-md text-[10px] uppercase tracking-wider text-secondary">
+                  Dedicated /backup Settings Page
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowFbConfigDrawer((p) => !p)}
+              className="px-3 py-1.5 rounded-xl bg-surface-container-low text-primary font-label-md text-[10px] uppercase tracking-wider border border-outline-variant/40 flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-[15px] text-secondary">key</span>
+              <span>{showFbConfigDrawer ? 'Hide Firebase Keys' : 'Connect Firebase Keys'}</span>
+            </button>
+          </div>
+
+          {/* Local-First & Cloud Sync Bar */}
+          <div className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/30 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[19px] text-secondary">
+                  cloud_sync
+                </span>
+                <span className="font-label-lg text-label-lg text-primary">
+                  Local-First &amp; Cloud Sync
+                </span>
+              </div>
+              <span className="px-2.5 py-0.5 rounded-full bg-secondary-container/70 text-on-secondary-container font-label-md text-[10px] uppercase tracking-wider">
+                {syncInfo.status === 'quota'
+                  ? 'Quota Reached (Local)'
+                  : syncInfo.status === 'cloud-live'
+                    ? `Firestore Live (${syncInfo.projectId})`
+                    : 'IndexedDB Ready'}
+              </span>
+            </div>
+
+            {syncInfo.userEmail ? (
+              <div className="flex items-center justify-between gap-2 pt-1">
+                <span className="font-body-sm text-body-sm text-on-surface-variant truncate-single">
+                  Signed in as <strong className="text-primary">{syncInfo.userEmail}</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="px-3.5 py-1.5 rounded-lg bg-surface-container-high text-primary font-label-md text-label-md uppercase tracking-wider shrink-0"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={isSigningIn}
+                onClick={handleGoogleSignIn}
+                className="w-full py-2.5 px-4 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-[18px]">account_circle</span>
+                <span>
+                  {isSigningIn ? 'Connecting Google Account...' : 'Sign in with Google'}
+                </span>
+              </button>
+            )}
+          </div>
+
+          {/* Interactive Firebase Project Credentials Drawer */}
+          {showFbConfigDrawer && (
+            <form
+              onSubmit={handleSaveFirebaseConfig}
+              className="bg-surface-container-low/75 rounded-xl p-4 border border-outline-variant/40 flex flex-col gap-3"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-label-md text-label-md uppercase tracking-wider text-primary">
+                  Firebase Project Configuration (Firestore + Auth)
+                </span>
+                <span className="font-label-md text-[10px] text-secondary">
+                  Saves to Browser &amp; Connects Instantly
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="font-label-md text-[10px] uppercase text-outline block mb-1">
+                    Firebase API Key
+                  </label>
+                  <input
+                    type="text"
+                    value={fbConfig.apiKey}
+                    onChange={(e) => setFbConfig({ ...fbConfig, apiKey: e.target.value })}
+                    placeholder="AIzaSy..."
+                    className="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                  />
+                </div>
+                <div>
+                  <label className="font-label-md text-[10px] uppercase text-outline block mb-1">
+                    Firebase Project ID
+                  </label>
+                  <input
+                    type="text"
+                    value={fbConfig.projectId}
+                    onChange={(e) => setFbConfig({ ...fbConfig, projectId: e.target.value })}
+                    placeholder="our-keepsake-zea"
+                    className="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                  />
+                </div>
+                <div>
+                  <label className="font-label-md text-[10px] uppercase text-outline block mb-1">
+                    Auth Domain (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={fbConfig.authDomain || ''}
+                    onChange={(e) => setFbConfig({ ...fbConfig, authDomain: e.target.value })}
+                    placeholder="our-keepsake-zea.firebaseapp.com"
+                    className="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                  />
+                </div>
+                <div>
+                  <label className="font-label-md text-[10px] uppercase text-outline block mb-1">
+                    App ID (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={fbConfig.appId || ''}
+                    onChange={(e) => setFbConfig({ ...fbConfig, appId: e.target.value })}
+                    placeholder="1:123456789:web:abcdef"
+                    className="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="w-full py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider"
+              >
+                Save &amp; Connect Firebase Firestore
+              </button>
+            </form>
+          )}
+
+          {/* Sanctuary Settings Form (Exact match to Couple Settings fields) */}
+          <form onSubmit={handleSaveSettings} className="flex flex-col gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-1">
+                  Your Name
+                </label>
+                <input
+                  type="text"
+                  value={form.partner1Name}
+                  onChange={(e) => setForm({ ...form, partner1Name: e.target.value })}
+                  className="w-full px-3 py-2.5 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-1">
+                  Her Name
+                </label>
+                <input
+                  type="text"
+                  value={form.partner2Name}
+                  onChange={(e) => setForm({ ...form, partner2Name: e.target.value })}
+                  className="w-full px-3 py-2.5 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-1">
+                  Anniversary Start Date
+                </label>
+                <input
+                  type="date"
+                  value={form.relationshipStartDateISO}
+                  onChange={(e) =>
+                    setForm({ ...form, relationshipStartDateISO: e.target.value })
+                  }
+                  className="w-full px-3 py-2.5 rounded-lg bg-surface-container-low text-primary calendar-num-font text-body-sm border border-outline-variant/40 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-1">
+                  Stationery Theme
+                </label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm({ ...form, theme: form.theme === 'dark' ? 'light' : 'dark' })
+                  }
+                  className="w-full px-3 py-2.5 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40 flex items-center justify-between"
+                >
+                  <span>
+                    {form.theme === 'dark' ? 'Midnight Espresso' : 'Warm Linen Paper'}
+                  </span>
+                  <span className="material-symbols-outlined text-[18px] text-secondary">
+                    {form.theme === 'dark' ? 'dark_mode' : 'light_mode'}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-1">
+                Romantic Banner Quote
+              </label>
+              <input
+                type="text"
+                value={form.heroQuote}
+                onChange={(e) => setForm({ ...form, heroQuote: e.target.value })}
+                className="w-full px-3 py-2.5 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40 focus:outline-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 bg-surface-container-low/60 p-3.5 rounded-xl border border-outline-variant/30">
+              <div className="sm:col-span-3">
+                <span className="font-label-md text-label-md uppercase tracking-wider text-secondary">
+                  Next Rendezvous Teaser Strip
+                </span>
+              </div>
+              <div className="sm:col-span-2">
+                <input
+                  type="text"
+                  value={form.nextRendezvousTitle}
+                  onChange={(e) => setForm({ ...form, nextRendezvousTitle: e.target.value })}
+                  placeholder="Sunset Picnic at Presidio"
+                  className="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                <input
+                  type="text"
+                  value={form.nextRendezvousDayLabel}
+                  onChange={(e) => setForm({ ...form, nextRendezvousDayLabel: e.target.value })}
+                  placeholder="This Sat"
+                  className="w-full px-2.5 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                />
+                <input
+                  type="text"
+                  value={form.nextRendezvousTimeLabel}
+                  onChange={(e) =>
+                    setForm({ ...form, nextRendezvousTimeLabel: e.target.value })
+                  }
+                  placeholder="5:30 PM"
+                  className="w-full px-2.5 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg uppercase tracking-wider shadow-md hover:bg-primary-container transition-colors"
+            >
+              Save Sanctuary Settings
+            </button>
+          </form>
+        </section>
+
+        {/* SECTION 2: DAILY BACKUPS SAVED ON FIRESTORE & LOCAL VAULT */}
+        <section className="bg-surface-container-lowest rounded-2xl p-5 sm:p-6 shadow-md border border-outline-variant/35 flex flex-col gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant/25 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-secondary text-[22px]">
+                backup
+              </span>
+              <div>
+                <h2 className="font-headline-sm text-headline-sm text-primary font-serif">
+                  Daily Backups Saved on Firestore &amp; Vault ({dailyBackups.length})
+                </h2>
+                <p className="font-body-sm text-body-sm text-on-surface-variant">
+                  Automated daily snapshots and manual checkpoints synced with{' '}
+                  <span className="font-medium text-primary">
+                    couples/jp_zea_vault/daily_backups
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={isBusy}
+              onClick={handleCreateManualDailyBackup}
+              className="px-4 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform"
+            >
+              <span className="material-symbols-outlined text-[16px]">cloud_upload</span>
+              <span>Create Daily Backup Now</span>
+            </button>
+          </div>
+
+          {/* Export / Import / Clean Slate Toolbar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                exportJSONSnapshot(DB.createSnapshot());
+                onToast('Exported JSON Keepsake Backup.', 'success');
+              }}
+              className="py-2.5 px-3 rounded-xl bg-surface-container-low text-primary font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-1.5 border border-outline-variant/30"
+            >
+              <span className="material-symbols-outlined text-[16px] text-secondary">
+                download
+              </span>
+              <span>Export JSON</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                exportCSVSnapshot(DB.createSnapshot());
+                onToast('Exported CSV Spreadsheet Backup.', 'success');
+              }}
+              className="py-2.5 px-3 rounded-xl bg-surface-container-low text-primary font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-1.5 border border-outline-variant/30"
+            >
+              <span className="material-symbols-outlined text-[16px] text-secondary">
+                table_view
+              </span>
+              <span>Export CSV</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={async () => {
+                await exportBothJSONandCSV(DB.createSnapshot());
+                onToast('Full Backup All (JSON + CSV) saved!', 'success');
+              }}
+              className="py-2.5 px-3 rounded-xl bg-secondary-container text-on-secondary-container font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-xs"
+            >
+              <span className="material-symbols-outlined text-[16px]">cloud_download</span>
+              <span>Backup All (JSON+CSV)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="py-2.5 px-3 rounded-xl bg-surface-container-high text-primary font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-xs"
+            >
+              <span className="material-symbols-outlined text-[16px]">upload_file</span>
+              <span>Import JSON</span>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,application/json"
+              onChange={handleImportBackup}
+              className="hidden"
+            />
+          </div>
+
+          {/* Clean Slate vs Restore Original Showcase Controls */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-surface-container-low/65 p-3.5 rounded-xl border border-outline-variant/30">
+            <div className="flex flex-col justify-between gap-2">
+              <div className="flex items-center justify-between">
+                <span className="font-label-md text-label-md uppercase tracking-wider text-primary">
+                  Main App Workspace State
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-surface-container-lowest text-secondary calendar-num-font text-[10px] font-semibold uppercase">
+                  {isCurrentlyBlankSlate
+                    ? 'Clean Slate (0 Items)'
+                    : `${memories.length} Memories • ${digitalLoveLetters.length} Letters • ${secretNotes.length} Notes`}
+                </span>
+              </div>
+              <button
+                type="button"
+                disabled={isBusy}
+                onClick={async () => {
+                  setIsBusy(true);
+                  await onResetToCleanSlate();
+                  setIsBusy(false);
+                  onToast('Main journal reset to a fresh Clean Slate!', 'info');
+                }}
+                className="w-full py-2.5 px-3 rounded-xl bg-surface-container-lowest text-primary font-label-md text-label-md uppercase tracking-wider border border-outline-variant/40 hover:bg-surface-container transition-colors flex items-center justify-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-[16px] text-secondary">
+                  cleaning_services
+                </span>
+                <span>Reset Main App to Clean Slate</span>
+              </button>
+            </div>
+
+            <div className="flex flex-col justify-between gap-2">
+              <span className="font-label-md text-label-md uppercase tracking-wider text-secondary">
+                Showcase Template Data
+              </span>
+              <button
+                type="button"
+                disabled={isBusy}
+                onClick={async () => {
+                  setIsBusy(true);
+                  await onRestoreShowcaseArchive();
+                  setIsBusy(false);
+                  onToast('Backed-up showcase memories, letters & notes restored!', 'success');
+                }}
+                className="w-full py-2.5 px-3 rounded-xl bg-primary-container text-on-primary font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-xs"
+              >
+                <span className="material-symbols-outlined text-[16px]">
+                  settings_backup_restore
+                </span>
+                <span>Restore Showcase Archive to App</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Segmented Inspector Tabs: Daily Backups List vs Backed-Up Items */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
+            {[
+              {
+                id: 'DAILY_BACKUPS',
+                label: `Daily Firestore Backups (${dailyBackups.length})`,
+              },
+              { id: 'MEMORIES', label: `Archived Memories (${INITIAL_MEMORIES.length})` },
+              {
+                id: 'LETTERS',
+                label: `Archived Love Letters (${INITIAL_DIGITAL_LOVE_LETTERS.length})`,
+              },
+              {
+                id: 'SECRET_NOTES',
+                label: `Archived Year Notes (${INITIAL_SECRET_YEAR_NOTES.length})`,
+              },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() =>
+                  setPreviewSection(
+                    tab.id as 'DAILY_BACKUPS' | 'MEMORIES' | 'LETTERS' | 'SECRET_NOTES'
+                  )
+                }
+                className={`px-3.5 py-1.5 rounded-full font-label-md text-[11px] uppercase tracking-wider whitespace-nowrap transition-colors ${
+                  previewSection === tab.id
+                    ? 'bg-primary text-on-primary shadow-xs'
+                    : 'bg-surface-container-low text-secondary hover:text-primary'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* TAB 1: DAILY BACKUPS SAVED ON FIRESTORE & LOCAL VAULT */}
+          {previewSection === 'DAILY_BACKUPS' && (
+            <div className="flex flex-col gap-3">
+              {dailyBackups.map((record) => (
+                <div
+                  key={record.id}
+                  className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                >
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="calendar-num-font text-[12px] font-bold text-primary">
+                        {formatStandardDate(record.dateISO)}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full font-label-md text-[9px] uppercase tracking-wider flex items-center gap-1 ${
+                          record.syncedToFirestore
+                            ? 'bg-secondary-container text-on-secondary-container'
+                            : 'bg-surface-container-high text-secondary'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-[12px]">
+                          {record.syncedToFirestore ? 'cloud_done' : 'storage'}
+                        </span>
+                        <span>
+                          {record.syncedToFirestore
+                            ? 'Saved on Firestore'
+                            : 'Local IndexedDB Vault'}
+                        </span>
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-surface-container-lowest text-outline font-label-md text-[9px] uppercase">
+                        {record.trigger}
+                      </span>
+                    </div>
+
+                    <p className="font-headline-sm text-body-md text-primary font-serif truncate-single">
+                      {record.label}
+                    </p>
+
+                    <p className="calendar-num-font text-[11px] text-secondary">
+                      {record.memoriesCount} Date Memories • {record.lettersCount} Digital Love
+                      Letters • {record.notesCount} Secret Year Notes
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await DB.restoreSnapshot(record.snapshot);
+                        syncManager.schedulePush();
+                        onToast(`Restored snapshot "${record.label}" to live app!`, 'success');
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-[10px] uppercase tracking-wider"
+                    >
+                      Restore
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        exportJSONSnapshot(record.snapshot);
+                        onToast('Downloaded daily backup JSON.', 'info');
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-label-md text-[10px] uppercase border border-outline-variant/40"
+                    >
+                      JSON
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        exportCSVSnapshot(record.snapshot);
+                        onToast('Downloaded daily backup CSV.', 'info');
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-label-md text-[10px] uppercase border border-outline-variant/40"
+                    >
+                      CSV
+                    </button>
+                    {!record.syncedToFirestore && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await syncManager.pushDailyBackupToFirestore(record);
+                          onToast('Snapshot synced to Firestore daily_backups!', 'success');
+                        }}
+                        className="px-2.5 py-1.5 rounded-lg bg-secondary-container text-on-secondary-container font-label-md text-[10px] uppercase"
+                      >
+                        Push Cloud
+                      </button>
+                    )}
+                    {record.trigger !== 'SHOWCASE_ARCHIVE' && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await syncManager.deleteDailyBackupFromFirestore(record.id);
+                          onToast('Daily backup snapshot deleted.', 'info');
+                        }}
+                        className="p-1.5 rounded-lg text-error hover:bg-error-container/40"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">delete</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* TAB 2: ARCHIVED SHOWCASE MEMORIES */}
+          {previewSection === 'MEMORIES' && (
+            <div className="flex flex-col gap-3">
+              {INITIAL_MEMORIES.map((mem) => (
+                <div
+                  key={mem.id}
+                  className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/25 flex flex-col gap-1.5"
+                >
+                  <div className="flex items-center justify-between text-secondary font-label-md text-[10px] uppercase tracking-wider">
+                    <span>
+                      Keepsake #{mem.keepsakeNumber} • {mem.location}
+                    </span>
+                    <span>{formatStandardDate(mem.dateISO)}</span>
+                  </div>
+                  <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                    {mem.title}
+                  </h3>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant italic">
+                    “{mem.quoteHighlight}”
+                  </p>
+                  <p className="font-body-sm text-body-sm text-on-surface whitespace-pre-line">
+                    {mem.storyBody}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* TAB 3: ARCHIVED DIGITAL LOVE LETTERS */}
+          {previewSection === 'LETTERS' && (
+            <div className="flex flex-col gap-3">
+              {INITIAL_DIGITAL_LOVE_LETTERS.map((letter) => (
+                <div
+                  key={letter.id}
+                  className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/25 flex flex-col gap-1.5"
+                >
+                  <div className="flex items-center justify-between text-secondary font-label-md text-[10px] uppercase tracking-wider">
+                    <span>
+                      Letter #{letter.letterNumber} • {letter.occasion}
+                    </span>
+                    <span>{formatStandardDate(letter.dateISO)}</span>
+                  </div>
+                  <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                    {letter.title}
+                  </h3>
+                  <p className="font-body-sm text-body-sm text-primary italic font-serif">
+                    {letter.salutation}
+                  </p>
+                  <p className="font-body-sm text-body-sm text-on-surface whitespace-pre-line font-serif">
+                    {letter.body}
+                  </p>
+                  <p className="font-body-sm text-body-sm text-secondary italic text-right font-serif">
+                    {letter.signOff}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* TAB 4: ARCHIVED SECRET YEAR NOTES */}
+          {previewSection === 'SECRET_NOTES' && (
+            <div className="flex flex-col gap-3">
+              {INITIAL_SECRET_YEAR_NOTES.map((note) => (
+                <div
+                  key={note.id}
+                  className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/25 flex flex-col gap-1.5"
+                >
+                  <div className="flex items-center justify-between text-secondary font-label-md text-[10px] uppercase tracking-wider">
+                    <span>{note.monthLabel}</span>
+                    <span>{formatStandardDate(note.dateISO)}</span>
+                  </div>
+                  <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                    {note.title}
+                  </h3>
+                  <p className="font-body-sm text-body-sm text-on-surface">
+                    {note.littleThingsNoted}
+                  </p>
+                  <p className="font-body-sm text-body-sm text-secondary italic font-serif">
+                    {note.whatSheSaid}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+};

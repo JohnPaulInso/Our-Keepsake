@@ -1,0 +1,907 @@
+// (2026-07-13) Build New Date Memory Composer view per Stitch & SKILL.md
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  CoupleProfile,
+  DotIndicator,
+  KeepsakeMemory,
+  MemoryCategory,
+  PolaroidPhoto,
+} from '../types';
+import { formatDuration, formatStandardDate } from '../utils/dateFormat';
+import { audioEngine } from '../utils/audioEngine';
+import { ImageCropperModal } from '../components/ImageCropperModal';
+
+interface ComposerViewProps {
+  profile: CoupleProfile;
+  editingMemory: KeepsakeMemory | null;
+  totalMemoriesCount: number;
+  onSaveMemory: (memory: KeepsakeMemory, isDraft: boolean) => void;
+  onCancel: () => void;
+  onToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
+}
+
+const DEFAULT_VIBE_TAGS = [
+  'First Time',
+  'Cozy Rainy Day',
+  'Deep Talks',
+  'Anniversary',
+  'Roadtrip',
+  'Laughter',
+  'Sweet Treats',
+  'Stargazing',
+];
+
+const DEFAULT_POLAROIDS: PolaroidPhoto[] = [
+  {
+    id: 'ph-comp-1',
+    url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDAOXzQOGwF2CYKNFaR-QjMcV7FAGBilFMfYTZL6sNFldieolONPGdIEb6x9r-B87hEIGpsRqcMkYU5hj8wiyqwAzIYeRy1uCBdMy5WERUGwbbIwkLSrA8L0Qd5O81Hj5QVbbGxWoGinksP9WGjzAZI_QtxVx_0YbB6dSr0zJqmB2muD2cQqaSHgLGQlJnBx6MFS-LYLA6YZjfCsOvQb9khGGTQTONTpGRb876VyEbM',
+    caption: 'She loved the cardamom bun...',
+    tag: 'CAFE',
+  },
+  {
+    id: 'ph-comp-2',
+    url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCYhI2O2CbQPJXIJas4Fts4Y4Zp1bf5WIimfD1RRzFlvUyve56rbVmPdfwpWQP6X7gyTW72ZLvAOoQIf4f4tb7DE8YCk3PrxU7Xooyt1CNZt2vN-F0Vb5m6g7wTQsRWtcX8Ibbj57Tme7h4tZqCRXpGpvJdwq44rpqy6pBPO68dnse4Dc12gVKzrsitM2EcOpWCD7iMFqi2ReJkIQ9yTrMHx_ypi9kA-jD66zYnypXJ',
+    caption: 'Holding our handwritten love note across the table',
+    tag: 'BISTRO',
+  },
+];
+
+export const ComposerView: React.FC<ComposerViewProps> = ({
+  profile,
+  editingMemory,
+  totalMemoriesCount,
+  onSaveMemory,
+  onToast,
+}) => {
+  const [dateISO, setDateISO] = useState(editingMemory?.dateISO || '2026-11-16');
+  const [timeFormatted, setTimeFormatted] = useState(
+    editingMemory?.timeFormatted || '7:30 PM PST'
+  );
+  const [location, setLocation] = useState(
+    editingMemory?.location || 'Little French Bistro, Soho'
+  );
+  const [weatherTemp, setWeatherTemp] = useState(editingMemory?.weatherTemp || 'Crisp 60°');
+  const [weatherConditions, setWeatherConditions] = useState(
+    editingMemory?.weatherConditions || 'Soft Evening Glow'
+  );
+  const [moodVibe, setMoodVibe] = useState(editingMemory?.moodVibe || 'Tender & Unhurried');
+  const [title, setTitle] = useState(editingMemory?.title || '');
+  const [letterHeading, setLetterHeading] = useState(editingMemory?.letterHeading || '');
+  const [storyBody, setStoryBody] = useState(editingMemory?.storyBody || '');
+  const [quoteHighlight, setQuoteHighlight] = useState(editingMemory?.quoteHighlight || '');
+  const [selectedTags, setSelectedTags] = useState<string[]>(
+    editingMemory?.vibeTags || ['First Time', 'Cozy Rainy Day']
+  );
+  const [customTagInput, setCustomTagInput] = useState('');
+  const [selectedDots, setSelectedDots] = useState<DotIndicator[]>(
+    editingMemory?.dotIndicators || ['GOLD', 'MOCHA']
+  );
+
+  // Voice Note State
+  const [voiceTitle, setVoiceTitle] = useState(
+    editingMemory?.audioMemo?.title || `Whispered note for ${profile.partner2Name}`
+  );
+  const [voiceDurationSec, setVoiceDurationSec] = useState(
+    editingMemory?.audioMemo?.durationSeconds || 42
+  );
+  const [voiceDataUrl, setVoiceDataUrl] = useState<string | undefined>(
+    editingMemory?.audioMemo?.url
+  );
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordElapsed, setRecordElapsed] = useState(0);
+  const recordTimerRef = useRef<number | null>(null);
+
+  // (2026-07-13) Start new memories with empty polaroids vs prefilled sample photos
+  const [photos, setPhotos] = useState<PolaroidPhoto[]>(
+    editingMemory ? editingMemory.photos : []
+  );
+  const [pendingCropSrc, setPendingCropSrc] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Video Capsule State
+  const [hasVideo, setHasVideo] = useState<boolean>(Boolean(editingMemory?.videoCapsule));
+  const [videoTitle, setVideoTitle] = useState(
+    editingMemory?.videoCapsule?.title || `Candid moment with ${profile.partner2Name} (22s)`
+  );
+  const [videoDuration, setVideoDuration] = useState(
+    editingMemory?.videoCapsule?.durationFormatted || '0:22'
+  );
+  const [videoUrl, setVideoUrl] = useState<string | undefined>(
+    editingMemory?.videoCapsule?.url
+  );
+  const videoInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Meta editor modal state
+  const [metaModalOpen, setMetaModalOpen] = useState(false);
+  const [sealingAnim, setSealingAnim] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (recordTimerRef.current) clearInterval(recordTimerRef.current);
+    };
+  }, []);
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const handleAddCustomTag = () => {
+    const clean = customTagInput.trim();
+    if (!clean) return;
+    if (!selectedTags.includes(clean)) {
+      setSelectedTags((prev) => [...prev, clean]);
+    }
+    setCustomTagInput('');
+  };
+
+  const toggleDot = (dot: DotIndicator) => {
+    setSelectedDots((prev) => {
+      if (prev.includes(dot)) {
+        return prev.length > 1 ? prev.filter((d) => d !== dot) : prev;
+      }
+      return [...prev, dot];
+    });
+  };
+
+  const handleToggleRecording = async () => {
+    if (!isRecording) {
+      setIsRecording(true);
+      setRecordElapsed(0);
+      await audioEngine.startRecording();
+      recordTimerRef.current = window.setInterval(() => {
+        setRecordElapsed((prev) => {
+          if (prev >= 120) {
+            handleStopRecording();
+            return 120;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+      onToast('Recording voice note... Tap again to seal audio.', 'info');
+    } else {
+      await handleStopRecording();
+    }
+  };
+
+  const handleStopRecording = async () => {
+    if (recordTimerRef.current) {
+      clearInterval(recordTimerRef.current);
+      recordTimerRef.current = null;
+    }
+    setIsRecording(false);
+    const res = await audioEngine.stopRecording();
+    setVoiceDurationSec(res.durationSeconds);
+    if (res.dataUrl) {
+      setVoiceDataUrl(res.dataUrl);
+    }
+    onToast(`Voice note captured (${formatDuration(res.durationSeconds)})!`, 'success');
+  };
+
+  const handleSelectPhotoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setPendingCropSrc(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSelectVideoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setHasVideo(true);
+    setVideoUrl(url);
+    setVideoTitle(file.name.replace(/\.[^.]+$/, '') || 'Uploaded Motion Capsule');
+    onToast('Video Capsule attached & optimized for storage!', 'success');
+  };
+
+  const buildMemoryPayload = (isDraft: boolean): KeepsakeMemory => {
+    const cleanTitle = title.trim() || `Evening at ${location.split(',')[0]}`;
+    const cleanBody =
+      storyBody.trim() ||
+      `Another unforgettable day with ${profile.partner2Name} at ${location}. I wrote this down so we never forget how warm and peaceful this moment felt.`;
+    const categories: MemoryCategory[] = ['EVENT'];
+    if (photos.length > 0) categories.push('PHOTO');
+    if (voiceTitle.trim()) categories.push('VOICE_MEMO');
+    if (hasVideo) categories.push('VIDEO');
+    if (selectedDots.includes('ROSE') || selectedTags.includes('Anniversary')) {
+      categories.push('ANNIVERSARY');
+    }
+
+    return {
+      id: editingMemory?.id || `mem-${Date.now()}`,
+      keepsakeNumber: editingMemory?.keepsakeNumber || 85 + totalMemoriesCount,
+      volumeNumber: editingMemory?.volumeNumber || 15,
+      dateISO,
+      timeFormatted,
+      title: cleanTitle,
+      letterHeading: letterHeading.trim() || cleanTitle,
+      snippet: cleanBody.slice(0, 175) + (cleanBody.length > 175 ? '...' : ''),
+      storyBody: cleanBody,
+      quoteHighlight:
+        quoteHighlight.trim() ||
+        `Every little moment with ${profile.partner2Name} is worth remembering forever.`,
+      signOffAuthor: `${profile.partner1Name} • St. ${editingMemory?.volumeNumber || 15}`,
+      location: location.trim() || 'Our Favorite Corner',
+      weatherTemp,
+      weatherConditions,
+      moodVibe,
+      vibeTags: selectedTags,
+      categories,
+      dotIndicators: selectedDots,
+      photos,
+      audioMemo: {
+        id: editingMemory?.audioMemo?.id || `aud-${Date.now()}`,
+        title: voiceTitle.trim() || 'Sweet voice note',
+        url: voiceDataUrl,
+        durationSeconds: voiceDurationSec,
+        durationFormatted: formatDuration(voiceDurationSec),
+        waveformPeaks: [35, 65, 90, 50, 80, 60, 95, 70, 45, 75, 85, 55, 40, 65, 45, 30],
+        isFavorite: editingMemory?.audioMemo?.isFavorite ?? true,
+      },
+      videoCapsule: hasVideo
+        ? {
+            id: editingMemory?.videoCapsule?.id || `vid-${Date.now()}`,
+            title: videoTitle,
+            url: videoUrl,
+            thumbnailUrl:
+              photos[0]?.url ||
+              'https://lh3.googleusercontent.com/aida-public/AB6AXuDA5pyX2Wv5H9GJg4tRmBwcg2Sp_yzAzCTFtWiNWJvFlBbyD6TQfOa_a1zc3_d8IWiOLv7gmNVT2AcX0ZXDN7I60ryxTZBbWootzYOroXkJIm80QxFDPipcJvPfd6vHfrFV6MJAMmXT842Xm2jBiIB8gG-2OPzzIYN3dppgmGdEzU_tKXCaz5Hb3bI1q3BZrYn-jhlRfI-yEbU5wXsR63r1NbFXMSpJMW_ACMhaKJNh',
+            durationFormatted: videoDuration,
+            resolution: '1080p HD',
+          }
+        : undefined,
+      partnerNotes: editingMemory?.partnerNotes || [],
+      isSealed: !isDraft,
+      isDraft,
+      sealLabel: isDraft ? 'Saved Draft on Desk' : `Sealed in ${profile.chapterTitle}`,
+      sealIcon: isDraft ? 'edit_note' : 'spa',
+      updatedAt: Date.now(),
+      sortOrder: editingMemory?.sortOrder ?? 0,
+    };
+  };
+
+  const handleSealSubmit = () => {
+    setSealingAnim(true);
+    setTimeout(() => {
+      setSealingAnim(false);
+      const payload = buildMemoryPayload(false);
+      onSaveMemory(payload, false);
+    }, 220);
+  };
+
+  const handleDraftSubmit = () => {
+    const payload = buildMemoryPayload(true);
+    onSaveMemory(payload, true);
+  };
+
+  return (
+    <div className="flex flex-col w-full px-margin pb-space-xl max-w-[760px] mx-auto">
+      {/* Whimsical Vignette & Header */}
+      <div className="relative pt-space-md pb-space-lg text-center flex flex-col items-center">
+        <div className="relative mb-space-sm flex items-center justify-center">
+          <div className="w-16 h-16 rounded-full bg-secondary-container/40 flex items-center justify-center shadow-sm">
+            <svg
+              className="w-10 h-10 text-secondary"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="1.8"
+              viewBox="0 0 48 48"
+            >
+              <path d="M14 34c0-7 4-13 12-13 5 0 9 3 11 8 .5 1.5 1.5 3 3 3h1c1.5 0 2.5 1 2.5 2.5s-1 2.5-2.5 2.5h-5c-2 0-3 1-4 2" />
+              <path d="M14 26c-2 0-4-1.5-4-4 0-3 2-6 5-6h5c3 0 5 2 5 5v5" />
+              <circle cx="17" cy="20" fill="currentColor" r="1.2" />
+              <path d="M12 22c-1 .2-2 .8-2 1.8" />
+              <path d="M22 16c0-1.5 1-3 2.5-3s2.5 1.5 2.5 3" />
+              <path d="M31 28c3-4 7-9 11-13-1 4-3 9-5 12" stroke="#cca440" strokeWidth="2" />
+              <path d="M37 20c-1.5-1-3-1-4 .5" stroke="#cca440" />
+              <circle cx="39" cy="18" fill="#cca440" r="1.5" />
+            </svg>
+          </div>
+          <span className="absolute -top-1 -right-2 text-tertiary-fixed-dim material-symbols-outlined text-[18px]">
+            auto_awesome
+          </span>
+        </div>
+        <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight font-serif">
+          {editingMemory ? 'Refine Our Keepsake Chapter' : "Preserve Today's Chapter"}
+        </h2>
+        <p className="font-italic-quote text-italic-quote text-secondary mt-space-xs max-w-xs leading-relaxed font-serif italic">
+          Every little moment with {profile.partner2Name} is worth remembering forever.
+        </p>
+      </div>
+
+      {/* Primary Journal Desk Canvas */}
+      <div className="flex flex-col gap-space-lg">
+        {/* Context Pills: Date & Location Bar */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+          <button
+            type="button"
+            onClick={() => setMetaModalOpen(true)}
+            className="group flex items-center justify-between px-space-md py-space-sm bg-surface-container-low text-primary rounded-full shadow-sm active:scale-[0.99] transition-transform text-left border border-outline-variant/30"
+          >
+            <div className="flex items-center gap-space-sm min-w-0">
+              <span className="material-symbols-outlined text-[20px] text-secondary">
+                calendar_today
+              </span>
+              <div className="flex flex-col min-w-0">
+                <span className="font-label-md text-label-md uppercase tracking-wider text-outline">
+                  Date &amp; Time
+                </span>
+                <span className="font-body-md text-body-md font-medium text-primary truncate-single">
+                  {formatStandardDate(dateISO)} • {timeFormatted}
+                </span>
+              </div>
+            </div>
+            <span className="material-symbols-outlined text-[18px] text-outline-variant group-hover:text-primary">
+              expand_more
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMetaModalOpen(true)}
+            className="group flex items-center justify-between px-space-md py-space-sm bg-surface-container-low text-primary rounded-full shadow-sm active:scale-[0.99] transition-transform text-left border border-outline-variant/30"
+          >
+            <div className="flex items-center gap-space-sm min-w-0">
+              <span className="material-symbols-outlined text-[20px] text-tertiary-container">
+                location_on
+              </span>
+              <div className="flex flex-col min-w-0">
+                <span className="font-label-md text-label-md uppercase tracking-wider text-outline">
+                  Location &amp; Vibe
+                </span>
+                <span className="font-body-md text-body-md font-medium text-primary truncate-single">
+                  {location}
+                </span>
+              </div>
+            </div>
+            <span className="material-symbols-outlined text-[18px] text-outline-variant group-hover:text-primary">
+              edit
+            </span>
+          </button>
+        </div>
+
+        {/* Editorial Title & Ruled Note Card */}
+        <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm relative overflow-hidden flex flex-col border border-outline-variant/30">
+          {/* Faint Capybara Botanical Watermark in corner */}
+          <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-[0.06] pointer-events-none text-primary">
+            <svg fill="currentColor" viewBox="0 0 100 100">
+              <path d="M20 70c0-18 12-32 30-32 15 0 26 8 30 20 2 4 4 8 8 8h4c4 0 6 3 6 7s-3 7-6 7h-12c-5 0-8 3-10 6H20z" />
+              <circle cx="32" cy="48" r="4" />
+              <circle cx="56" cy="24" r="8" />
+              <path d="M50 16c2-4 6-6 10-6 2 4 1 8-2 10" />
+            </svg>
+          </div>
+
+          {/* Title Input */}
+          <div className="mb-space-md relative">
+            <label
+              className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-space-xs"
+              htmlFor="memory-title"
+            >
+              Title of this moment
+            </label>
+            <input
+              id="memory-title"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="E.g., Sunday morning pastries and warm coffee..."
+              className="w-full bg-transparent font-headline-sm text-headline-sm text-primary placeholder:text-outline-variant focus:outline-none pb-space-xs font-serif"
+            />
+            <div className="w-full h-px bg-surface-container-high" />
+          </div>
+
+          {/* Favorite Quote Input */}
+          <div className="mb-space-md relative">
+            <label
+              className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-space-xs"
+              htmlFor="memory-quote"
+            >
+              What {profile.partner2Name} Said (Highlighted Quote)
+            </label>
+            <input
+              id="memory-quote"
+              type="text"
+              value={quoteHighlight}
+              onChange={(e) => setQuoteHighlight(e.target.value)}
+              placeholder={`E.g., "You whispered that this felt like forever..."`}
+              className="w-full bg-transparent font-italic-quote text-body-md italic text-secondary placeholder:text-outline-variant/80 focus:outline-none pb-space-xs font-serif"
+            />
+            <div className="w-full h-px bg-surface-container-high" />
+          </div>
+
+          {/* Ruled Stationery Notepad Area */}
+          <div className="relative">
+            <label
+              className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-space-xs"
+              htmlFor="memory-narrative"
+            >
+              The Heartfelt Note
+            </label>
+            <div className="relative rounded-lg bg-surface-container-low/50 p-space-md">
+              <textarea
+                id="memory-narrative"
+                rows={5}
+                value={storyBody}
+                onChange={(e) => setStoryBody(e.target.value)}
+                placeholder={`Write down how ${profile.partner2Name} smiled, what she said, the quiet moments you never want to forget...`}
+                className="w-full bg-transparent font-body-lg text-body-lg text-primary placeholder:text-outline-variant/80 focus:outline-none resize-none leading-[2rem] ruled-notebook"
+              />
+            </div>
+          </div>
+
+          {/* Calendar Dot Status Selector */}
+          <div className="mt-space-md pt-space-sm border-t border-outline-variant/20">
+            <span className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-space-xs">
+              Calendar Ribbon Dots
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'GOLD' as DotIndicator, label: 'Big Event', color: '#E5A93C' },
+                { id: 'MOCHA' as DotIndicator, label: 'Photos & Voice', color: '#5C4033' },
+                { id: 'ROSE' as DotIndicator, label: 'Milestone / Anniversary', color: '#C96B78' },
+              ].map((d) => {
+                const active = selectedDots.includes(d.id);
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => toggleDot(d.id)}
+                    className={`px-3 py-1 rounded-full font-label-md text-label-md flex items-center gap-1.5 transition-all ${
+                      active
+                        ? 'bg-primary text-on-primary shadow-xs'
+                        : 'bg-surface-container-high text-on-surface-variant'
+                    }`}
+                  >
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: d.color }}
+                    />
+                    <span>{d.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Vibe & Memory Tags Carousel */}
+          <div className="mt-space-md pt-space-sm">
+            <span className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-space-sm">
+              Vibe &amp; Memory Tags
+            </span>
+            <div className="flex flex-wrap gap-space-xs">
+              {Array.from(new Set([...DEFAULT_VIBE_TAGS, ...selectedTags])).map((tag) => {
+                const isSelected = selectedTags.includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleTag(tag)}
+                    className={`px-space-md py-1.5 rounded-full font-label-lg text-label-lg transition-all active:scale-95 ${
+                      isSelected
+                        ? 'bg-secondary-container text-on-secondary-container shadow-sm'
+                        : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-variant'
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex items-center gap-2 mt-2.5">
+              <input
+                type="text"
+                value={customTagInput}
+                onChange={(e) => setCustomTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddCustomTag();
+                  }
+                }}
+                placeholder="Add custom tag..."
+                className="px-3 py-1.5 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleAddCustomTag}
+                className="px-3 py-1.5 rounded-lg bg-surface-container-high text-primary font-label-md text-label-md uppercase"
+              >
+                + Tag
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Media Attachment Vault */}
+        <div className="flex flex-col gap-space-md">
+          <div className="flex items-center justify-between">
+            <h3 className="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs font-serif">
+              <span className="material-symbols-outlined text-[20px] text-secondary">
+                attachment
+              </span>
+              Attach Keepsakes
+            </h3>
+            <span className="font-label-md text-label-md text-outline">3 Vault Slots</span>
+          </div>
+
+          {/* 1. Voice Note Recording Module */}
+          <div className="bg-surface-container-low rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm relative border border-outline-variant/25">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-space-xs">
+                <span className="material-symbols-outlined text-[18px] text-secondary">mic</span>
+                <span className="font-label-lg text-label-lg text-primary">
+                  Her Voice &amp; Whispers
+                </span>
+              </div>
+              <span className="font-body-sm text-body-sm text-outline">
+                {isRecording
+                  ? `${formatDuration(recordElapsed)} / 02:00`
+                  : `${formatDuration(voiceDurationSec)} / 02:00`}
+              </span>
+            </div>
+
+            <input
+              type="text"
+              value={voiceTitle}
+              onChange={(e) => setVoiceTitle(e.target.value)}
+              placeholder="Voice note title (e.g., Laughing at the icy waves)..."
+              className="w-full px-3 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/30 focus:outline-none"
+            />
+
+            <div className="flex items-center gap-space-md bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
+              <button
+                type="button"
+                onClick={handleToggleRecording}
+                className="w-12 h-12 rounded-full bg-error-container text-error flex items-center justify-center shrink-0 active:scale-90 transition-transform relative group"
+              >
+                {isRecording && (
+                  <span className="w-5 h-5 rounded-full bg-error animate-ping absolute opacity-60" />
+                )}
+                <span
+                  className={`bg-error relative z-10 transition-all ${
+                    isRecording ? 'w-3.5 h-3.5 rounded-xs' : 'w-3.5 h-3.5 rounded-full'
+                  }`}
+                />
+              </button>
+              <div className="flex-1 flex flex-col justify-center min-w-0">
+                <p className="font-body-sm text-body-sm text-on-surface truncate-single">
+                  {isRecording
+                    ? 'Recording live microphone... Tap red button to finish'
+                    : `Tap red button to record ${profile.partner2Name}'s voice or a note`}
+                </p>
+                <div className="w-full h-6 flex items-center gap-1 mt-1 overflow-hidden opacity-85">
+                  {[2, 3, 5, 4, 6, 3, 5, 2, 4, 5, 3, 2, 4, 6, 3, 2].map((h, i) => (
+                    <span
+                      key={i}
+                      style={{ height: `${h * 4}px` }}
+                      className={`w-1 rounded-full ${
+                        isRecording && i % 2 === 0
+                          ? 'bg-error animate-pulse'
+                          : i % 3 === 0
+                            ? 'bg-tertiary-container'
+                            : 'bg-secondary'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  audioEngine.toggleTrack('composer-preview', voiceDurationSec, voiceDataUrl)
+                }
+                className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-primary hover:bg-secondary-container transition-colors shrink-0"
+              >
+                <span className="material-symbols-outlined text-[18px]">play_arrow</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 2. Photo Polaroids Scrapbook Section */}
+          <div className="bg-surface-container-low rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm border border-outline-variant/25">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-space-xs">
+                <span className="material-symbols-outlined text-[18px] text-secondary">
+                  photo_library
+                </span>
+                <span className="font-label-lg text-label-lg text-primary">
+                  Polaroids &amp; Photos
+                </span>
+              </div>
+              <span className="font-label-md text-label-md text-secondary">
+                {photos.length} Attached
+              </span>
+            </div>
+
+            {photos.length > 0 && (
+              <div className="grid grid-cols-2 gap-space-sm">
+                {photos.map((photo, index) => (
+                  <div
+                    key={photo.id}
+                    className="bg-surface-container-lowest p-2 rounded-lg shadow-sm flex flex-col gap-2"
+                  >
+                    <div className="w-full aspect-square rounded overflow-hidden bg-surface-container relative">
+                      <img
+                        className="w-full h-full object-cover"
+                        alt={photo.caption}
+                        src={photo.url}
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPhotos((prev) => prev.filter((item) => item.id !== photo.id))
+                        }
+                        className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-primary/70 text-on-primary flex items-center justify-center text-xs backdrop-blur-sm"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">close</span>
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      value={photo.caption}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setPhotos((prev) =>
+                          prev.map((p, i) => (i === index ? { ...p, caption: val } : p))
+                        );
+                      }}
+                      placeholder="Add cute caption..."
+                      className="w-full bg-transparent font-body-sm text-body-sm text-primary placeholder:text-outline-variant focus:outline-none px-1"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => photoInputRef.current?.click()}
+              className="w-full py-space-sm bg-surface-container-lowest hover:bg-surface-container-high rounded-lg text-primary font-label-lg text-label-lg flex items-center justify-center gap-space-xs transition-colors shadow-sm border border-outline-variant/30"
+            >
+              <span className="material-symbols-outlined text-[18px] text-secondary">
+                add_photo_alternate
+              </span>
+              <span>Add Another Polaroid (1600px Cropper)</span>
+            </button>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleSelectPhotoFile}
+              className="hidden"
+            />
+          </div>
+
+          {/* 3. Video Capsule Card */}
+          <div className="bg-surface-container-low rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm border border-outline-variant/25">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-space-xs">
+                <span className="material-symbols-outlined text-[18px] text-secondary">
+                  videocam
+                </span>
+                <span className="font-label-lg text-label-lg text-primary">
+                  Motion Video Capsule
+                </span>
+              </div>
+              <div className="flex items-center gap-1 bg-surface-container-high px-2 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim" />
+                <span className="font-label-md text-label-md text-primary font-medium">
+                  Firestore Ready
+                </span>
+              </div>
+            </div>
+
+            {hasVideo ? (
+              <div className="bg-surface-container-lowest rounded-lg p-3 flex flex-col gap-2 border border-outline-variant/30">
+                <div className="flex items-center justify-between">
+                  <span className="font-label-md text-label-md text-secondary uppercase">
+                    Attached 1080p HD Reel ({videoDuration})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setHasVideo(false)}
+                    className="text-error font-label-md text-label-md"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  value={videoTitle}
+                  onChange={(e) => setVideoTitle(e.target.value)}
+                  className="w-full px-2.5 py-1.5 rounded bg-surface-container-low text-primary font-body-sm text-body-sm"
+                />
+              </div>
+            ) : (
+              <div
+                onClick={() => videoInputRef.current?.click()}
+                className="relative bg-surface-container-lowest rounded-lg p-space-md flex flex-col items-center justify-center text-center cursor-pointer shadow-sm group border border-outline-variant/25"
+              >
+                <div className="w-12 h-12 rounded-full bg-secondary-container/60 text-on-secondary-container flex items-center justify-center mb-space-xs group-hover:scale-105 transition-transform">
+                  <span className="material-symbols-outlined text-[24px]">movie_filter</span>
+                </div>
+                <p className="font-body-md text-body-md font-medium text-primary">
+                  Upload 4K / HD Video Clip
+                </p>
+                <p className="font-body-sm text-body-sm text-outline mt-0.5">
+                  Auto-optimized for streaming storage
+                </p>
+              </div>
+            )}
+            <input
+              ref={videoInputRef}
+              type="file"
+              accept="video/*"
+              onChange={handleSelectVideoFile}
+              className="hidden"
+            />
+          </div>
+        </div>
+
+        {/* Editorial Footer & Sealing Actions */}
+        <div className="pt-space-md flex flex-col gap-space-sm">
+          <button
+            type="button"
+            onClick={handleSealSubmit}
+            className={`w-full py-space-md bg-primary-container text-on-primary rounded-xl font-label-lg text-label-lg shadow-md hover:bg-primary transition-all flex items-center justify-center gap-space-sm relative overflow-hidden ${
+              sealingAnim ? 'scale-95' : 'active:scale-[0.98]'
+            }`}
+          >
+            <div className="w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0 shadow-inner">
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+              </svg>
+            </div>
+            <span className="tracking-wide font-semibold text-surface-bright">
+              Seal into Our Memory Box
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDraftSubmit}
+            className="w-full py-space-sm bg-surface-container-low text-secondary hover:text-primary rounded-xl font-label-lg text-label-lg transition-colors text-center active:scale-[0.99]"
+          >
+            Save Draft to Desk
+          </button>
+        </div>
+      </div>
+
+      {/* High-Res Image Cropper Modal */}
+      {pendingCropSrc && (
+        <ImageCropperModal
+          imageSrc={pendingCropSrc}
+          onCancel={() => setPendingCropSrc(null)}
+          onComplete={(finalUrl, caption, tag) => {
+            setPhotos((prev) => [
+              ...prev,
+              {
+                id: `ph-${Date.now()}`,
+                url: finalUrl,
+                caption,
+                tag,
+              },
+            ]);
+            setPendingCropSrc(null);
+            onToast('High-resolution Polaroid developed & attached!', 'success');
+          }}
+        />
+      )}
+
+      {/* Date, Location & Weather Metadata Modal */}
+      {metaModalOpen && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setMetaModalOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-5 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col gap-3.5"
+          >
+            <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2.5">
+              <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                Date, Location &amp; Atmosphere
+              </h3>
+              <button
+                type="button"
+                onClick={() => setMetaModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2.5">
+              <div>
+                <label className="font-label-md text-label-md uppercase text-outline block mb-1">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={dateISO}
+                  onChange={(e) => setDateISO(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                />
+              </div>
+              <div>
+                <label className="font-label-md text-label-md uppercase text-outline block mb-1">
+                  Time
+                </label>
+                <input
+                  type="text"
+                  value={timeFormatted}
+                  onChange={(e) => setTimeFormatted(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="font-label-md text-label-md uppercase text-outline block mb-1">
+                Location Geotag
+              </label>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2.5">
+              <div>
+                <label className="font-label-md text-label-md uppercase text-outline block mb-1">
+                  Temperature
+                </label>
+                <input
+                  type="text"
+                  value={weatherTemp}
+                  onChange={(e) => setWeatherTemp(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                />
+              </div>
+              <div>
+                <label className="font-label-md text-label-md uppercase text-outline block mb-1">
+                  Sky / Weather
+                </label>
+                <input
+                  type="text"
+                  value={weatherConditions}
+                  onChange={(e) => setWeatherConditions(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="font-label-md text-label-md uppercase text-outline block mb-1">
+                Emotional Vibe Badge
+              </label>
+              <input
+                type="text"
+                value={moodVibe}
+                onChange={(e) => setMoodVibe(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setMetaModalOpen(false)}
+              className="w-full py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase shadow-md mt-1"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
