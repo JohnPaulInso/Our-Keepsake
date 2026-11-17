@@ -11,11 +11,9 @@ import {
   SecretYearNote,
   TimeCapsuleItem,
 } from '../types';
+// (2026-07-13) Remove sample seed imports vs hardcoded showcase arrays
 import {
   CAPYBARA_SEAL_LOGO,
-  INITIAL_DIGITAL_LOVE_LETTERS,
-  INITIAL_MEMORIES,
-  INITIAL_SECRET_YEAR_NOTES,
 } from '../data/seedMemories';
 import {
   DB,
@@ -637,19 +635,20 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
 
           {/* Segmented Inspector Tabs: Daily Backups List vs Backed-Up Items */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
+            // (2026-07-13) Display live counts for memories/notes vs sample data lengths
             {[
               {
                 id: 'DAILY_BACKUPS',
                 label: `Daily Firestore Backups (${dailyBackups.length})`,
               },
-              { id: 'MEMORIES', label: `Archived Memories (${INITIAL_MEMORIES.length})` },
+              { id: 'MEMORIES', label: `Keepsake Memories (${memories.length})` },
               {
                 id: 'LETTERS',
-                label: `Archived Love Letters (${INITIAL_DIGITAL_LOVE_LETTERS.length})`,
+                label: `Love Letters (${digitalLoveLetters.length})`,
               },
               {
                 id: 'SECRET_NOTES',
-                label: `Archived Year Notes (${INITIAL_SECRET_YEAR_NOTES.length})`,
+                label: `Secret Notes (${secretNotes.length})`,
               },
             ].map((tab) => (
               <button
@@ -777,88 +776,107 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
             </div>
           )}
 
-          {/* TAB 2: ARCHIVED SHOWCASE MEMORIES */}
+          {/* TAB 2: LIVE KEEPSAKE MEMORIES */}
+          // (2026-07-13) Render live memories/notes preview vs static initial seed lists
           {previewSection === 'MEMORIES' && (
             <div className="flex flex-col gap-3">
-              {INITIAL_MEMORIES.map((mem) => (
-                <div
-                  key={mem.id}
-                  className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/25 flex flex-col gap-1.5"
-                >
-                  <div className="flex items-center justify-between text-secondary font-label-md text-[10px] uppercase tracking-wider">
-                    <span>
-                      Keepsake #{mem.keepsakeNumber} • {mem.location}
-                    </span>
-                    <span>{formatStandardDate(mem.dateISO)}</span>
+              {memories.length === 0 ? (
+                <p className="text-center py-6 text-on-surface-variant font-body-sm text-body-sm">
+                  No keepsake memories added yet. A clean canvas is ready for your uploads.
+                </p>
+              ) : (
+                memories.map((mem) => (
+                  <div
+                    key={mem.id}
+                    className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/25 flex flex-col gap-1.5"
+                  >
+                    <div className="flex items-center justify-between text-secondary font-label-md text-[10px] uppercase tracking-wider">
+                      <span>
+                        Keepsake #{mem.keepsakeNumber} • {mem.location}
+                      </span>
+                      <span>{formatStandardDate(mem.dateISO)}</span>
+                    </div>
+                    <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                      {mem.title}
+                    </h3>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant italic">
+                      “{mem.quoteHighlight}”
+                    </p>
+                    <p className="font-body-sm text-body-sm text-on-surface whitespace-pre-line">
+                      {mem.storyBody}
+                    </p>
                   </div>
-                  <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
-                    {mem.title}
-                  </h3>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant italic">
-                    “{mem.quoteHighlight}”
-                  </p>
-                  <p className="font-body-sm text-body-sm text-on-surface whitespace-pre-line">
-                    {mem.storyBody}
-                  </p>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           )}
 
-          {/* TAB 3: ARCHIVED DIGITAL LOVE LETTERS */}
+          {/* TAB 3: LIVE DIGITAL LOVE LETTERS */}
           {previewSection === 'LETTERS' && (
             <div className="flex flex-col gap-3">
-              {INITIAL_DIGITAL_LOVE_LETTERS.map((letter) => (
-                <div
-                  key={letter.id}
-                  className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/25 flex flex-col gap-1.5"
-                >
-                  <div className="flex items-center justify-between text-secondary font-label-md text-[10px] uppercase tracking-wider">
-                    <span>
-                      Letter #{letter.letterNumber} • {letter.occasion}
-                    </span>
-                    <span>{formatStandardDate(letter.dateISO)}</span>
+              {digitalLoveLetters.length === 0 ? (
+                <p className="text-center py-6 text-on-surface-variant font-body-sm text-body-sm">
+                  No love letters recorded yet.
+                </p>
+              ) : (
+                digitalLoveLetters.map((letter) => (
+                  <div
+                    key={letter.id}
+                    className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/25 flex flex-col gap-1.5"
+                  >
+                    <div className="flex items-center justify-between text-secondary font-label-md text-[10px] uppercase tracking-wider">
+                      <span>
+                        Letter #{letter.letterNumber} • {letter.occasion}
+                      </span>
+                      <span>{formatStandardDate(letter.dateISO)}</span>
+                    </div>
+                    <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                      {letter.title}
+                    </h3>
+                    <p className="font-body-sm text-body-sm text-primary italic font-serif">
+                      {letter.salutation}
+                    </p>
+                    <p className="font-body-sm text-body-sm text-on-surface whitespace-pre-line font-serif">
+                      {letter.body}
+                    </p>
+                    <p className="font-body-sm text-body-sm text-secondary italic text-right font-serif">
+                      {letter.signOff}
+                    </p>
                   </div>
-                  <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
-                    {letter.title}
-                  </h3>
-                  <p className="font-body-sm text-body-sm text-primary italic font-serif">
-                    {letter.salutation}
-                  </p>
-                  <p className="font-body-sm text-body-sm text-on-surface whitespace-pre-line font-serif">
-                    {letter.body}
-                  </p>
-                  <p className="font-body-sm text-body-sm text-secondary italic text-right font-serif">
-                    {letter.signOff}
-                  </p>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           )}
 
-          {/* TAB 4: ARCHIVED SECRET YEAR NOTES */}
+          {/* TAB 4: LIVE SECRET YEAR NOTES */}
           {previewSection === 'SECRET_NOTES' && (
             <div className="flex flex-col gap-3">
-              {INITIAL_SECRET_YEAR_NOTES.map((note) => (
-                <div
-                  key={note.id}
-                  className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/25 flex flex-col gap-1.5"
-                >
-                  <div className="flex items-center justify-between text-secondary font-label-md text-[10px] uppercase tracking-wider">
-                    <span>{note.monthLabel}</span>
-                    <span>{formatStandardDate(note.dateISO)}</span>
+              {secretNotes.length === 0 ? (
+                <p className="text-center py-6 text-on-surface-variant font-body-sm text-body-sm">
+                  No secret notes recorded yet.
+                </p>
+              ) : (
+                secretNotes.map((note) => (
+                  <div
+                    key={note.id}
+                    className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/25 flex flex-col gap-1.5"
+                  >
+                    <div className="flex items-center justify-between text-secondary font-label-md text-[10px] uppercase tracking-wider">
+                      <span>{note.monthLabel}</span>
+                      <span>{formatStandardDate(note.dateISO)}</span>
+                    </div>
+                    <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                      {note.title}
+                    </h3>
+                    <p className="font-body-sm text-body-sm text-on-surface">
+                      {note.littleThingsNoted}
+                    </p>
+                    <p className="font-body-sm text-body-sm text-secondary italic font-serif">
+                      {note.whatSheSaid}
+                    </p>
                   </div>
-                  <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
-                    {note.title}
-                  </h3>
-                  <p className="font-body-sm text-body-sm text-on-surface">
-                    {note.littleThingsNoted}
-                  </p>
-                  <p className="font-body-sm text-body-sm text-secondary italic font-serif">
-                    {note.whatSheSaid}
-                  </p>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           )}
         </section>

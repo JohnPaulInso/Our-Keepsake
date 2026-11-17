@@ -184,33 +184,8 @@ class LocalDatabase {
     }
   }
 
-  // (2026-07-13) Hydrate dailyBackups & showcase backup record vs raw snapshot
+  // (2026-07-13) Clean slate initialization without sample data vs seeded entries
   private async hydrateAll(): Promise<void> {
-    const showcaseSnapshot: BackupSnapshot = {
-      version: '1.0.0',
-      exportedAt: 1763260000000,
-      coupleProfile: DEFAULT_COUPLE_PROFILE,
-      memories: INITIAL_MEMORIES,
-      secretYearNotes: INITIAL_SECRET_YEAR_NOTES,
-      digitalLoveLetters: INITIAL_DIGITAL_LOVE_LETTERS,
-      timeCapsule: INITIAL_TIME_CAPSULE,
-    };
-
-    const showcaseRecord: DailyBackupRecord = {
-      id: 'daily_showcase_archive_2026-11-15',
-      dateISO: '2026-11-15',
-      label: 'Original Showcase Archive (Memories, Love Letters & Secret Year Notes)',
-      createdAt: 1763200000000,
-      trigger: 'SHOWCASE_ARCHIVE',
-      syncedToFirestore: true,
-      memoriesCount: INITIAL_MEMORIES.length,
-      lettersCount: INITIAL_DIGITAL_LOVE_LETTERS.length,
-      notesCount: INITIAL_SECRET_YEAR_NOTES.length,
-      snapshot: showcaseSnapshot,
-    };
-
-    await idbSet(showcaseRecord.id, showcaseRecord, STORE_BACKUPS);
-
     const [savedMemories, savedNotes, savedLetters, savedProfile, savedCapsule] =
       await Promise.all([
         idbGet<KeepsakeMemory[]>('memories'),
@@ -220,25 +195,30 @@ class LocalDatabase {
         idbGet<TimeCapsuleItem>('timeCapsule'),
       ]);
 
-    if (savedMemories && Array.isArray(savedMemories)) {
-      memCache.memories = savedMemories;
-    } else {
+    // Purge any legacy sample mock data from local cache
+    const hasSampleData =
+      savedMemories?.some((m) => m.id.startsWith('mem-baker-beach')) ||
+      savedNotes?.some((n) => n.id.startsWith('syn-')) ||
+      savedLetters?.some((l) => l.id.startsWith('dll-'));
+
+    if (hasSampleData) {
       memCache.memories = [];
-      await idbSet('memories', []);
-    }
-
-    if (savedNotes && Array.isArray(savedNotes)) {
-      memCache.secretYearNotes = savedNotes;
-    } else {
       memCache.secretYearNotes = [];
-      await idbSet('secretYearNotes', []);
-    }
-
-    if (savedLetters && Array.isArray(savedLetters)) {
-      memCache.digitalLoveLetters = savedLetters;
-    } else {
       memCache.digitalLoveLetters = [];
-      await idbSet('digitalLoveLetters', []);
+      await Promise.all([
+        idbSet('memories', []),
+        idbSet('secretYearNotes', []),
+        idbSet('digitalLoveLetters', []),
+      ]);
+      try {
+        localStorage.removeItem('ok_memories_mirror');
+      } catch {
+        // Ignore
+      }
+    } else {
+      memCache.memories = savedMemories && Array.isArray(savedMemories) ? savedMemories : [];
+      memCache.secretYearNotes = savedNotes && Array.isArray(savedNotes) ? savedNotes : [];
+      memCache.digitalLoveLetters = savedLetters && Array.isArray(savedLetters) ? savedLetters : [];
     }
 
     if (savedProfile && savedProfile.partner1Name) {

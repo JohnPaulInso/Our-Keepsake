@@ -380,9 +380,23 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
       </section>
 
       {/* VIEW 1: DIGITAL COPIES OF LOVE LETTERS (WRITTEN BEFORE PAPER) */}
+      {/* (2026-07-13) Clean slate empty card for letters vs empty white space */}
       {activeMode === 'DIGITAL_LETTERS' && (
         <div className="flex flex-col gap-space-lg">
-          {filteredLetters.map((letter) => (
+          {filteredLetters.length === 0 ? (
+            <div className="bg-surface-container-lowest rounded-2xl p-8 text-center shadow-sm border border-outline-variant/35 flex flex-col items-center gap-3">
+              <span className="material-symbols-outlined text-[32px] text-secondary">
+                history_edu
+              </span>
+              <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                No Digital Love Letters Yet
+              </h3>
+              <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm">
+                A clean slate is ready for you. Tap &ldquo;Add / Paste Digital Love Letter&rdquo; above to record the digital drafts of your love letters for {profile.partner2Name}.
+              </p>
+            </div>
+          ) : (
+            filteredLetters.map((letter) => (
             <article
               key={letter.id}
               className="relative bg-surface-container-lowest rounded-2xl p-space-lg shadow-md border border-outline-variant/35 overflow-hidden hover-lift"
@@ -491,14 +505,28 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                 )}
               </div>
             </article>
-          ))}
+          )))}
         </div>
       )}
 
       {/* VIEW 2: SECRET PAST-YEAR NOTES FOR ZEA */}
+      {/* (2026-07-13) Clean slate empty card for notes vs empty white space */}
       {activeMode === 'SECRET_YEAR_NOTES' && (
         <div className="flex flex-col gap-space-md">
-          {filteredNotes.map((note, idx) => (
+          {filteredNotes.length === 0 ? (
+            <div className="bg-surface-container-lowest rounded-2xl p-8 text-center shadow-sm border border-outline-variant/35 flex flex-col items-center gap-3">
+              <span className="material-symbols-outlined text-[32px] text-secondary">
+                auto_awesome
+              </span>
+              <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                No Secret Year Notes Yet
+              </h3>
+              <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm">
+                Tap &ldquo;Add Secret Year Note&rdquo; above to record private memories, thoughts, and little things you noticed about {profile.partner2Name}.
+              </p>
+            </div>
+          ) : (
+            filteredNotes.map((note, idx) => (
             <article
               key={note.id}
               className="relative bg-surface-container-lowest rounded-xl p-space-md shadow-md border border-outline-variant/30 overflow-hidden hover-lift"
@@ -591,7 +619,7 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                 </div>
               )}
             </article>
-          ))}
+          )))}
         </div>
       )}
 
