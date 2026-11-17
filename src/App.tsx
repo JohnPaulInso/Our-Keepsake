@@ -231,11 +231,13 @@ export const App: React.FC = () => {
       ? memories.map((m) => (m.id === memory.id ? memory : m))
       : [memory, ...memories];
 
+    // (2026-07-13) Synchronously update memories state; was async listener lag
+    setMemories(nextList);
+    setSelectedMemoryId(memory.id);
+    DB.setSelectedMemoryId(memory.id);
     await DB.setMemories(nextList);
     syncManager.schedulePush();
     setEditingMemory(null);
-    setSelectedMemoryId(memory.id);
-    DB.setSelectedMemoryId(memory.id);
 
     if (isDraft) {
       addToast(`Draft "${memory.title}" saved to your desk.`, 'info');

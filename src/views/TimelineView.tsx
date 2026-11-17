@@ -486,6 +486,20 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recordTimerRef = useRef<number | null>(null);
+  // (2026-07-13) Auto-expanding Keep textarea ref & resize; was fixed 6 rows
+  const storyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const adjustStoryTextareaHeight = (el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.max(240, el.scrollHeight)}px`;
+  };
+
+  useEffect(() => {
+    if (isEditingDate) {
+      setTimeout(() => adjustStoryTextareaHeight(storyTextareaRef.current), 50);
+    }
+  }, [isEditingDate, editStoryBody]);
 
   const handleEnterEditMode = () => {
     if (primaryDateMemory) {
@@ -689,8 +703,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     if (editAudioMemo && editAudioMemo.url) updatedMemory.categories.push('VOICE_MEMO');
     if (editVideoCapsule && editVideoCapsule.url) updatedMemory.categories.push('VIDEO');
 
+    // (2026-07-13) Save and immediately open created keepsake; was stay in edit
     if (onSaveMemory) {
-      onSaveMemory(updatedMemory, false);
+      await onSaveMemory(updatedMemory, false);
     } else {
       const exists = memories.some((m) => m.id === updatedMemory.id);
       const nextList = exists
@@ -699,6 +714,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       await DB.setMemories(nextList);
     }
     setIsEditingDate(false);
+    closeDateOverlay(() => {
+      onOpenMemory(updatedMemory.id);
+    });
   };
 
   useEffect(() => {
@@ -1779,16 +1797,27 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 </div>
 
                 {/* The Heartfelt Note */}
-                <div>
-                  <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-2">
-                    The Heartfelt Note
-                  </span>
+                {/* (2026-07-13) Auto-expanding Keep textarea with limit; was 6-line striped box */}
+                <div id="heartfelt-note-input-container">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
+                      The Heartfelt Note
+                    </span>
+                    <span className="text-[10px] font-mono text-outline/60">
+                      {editStoryBody.length}/3000
+                    </span>
+                  </div>
                   <textarea
+                    ref={storyTextareaRef}
                     value={editStoryBody}
-                    onChange={(e) => setEditStoryBody(e.target.value)}
-                    placeholder="Write down how Zea smiled, what she said, the quiet moments you never want to forget..."
-                    rows={6}
-                    className="w-full bg-transparent font-['Cormorant_Garamond',serif] text-[18px] leading-[2.1rem] bg-[linear-gradient(transparent_31px,#e5ded8_32px)] bg-[size:100%_32px] text-on-surface focus:outline-none resize-none placeholder:text-outline/50 border-none p-0"
+                    maxLength={3000}
+                    onChange={(e) => {
+                      setEditStoryBody(e.target.value);
+                      adjustStoryTextareaHeight(e.target);
+                    }}
+                    placeholder={`Write down how ${profile.partner2Name} smiled, what she said, the quiet moments you never want to forget...`}
+                    className="w-full bg-transparent font-['Cormorant_Garamond',Georgia,serif] text-lg sm:text-[19px] leading-relaxed text-on-surface focus:outline-none border-none p-0 placeholder:text-outline/40 overflow-hidden resize-none min-h-[240px]"
+                    style={{ minHeight: '240px' }}
                   />
                 </div>
 
@@ -2124,13 +2153,16 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 </div>
 
                 {/* The Heartfelt Note with stationery lines */}
-                <div>
+                {/* (2026-07-13) Clean Keep-style note layout; was fixed 160px striped lines */}
+                <div id="heartfelt-note-view-container">
                   <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-2">
                     The Heartfelt Note
                   </span>
-                  <div className="min-h-[160px] text-on-surface-variant font-['Cormorant_Garamond',serif] text-[18px] leading-[2.1rem] bg-[linear-gradient(transparent_31px,#e5ded8_32px)] bg-[size:100%_32px]">
+                  <div className="min-h-[160px] text-on-surface font-['Cormorant_Garamond',Georgia,serif] text-lg sm:text-[19px] leading-relaxed">
                     <p className="whitespace-pre-wrap">
-                      {primaryDateMemory?.storyBody || primaryDateMemory?.snippet || "Write down how Zea smiled, what she said, the quiet moments you never want to forget..."}
+                      {primaryDateMemory?.storyBody ||
+                        primaryDateMemory?.snippet ||
+                        `Write down how ${profile.partner2Name} smiled, what she said, the quiet moments you never want to forget...`}
                     </p>
                   </div>
                 </div>
