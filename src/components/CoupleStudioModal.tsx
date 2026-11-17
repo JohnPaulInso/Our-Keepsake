@@ -323,7 +323,7 @@ export const CoupleStudioModal: React.FC<CoupleStudioModalProps> = ({
                     type="text"
                     value={form.milestoneTitle || ''}
                     onChange={(e) => setForm({ ...form, milestoneTitle: e.target.value })}
-                    placeholder="First Chapter • The Day We Began"
+                    placeholder="The Day I Courted Her"
                     className="w-full px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
                   />
                 </div>
@@ -332,7 +332,7 @@ export const CoupleStudioModal: React.FC<CoupleStudioModalProps> = ({
                     type="text"
                     value={form.milestoneDateLabel || ''}
                     onChange={(e) => setForm({ ...form, milestoneDateLabel: e.target.value })}
-                    placeholder="Sep 14, 2025"
+                    placeholder="Nov 7, 2025"
                     className="w-full px-2 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
                   />
                   <input

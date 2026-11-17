@@ -51,6 +51,23 @@ interface TimelineViewProps {
   onOpenMonthlyNotepad?: () => void;
 }
 
+// (2026-07-13) Format date with weekday for easy date identification; was plain
+function formatDateWithWeekday(dateInput: string | undefined): string {
+  if (!dateInput) return 'Jan 1, 2026';
+  try {
+    const [y, m, d] = dateInput.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    return dt.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  } catch {
+    return dateInput;
+  }
+}
+
 interface SortableMemoryCardProps {
   memory: KeepsakeMemory;
   audioState: ReturnType<typeof audioEngine.getState>;
@@ -102,8 +119,10 @@ const SortableMemoryCard: React.FC<SortableMemoryCardProps> = ({
               Draft
             </span>
           )}
-          <span className="font-body-sm text-body-sm text-on-surface-variant font-serif">
-            {formatStandardDate(memory.dateISO)}
+          {/* (2026-07-13) Format date with weekday badge for clarity; was month/day */}
+          <span className="px-2 py-0.5 rounded-md bg-surface-container text-primary font-label-md text-xs font-semibold uppercase tracking-wider border border-outline-variant/30 flex items-center gap-1">
+            <span className="material-symbols-outlined text-[13px] text-secondary">event</span>
+            <span>{formatDateWithWeekday(memory.dateISO)}</span>
           </span>
           <button
             type="button"
@@ -327,6 +346,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const [calendarYear, setCalendarYear] = useState<number>(() => new Date().getFullYear());
   const [calendarMonth, setCalendarMonth] = useState<number>(() => new Date().getMonth());
   const [selectedDay, setSelectedDay] = useState<number | null>(() => new Date().getDate());
+  // (2026-07-13) Paginated scrolling for older memories; was unpaginated list
+  const [visibleMemoriesCount, setVisibleMemoriesCount] = useState<number>(10);
   // (2026-07-13) Slide animation and vertical scroll support; was instant fade
   const [isFullscreenDateOpen, setIsFullscreenDateOpen] = useState<boolean>(false);
   const [isOverlayVisible, setIsOverlayVisible] = useState<boolean>(false);
@@ -736,32 +757,22 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     [profile.relationshipStartDateISO]
   );
 
-  // (2026-07-13) Compute past milestone for showcase; was next rendezvous only
+  // (2026-07-13) Set only milestone to Nov 7, 2025 courted her; was Sept 14
   const pastMilestone = useMemo(() => {
-    const found = memories.find(
-      (m) =>
-        m.categories?.includes('ANNIVERSARY') ||
-        m.dotIndicators?.includes('ROSE') ||
-        m.vibeTags?.some(
-          (t) =>
-            t.toLowerCase().includes('milestone') ||
-            t.toLowerCase().includes('anniversary')
-        )
-    );
+    const found = memories.find((m) => m.dateISO === '2025-11-07');
     if (found) {
       return {
         id: found.id,
-        title: found.title,
-        dateFormatted: formatStandardDate(found.dateISO),
+        title: found.title || 'The Day I Courted Her',
+        dateFormatted: 'Nov 7, 2025',
         tag: 'Milestone',
       };
     }
     return {
       id: null,
-      title: profile.milestoneTitle || 'First Chapter • The Day We Officially Began',
-      dateFormatted:
-        profile.milestoneDateLabel || formatStandardDate(profile.relationshipStartDateISO),
-      tag: profile.milestoneTag || 'Anniversary',
+      title: profile.milestoneTitle || 'The Day I Courted Her',
+      dateFormatted: profile.milestoneDateLabel || 'Nov 7, 2025',
+      tag: profile.milestoneTag || 'Milestone',
     };
   }, [memories, profile]);
 
@@ -888,6 +899,24 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     calendarYear,
     sortBy,
   ]);
+
+  // (2026-07-13) Auto-load more older memories on scroll; was unpaginated feed
+  useEffect(() => {
+    setVisibleMemoriesCount(10);
+  }, [searchQuery, selectedDay, activeCategory, dotFilter]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 380
+      ) {
+        setVisibleMemoriesCount((prev) => Math.min(filteredMemories.length, prev + 10));
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [filteredMemories.length]);
 
   const matchingSecretNotes = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -1253,8 +1282,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               <button
                 key={idx}
                 type="button"
-                // (2026-07-13) Open date overlay with slide animation; was instant
-                onClick={() => openDateOverlay(cell.day)}
+                // (2026-07-13) Select date for quick peep; was openDateOverlay
+                onClick={() => setSelectedDay(cell.day)}
                 className={`flex flex-col items-center justify-center h-10 mx-auto w-10 rounded-xl transition-all relative ${
                   isSelected
                     ? 'bg-primary text-on-primary font-bold shadow-sm active:scale-95'
@@ -1367,8 +1396,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               <button
                 key={item.day}
                 type="button"
-                // (2026-07-13) Open date overlay with slide animation; was instant
-                onClick={() => openDateOverlay(item.day)}
+                // (2026-07-13) Select date for quick peep; was openDateOverlay
+                onClick={() => setSelectedDay(item.day)}
                 className={`flex flex-col items-center justify-center min-w-[52px] h-[74px] rounded-xl flex-shrink-0 relative transition-transform active:scale-95 ${
                   isSelected
                     ? 'bg-primary text-on-primary shadow-md'
@@ -1425,6 +1454,98 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           })}
         </div>
       </section>
+
+      {/* (2026-07-13) Quick peep card of selected date; was instant overlay opening */}
+      {selectedDay !== null && (
+        <div
+          id="selected-day-peep-card" // Quick peep card for selected date
+          className="mb-space-lg bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm border border-outline-variant/40 flex flex-col gap-3 relative overflow-hidden"
+        >
+          <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2.5">
+            <div className="flex items-center gap-2 text-secondary font-label-md text-[11px] uppercase tracking-wider font-semibold">
+              <span className="material-symbols-outlined text-[16px]">location_on</span>
+              <span>Our Keepsake Journal</span>
+            </div>
+            <span className="font-label-md text-[11px] text-secondary font-medium">
+              {selectedDayFormatted}
+            </span>
+          </div>
+
+          <div>
+            <h3 className="font-['Playfair_Display',Georgia,serif] text-xl text-primary font-bold leading-snug">
+              {primaryDateMemory ? primaryDateMemory.title : `A Keepsake for ${selectedDayFormatted}`}
+            </h3>
+            <p className="font-body-md text-body-md text-on-surface-variant font-serif italic mt-1 line-clamp-3">
+              “{primaryDateMemory?.snippet || primaryDateMemory?.storyBody || `No memories recorded for this specific date yet. Every moment with ${profile.partner2Name} is a keepsake waiting to be written.`}”
+            </p>
+          </div>
+
+          {/* Media quick badges if attached */}
+          {primaryDateMemory &&
+            (primaryDateMemory.photos?.length > 0 ||
+              primaryDateMemory.audioMemo ||
+              primaryDateMemory.videoCapsule) && (
+              <div className="flex items-center gap-2 pt-1 flex-wrap">
+                {primaryDateMemory.photos?.length > 0 && (
+                  <span className="px-2.5 py-0.5 rounded-full bg-surface-container-low text-secondary text-[11px] font-label-md uppercase tracking-wider flex items-center gap-1 border border-outline-variant/30">
+                    <span className="material-symbols-outlined text-[14px]">photo_camera</span>
+                    <span>
+                      {primaryDateMemory.photos.length} Photo
+                      {primaryDateMemory.photos.length > 1 ? 's' : ''}
+                    </span>
+                  </span>
+                )}
+                {primaryDateMemory.audioMemo && (
+                  <span className="px-2.5 py-0.5 rounded-full bg-surface-container-low text-secondary text-[11px] font-label-md uppercase tracking-wider flex items-center gap-1 border border-outline-variant/30">
+                    <span className="material-symbols-outlined text-[14px]">mic</span>
+                    <span>Voice Memo</span>
+                  </span>
+                )}
+                {primaryDateMemory.videoCapsule && (
+                  <span className="px-2.5 py-0.5 rounded-full bg-surface-container-low text-secondary text-[11px] font-label-md uppercase tracking-wider flex items-center gap-1 border border-outline-variant/30">
+                    <span className="material-symbols-outlined text-[14px]">movie</span>
+                    <span>Video</span>
+                  </span>
+                )}
+              </div>
+            )}
+
+          <div className="flex items-center justify-between pt-2 border-t border-outline-variant/30 gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  openDateOverlay(selectedDay);
+                  if (!primaryDateMemory) handleEnterEditMode();
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-primary text-on-primary font-label-md text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-xs active:scale-95 transition-transform"
+              >
+                <span className="material-symbols-outlined text-[15px]">
+                  {primaryDateMemory ? 'edit_note' : 'add_circle'}
+                </span>
+                <span>{primaryDateMemory ? 'Open / Edit Note' : 'Add Keepsake for This Date'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => openDateOverlay(selectedDay)}
+                className="px-3 py-1.5 rounded-xl bg-surface-container-high text-primary font-label-md text-xs uppercase tracking-wider flex items-center gap-1 hover:bg-surface-variant transition-colors"
+              >
+                <span className="material-symbols-outlined text-[15px]">fullscreen</span>
+                <span>View Fullscreen</span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setSelectedDay(null)}
+              className="font-label-md text-xs uppercase tracking-wider text-secondary hover:text-primary transition-colors underline"
+            >
+              Show Entire Dates
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Tactile Botanical Filter Ribbon */}
       <section className="flex items-center gap-space-xs overflow-x-auto no-scrollbar -mx-margin px-margin mb-space-lg">
@@ -1539,12 +1660,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
           >
+            {/* (2026-07-13) Paginated memories with scroll trigger; was unpaginated feed */}
             <SortableContext
-              items={filteredMemories.map((m) => m.id)}
+              items={filteredMemories.slice(0, visibleMemoriesCount).map((m) => m.id)}
               strategy={verticalListSortingStrategy}
             >
               <div className="flex flex-col gap-space-lg">
-                {filteredMemories.map((memory) => (
+                {filteredMemories.slice(0, visibleMemoriesCount).map((memory) => (
                   <SortableMemoryCard
                     key={memory.id}
                     memory={memory}
@@ -1555,6 +1677,26 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 ))}
               </div>
             </SortableContext>
+            {visibleMemoriesCount < filteredMemories.length && (
+              <div id="older-memories-load-trigger" className="flex justify-center pt-4 pb-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setVisibleMemoriesCount((prev) =>
+                      Math.min(filteredMemories.length, prev + 10)
+                    )
+                  }
+                  className="px-5 py-2.5 rounded-xl bg-surface-container-low text-primary font-label-md text-xs uppercase tracking-wider border border-outline-variant/40 flex items-center gap-2 hover:bg-surface-container shadow-xs active:scale-95 transition-transform"
+                >
+                  <span className="material-symbols-outlined text-[16px] text-secondary">
+                    history
+                  </span>
+                  <span>
+                    Load Older Memories ({filteredMemories.length - visibleMemoriesCount} more)
+                  </span>
+                </button>
+              </div>
+            )}
           </DndContext>
         </>
       )}

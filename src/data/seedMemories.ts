@@ -26,11 +26,11 @@ export const DEFAULT_COUPLE_PROFILE: CoupleProfile = {
   nextRendezvousDayLabel: 'This Sat',
   nextRendezvousTimeLabel: '5:30 PM',
   nextRendezvousLocation: 'Presidio Overlook Lawn',
-  // (2026-07-13) Set showNextRendezvous false & add milestone; was true always
+  // (2026-07-13) Set milestone to Nov 7, 2025 courted her; was Sept 14 first hangout
   showNextRendezvous: false,
-  milestoneTitle: 'First Chapter • The Day We Officially Began',
-  milestoneDateLabel: 'Sep 14, 2025',
-  milestoneTag: 'Anniversary',
+  milestoneTitle: 'The Day I Courted Her',
+  milestoneDateLabel: 'Nov 7, 2025',
+  milestoneTag: 'Milestone',
   theme: 'light',
   updatedAt: 1730000000000,
 };
