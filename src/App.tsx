@@ -19,6 +19,8 @@ import { ComposerView } from './views/ComposerView';
 import { CapsuleVaultView } from './views/CapsuleVaultView';
 import { SecretYearLettersView } from './views/SecretYearLettersView';
 import { BackupVaultPage } from './views/BackupVaultPage';
+// (2026-07-13) Import MonthlyNotepadView for notepad tab; was unimported
+import { MonthlyNotepadView } from './views/MonthlyNotepadView';
 import { ToastContainer, ToastItem } from './components/ToastContainer';
 import { CoupleStudioModal } from './components/CoupleStudioModal';
 // (2026-07-13) Import formatStandardDate for responsive desktop sidebar vs none
@@ -351,12 +353,14 @@ export const App: React.FC = () => {
   const activeMemory =
     memories.find((m) => m.id === selectedMemoryId) || memories[0];
 
+  // (2026-07-13) Add notepad subtitle mapping; was missing notepad record key
   const tabSubtitle: Record<ActiveTab, string> = {
     timeline: 'Timeline',
     story: 'Story',
     'new-date': editingMemory ? 'Edit Memory' : 'New Date',
     capsule: 'Capsule',
     letters: `For ${profile.partner2Name}`,
+    notepad: 'Monthly Notepad',
   };
 
   // (2026-07-13) Render full-page /backup settings & daily backups vs 404
@@ -601,6 +605,25 @@ export const App: React.FC = () => {
               </span>
             </button>
 
+            {/* (2026-07-13) Add Monthly Notepads button in sidebar; was absent from nav */}
+            <button
+              type="button"
+              onClick={() => {
+                setEditingMemory(null);
+                switchTab('notepad');
+              }}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md tracking-wide transition-all ${
+                activeTab === 'notepad'
+                  ? 'bg-secondary-container/70 text-on-secondary-container font-bold shadow-xs'
+                  : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-[22px]">sticky_note_2</span>
+                <span>Monthly Notepads</span>
+              </div>
+            </button>
+
             <div className="my-2 border-t border-outline-variant/25" />
 
             <button
@@ -792,6 +815,7 @@ export const App: React.FC = () => {
                 onReorderMemories={handleReorderMemories}
                 onOpenSecretNotesTab={() => switchTab('letters')}
                 onOpenProfileModal={() => navigate('/backup')}
+                onOpenMonthlyNotepad={() => switchTab('notepad')}
               />
             )}
 
@@ -885,6 +909,16 @@ export const App: React.FC = () => {
                 onToggleFavoriteNote={handleToggleFavoriteSecretNote}
                 onSaveDigitalLetter={handleSaveDigitalLetter}
                 onDeleteDigitalLetter={handleDeleteDigitalLetter}
+                onToast={addToast}
+              />
+            )}
+
+            {/* (2026-07-13) Render MonthlyNotepadView for notepad tab; was unhandled */}
+            {activeTab === 'notepad' && (
+              <MonthlyNotepadView
+                profile={profile}
+                memories={memories}
+                onBackToTimeline={() => switchTab('timeline')}
                 onToast={addToast}
               />
             )}

@@ -167,4 +167,5 @@ export interface FirebaseRuntimeConfig {
   measurementId?: string;
 }
 
-export type ActiveTab = 'timeline' | 'story' | 'new-date' | 'capsule' | 'letters';
+// (2026-07-13) Add notepad to ActiveTab union; was 5 tabs only
+export type ActiveTab = 'timeline' | 'story' | 'new-date' | 'capsule' | 'letters' | 'notepad';

@@ -39,6 +39,8 @@ interface TimelineViewProps {
   onReorderMemories: (reordered: KeepsakeMemory[]) => void;
   onOpenSecretNotesTab: () => void;
   onOpenProfileModal: () => void;
+  // (2026-07-13) Add onOpenMonthlyNotepad callback prop; was missing prop
+  onOpenMonthlyNotepad?: () => void;
 }
 
 interface SortableMemoryCardProps {
@@ -304,6 +306,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   onReorderMemories,
   onOpenSecretNotesTab,
   onOpenProfileModal,
+  // (2026-07-13) Destructure onOpenMonthlyNotepad handler; was unpassed
+  onOpenMonthlyNotepad,
 }) => {
   const [activeCategory, setActiveCategory] = useState<
     'ALL' | 'PHOTO' | 'VOICE_MEMO' | 'VIDEO' | 'ANNIVERSARY' | 'DRAFT'
@@ -751,6 +755,17 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             >
               <span>{selectedDay ? 'Show All' : 'Keepsake'}</span>
             </button>
+            {/* (2026-07-13) Add notepad quick button in calendar header; was missing */}
+            {onOpenMonthlyNotepad && (
+              <button
+                type="button"
+                onClick={onOpenMonthlyNotepad}
+                title="Open Monthly Notepad"
+                className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-surface-container-low text-secondary hover:text-primary transition-colors active:scale-95 ml-1"
+              >
+                <span className="material-symbols-outlined text-[15px]">sticky_note_2</span>
+              </button>
+            )}
           </div>
           <button
             type="button"
@@ -869,19 +884,33 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             </span>
             <span className="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim" />
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              // (2026-07-13) Reset view to current month on clear; was fixed Oct 2026
-              setCalendarYear(new Date().getFullYear());
-              setCalendarMonth(new Date().getMonth());
-              setSelectedDay(null);
-            }}
-            className="flex items-center gap-1 text-secondary font-label-md text-label-md tracking-wider uppercase hover:text-primary transition-colors"
-          >
-            <span>{selectedDay ? 'Clear Day Filter' : 'Full Journal'}</span>
-            <span className="material-symbols-outlined text-[16px]">calendar_month</span>
-          </button>
+          {/* (2026-07-13) Add Monthly Notepad button in timeline strip; was absent */}
+          <div className="flex items-center gap-2">
+            {onOpenMonthlyNotepad && (
+              <button
+                type="button"
+                onClick={onOpenMonthlyNotepad}
+                className="flex items-center gap-1 text-primary font-label-md text-label-md tracking-wider uppercase px-2.5 py-1 rounded-full bg-secondary-container/60 hover:bg-secondary-container transition-colors shadow-2xs active:scale-95"
+                title="Open Monthly Notepad"
+              >
+                <span className="material-symbols-outlined text-[15px]">sticky_note_2</span>
+                <span>Notepad</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                // (2026-07-13) Reset view to current month on clear; was fixed Oct 2026
+                setCalendarYear(new Date().getFullYear());
+                setCalendarMonth(new Date().getMonth());
+                setSelectedDay(null);
+              }}
+              className="flex items-center gap-1 text-secondary font-label-md text-label-md tracking-wider uppercase hover:text-primary transition-colors"
+            >
+              <span>{selectedDay ? 'Clear Day Filter' : 'Full Journal'}</span>
+              <span className="material-symbols-outlined text-[16px]">calendar_month</span>
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-space-sm overflow-x-auto py-1 no-scrollbar -mx-margin px-margin">

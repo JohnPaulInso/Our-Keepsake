@@ -419,13 +419,31 @@ class LocalDatabase {
   getActiveTab(): ActiveTab {
     try {
       const saved = localStorage.getItem('ok_active_tab') as ActiveTab | null;
-      if (saved && ['timeline', 'story', 'new-date', 'capsule', 'letters'].includes(saved)) {
+      if (saved && ['timeline', 'story', 'new-date', 'capsule', 'letters', 'notepad'].includes(saved)) {
         return saved;
       }
     } catch {
       // Fallback
     }
     return 'timeline';
+  }
+
+  // (2026-07-13) Add monthly notepad storage helpers; was missing notepad API
+  getMonthlyNotepad(monthKey: string): string | null {
+    try {
+      return localStorage.getItem(`ok_monthly_notepad_${monthKey}`);
+    } catch {
+      return null;
+    }
+  }
+
+  setMonthlyNotepad(monthKey: string, content: string): void {
+    try {
+      localStorage.setItem(`ok_monthly_notepad_${monthKey}`, content);
+      idbSet(`notepad_${monthKey}`, content);
+    } catch {
+      // Ignore
+    }
   }
 
   setActiveTab(tab: ActiveTab) {
