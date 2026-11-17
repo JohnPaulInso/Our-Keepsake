@@ -1,5 +1,5 @@
-// (2026-07-13) Import createPortal for date overlay; was react only
-import React, { useState, useMemo, useEffect } from 'react';
+// (2026-07-13) Add useRef for gesture handling; was without useRef
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   DndContext,
@@ -322,20 +322,45 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const [calendarYear, setCalendarYear] = useState<number>(() => new Date().getFullYear());
   const [calendarMonth, setCalendarMonth] = useState<number>(() => new Date().getMonth());
   const [selectedDay, setSelectedDay] = useState<number | null>(() => new Date().getDate());
-  // (2026-07-13) Add fullscreen date state without navbars; was standard view only
+  // (2026-07-13) Slide animation and vertical scroll support; was instant fade
   const [isFullscreenDateOpen, setIsFullscreenDateOpen] = useState<boolean>(false);
-  // (2026-07-13) Add overlay swipe left/right date switching; was static overlay
-  const [overlayTouchStartX, setOverlayTouchStartX] = useState<number | null>(null);
-  const [overlayTouchStartY, setOverlayTouchStartY] = useState<number | null>(null);
-  const [overlaySwipeDeltaX, setOverlaySwipeDeltaX] = useState(0);
-  const [isOverlaySwiping, setIsOverlaySwiping] = useState(false);
-  const [overlaySlideAnim, setOverlaySlideAnim] = useState<'left' | 'right' | null>(null);
+  const [isOverlayVisible, setIsOverlayVisible] = useState<boolean>(false);
+  const [isOverlayClosing, setIsOverlayClosing] = useState<boolean>(false);
+  const [dateSlideStage, setDateSlideStage] = useState<
+    'idle' | 'sliding-out-left' | 'sliding-out-right' | 'sliding-in-left' | 'sliding-in-right'
+  >('idle');
+  const [isDraggingHorizontal, setIsDraggingHorizontal] = useState(false);
+  const [dragDeltaX, setDragDeltaX] = useState(0);
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const isHorizontalGestureRef = useRef<boolean | null>(null);
+
+  const openDateOverlay = (day: number) => {
+    setSelectedDay(day);
+    setIsFullscreenDateOpen(true);
+    setIsOverlayClosing(false);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsOverlayVisible(true);
+      });
+    });
+  };
+
+  const closeDateOverlay = (callback?: () => void) => {
+    setIsOverlayClosing(true);
+    setIsOverlayVisible(false);
+    setTimeout(() => {
+      setIsFullscreenDateOpen(false);
+      setIsOverlayClosing(false);
+      if (callback) callback();
+    }, 280);
+  };
 
   // (2026-07-13) Lock scroll and bind Escape for date overlay; was unmanaged
   useEffect(() => {
     if (!isFullscreenDateOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsFullscreenDateOpen(false);
+      if (e.key === 'Escape') closeDateOverlay();
     };
     window.addEventListener('keydown', handleKeyDown);
     const prevOverflow = document.body.style.overflow;
@@ -347,8 +372,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   }, [isFullscreenDateOpen]);
 
   const handleNextOverlayDate = () => {
-    if (selectedDay === null) return;
-    setOverlaySlideAnim('left');
+    if (selectedDay === null || dateSlideStage !== 'idle') return;
+    setDateSlideStage('sliding-out-left');
     setTimeout(() => {
       const daysInCurrentMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
       if (selectedDay < daysInCurrentMonth) {
@@ -362,28 +387,36 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         }
         setSelectedDay(1);
       }
-      setOverlaySlideAnim(null);
-    }, 140);
+      setDateSlideStage('sliding-in-right');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setDateSlideStage('idle');
+        });
+      });
+    }, 220);
   };
 
   const handlePrevOverlayDate = () => {
-    if (selectedDay === null) return;
-    setOverlaySlideAnim('right');
+    if (selectedDay === null || dateSlideStage !== 'idle') return;
+    setDateSlideStage('sliding-out-right');
     setTimeout(() => {
       if (selectedDay > 1) {
         setSelectedDay((d) => (d ? d - 1 : 1));
       } else {
-        const prevMonthDays = new Date(calendarYear, calendarMonth, 0).getDate();
-        if (calendarMonth === 0) {
-          setCalendarMonth(11);
-          setCalendarYear((y) => y - 1);
-        } else {
-          setCalendarMonth((m) => m - 1);
-        }
-        setSelectedDay(prevMonthDays);
+        const prevMonth = calendarMonth === 0 ? 11 : calendarMonth - 1;
+        const prevYear = calendarMonth === 0 ? calendarYear - 1 : calendarYear;
+        const daysInPrevMonth = new Date(prevYear, prevMonth + 1, 0).getDate();
+        setCalendarMonth(prevMonth);
+        setCalendarYear(prevYear);
+        setSelectedDay(daysInPrevMonth);
       }
-      setOverlaySlideAnim(null);
-    }, 140);
+      setDateSlideStage('sliding-in-left');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setDateSlideStage('idle');
+        });
+      });
+    }, 220);
   };
   const [audioState, setAudioState] = useState(audioEngine.getState());
 
@@ -873,11 +906,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               <button
                 key={idx}
                 type="button"
-                // (2026-07-13) Open date overlay on select; was setting filter only
-                onClick={() => {
-                  setSelectedDay(cell.day);
-                  setIsFullscreenDateOpen(true);
-                }}
+                // (2026-07-13) Open date overlay with slide animation; was instant
+                onClick={() => openDateOverlay(cell.day)}
                 className={`flex flex-col items-center justify-center h-10 mx-auto w-10 rounded-xl transition-all relative ${
                   isSelected
                     ? 'bg-primary text-on-primary font-bold shadow-sm active:scale-95'
@@ -990,11 +1020,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               <button
                 key={item.day}
                 type="button"
-                // (2026-07-13) Open date overlay from week strip; was filter only
-                onClick={() => {
-                  setSelectedDay(item.day);
-                  setIsFullscreenDateOpen(true);
-                }}
+                // (2026-07-13) Open date overlay with slide animation; was instant
+                onClick={() => openDateOverlay(item.day)}
                 className={`flex flex-col items-center justify-center min-w-[52px] h-[74px] rounded-xl flex-shrink-0 relative transition-transform active:scale-95 ${
                   isSelected
                     ? 'bg-primary text-on-primary shadow-md'
@@ -1199,98 +1226,134 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         </p>
       </div>
 
-      {/* (2026-07-13) Portal fullscreen date overlay to document.body; was in main */}
+      {/* (2026-07-13) Slide animation and vertical scroll support; was instant fade */}
       {isFullscreenDateOpen && selectedDay !== null && typeof document !== 'undefined' && createPortal(
         <div
           id="specific-date-fullscreen-view"
-          onTouchStart={(e) => {
-            if (e.touches.length === 1) {
-              setOverlayTouchStartX(e.touches[0].clientX);
-              setOverlayTouchStartY(e.touches[0].clientY);
-              setIsOverlaySwiping(true);
-            }
-          }}
-          onTouchMove={(e) => {
-            if (overlayTouchStartX === null || overlayTouchStartY === null) return;
-            const currentX = e.touches[0].clientX;
-            const currentY = e.touches[0].clientY;
-            const deltaX = currentX - overlayTouchStartX;
-            const deltaY = currentY - overlayTouchStartY;
-            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 15) {
-              setOverlaySwipeDeltaX(deltaX);
-            }
-          }}
-          onTouchEnd={() => {
-            setIsOverlaySwiping(false);
-            if (overlaySwipeDeltaX < -50) {
-              handleNextOverlayDate();
-            } else if (overlaySwipeDeltaX > 50) {
-              handlePrevOverlayDate();
-            }
-            setOverlaySwipeDeltaX(0);
-            setOverlayTouchStartX(null);
-            setOverlayTouchStartY(null);
-          }}
           style={{
-            transform:
-              isOverlaySwiping && overlaySwipeDeltaX !== 0
-                ? `translateX(${overlaySwipeDeltaX * 0.45}px)`
-                : undefined,
-            transition: isOverlaySwiping
-              ? 'none'
-              : 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease',
+            touchAction: 'pan-y',
+            WebkitOverflowScrolling: 'touch',
           }}
-          className={`fixed inset-0 z-[100] bg-background text-on-surface overflow-y-auto px-4 py-6 md:px-8 md:py-10 flex flex-col items-center select-text no-print ${
-            overlaySlideAnim === 'left'
-              ? '-translate-x-8 opacity-40'
-              : overlaySlideAnim === 'right'
-              ? 'translate-x-8 opacity-40'
-              : 'translate-x-0 opacity-100'
+          className={`fixed inset-0 z-[100] bg-background text-on-surface overflow-y-auto overscroll-y-contain px-4 py-4 md:px-8 md:py-6 select-text no-print transition-transform duration-300 ease-out ${
+            !isOverlayVisible || isOverlayClosing
+              ? 'translate-x-full pointer-events-none'
+              : 'translate-x-0'
           }`}
         >
           {/* Subtle paper dot background texture */}
           <div className="fixed inset-0 pointer-events-none opacity-[0.035] bg-[radial-gradient(#4a3b32_1px,transparent_1px)] [background-size:20px_20px] -z-10" />
 
-          {/* Top discreet bar with date switcher without navbars */}
-          <div className="w-full max-w-xl flex items-center justify-between mb-4 sticky top-0 z-30 pt-2 pb-2 bg-background/95 backdrop-blur-md">
-            <button
-              type="button"
-              onClick={() => setIsFullscreenDateOpen(false)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high/90 text-primary border border-outline-variant/30 text-[13px] font-medium shadow-sm hover:bg-surface-variant transition-colors active:scale-95"
-            >
-              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-              <span>Back to Timeline</span>
-            </button>
-            <div className="flex items-center gap-1.5">
+          {/* Centered Column Wrapper for robust vertical scrolling */}
+          <div className="w-full max-w-xl mx-auto flex flex-col items-center min-h-full pb-24">
+            {/* Top discreet bar with date switcher without navbars */}
+            <div className="w-full flex items-center justify-between mb-3 sticky top-0 z-30 pt-2 pb-2 bg-background/95 backdrop-blur-md">
               <button
                 type="button"
-                onClick={handlePrevOverlayDate}
-                title="Previous Date"
-                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90"
+                onClick={() => closeDateOverlay()}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high/90 text-primary border border-outline-variant/30 text-[13px] font-medium shadow-sm hover:bg-surface-variant transition-colors active:scale-95"
               >
-                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+                <span>Back to Timeline</span>
               </button>
-              <span className="text-[11px] uppercase font-bold tracking-widest text-secondary bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant/30">
-                {selectedDayFormatted}
-              </span>
-              <button
-                type="button"
-                onClick={handleNextOverlayDate}
-                title="Next Date"
-                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90"
-              >
-                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsFullscreenDateOpen(false)}
-                title="Close overlay"
-                className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 ml-1"
-              >
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={handlePrevOverlayDate}
+                  title="Previous Date"
+                  className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90"
+                >
+                  <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                </button>
+                <span className="text-[11px] uppercase font-bold tracking-widest text-secondary bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant/30">
+                  {selectedDayFormatted}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleNextOverlayDate}
+                  title="Next Date"
+                  className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90"
+                >
+                  <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => closeDateOverlay()}
+                  title="Close overlay"
+                  className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 ml-1"
+                >
+                  <span className="material-symbols-outlined text-[18px]">close</span>
+                </button>
+              </div>
             </div>
-          </div>
+
+            {/* Date Content Card that animates horizontally */}
+            <div
+              onTouchStart={(e) => {
+                if (e.touches.length === 1) {
+                  touchStartXRef.current = e.touches[0].clientX;
+                  touchStartYRef.current = e.touches[0].clientY;
+                  isHorizontalGestureRef.current = null;
+                }
+              }}
+              onTouchMove={(e) => {
+                if (touchStartXRef.current === null || touchStartYRef.current === null) return;
+                const deltaX = e.touches[0].clientX - touchStartXRef.current;
+                const deltaY = e.touches[0].clientY - touchStartYRef.current;
+                if (isHorizontalGestureRef.current === null) {
+                  if (Math.abs(deltaY) > 8 && Math.abs(deltaY) >= Math.abs(deltaX)) {
+                    isHorizontalGestureRef.current = false;
+                    return;
+                  } else if (Math.abs(deltaX) > 12 && Math.abs(deltaX) > Math.abs(deltaY)) {
+                    isHorizontalGestureRef.current = true;
+                    setIsDraggingHorizontal(true);
+                    setDragDeltaX(deltaX);
+                  }
+                } else if (isHorizontalGestureRef.current === true) {
+                  setDragDeltaX(deltaX);
+                }
+              }}
+              onTouchEnd={() => {
+                if (isHorizontalGestureRef.current === true) {
+                  if (dragDeltaX < -45) {
+                    handleNextOverlayDate();
+                  } else if (dragDeltaX > 45) {
+                    handlePrevOverlayDate();
+                  }
+                }
+                setIsDraggingHorizontal(false);
+                setDragDeltaX(0);
+                touchStartXRef.current = null;
+                touchStartYRef.current = null;
+                isHorizontalGestureRef.current = null;
+              }}
+              style={{
+                transform: isDraggingHorizontal
+                  ? `translateX(${dragDeltaX * 0.75}px)`
+                  : dateSlideStage === 'sliding-out-left'
+                  ? 'translateX(-100%)'
+                  : dateSlideStage === 'sliding-out-right'
+                  ? 'translateX(100%)'
+                  : dateSlideStage === 'sliding-in-right'
+                  ? 'translateX(100%)'
+                  : dateSlideStage === 'sliding-in-left'
+                  ? 'translateX(-100%)'
+                  : 'translateX(0)',
+                opacity:
+                  dateSlideStage === 'sliding-out-left' ||
+                  dateSlideStage === 'sliding-out-right' ||
+                  dateSlideStage === 'sliding-in-right' ||
+                  dateSlideStage === 'sliding-in-left'
+                    ? 0
+                    : 1,
+                transition:
+                  isDraggingHorizontal ||
+                  dateSlideStage === 'sliding-in-right' ||
+                  dateSlideStage === 'sliding-in-left'
+                    ? 'none'
+                    : 'transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease',
+              }}
+              className="w-full flex flex-col items-center"
+            >
 
           {/* (2026-07-13) Add swipe hint in date overlay; was missing guidance */}
           <div className="flex items-center gap-1.5 text-[11px] text-secondary/80 font-medium mb-4 select-none">
@@ -1414,45 +1477,46 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             )}
 
             {/* Action buttons */}
-            <div className="mt-6 pt-4 border-t border-outline-variant/20 flex items-center justify-between">
+            <div className="mt-6 pt-4 border-t border-outline-variant/20 flex items-center justify-between w-full">
               <button
                 type="button"
                 onClick={() => {
-                  setIsFullscreenDateOpen(false);
-                  if (primaryDateMemory) {
-                    onEditMemory(primaryDateMemory);
-                  } else {
-                    const mStr = String(calendarMonth + 1).padStart(2, '0');
-                    const dStr = String(selectedDay).padStart(2, '0');
-                    const targetIso = `${calendarYear}-${mStr}-${dStr}`;
-                    onEditMemory({
-                      id: `mem-${Date.now()}`,
-                      keepsakeNumber: memories.length + 1,
-                      volumeNumber: 1,
-                      dateISO: targetIso,
-                      timeFormatted: 'All Day',
-                      title: '',
-                      snippet: '',
-                      storyBody: '',
-                      quoteHighlight: '',
-                      signOffAuthor: profile.partner1Name,
-                      location: 'Bogo City, Cebu',
-                      weatherTemp: '',
-                      weatherConditions: '',
-                      moodVibe: '',
-                      vibeTags: [],
-                      categories: ['PHOTO'],
-                      dotIndicators: ['GOLD'],
-                      photos: [],
-                      partnerNotes: [],
-                      isSealed: false,
-                      isDraft: false,
-                      sealLabel: 'Capybara Wax Seal',
-                      sealIcon: 'verified',
-                      updatedAt: Date.now(),
-                      sortOrder: 0,
-                    });
-                  }
+                  closeDateOverlay(() => {
+                    if (primaryDateMemory) {
+                      onEditMemory(primaryDateMemory);
+                    } else {
+                      const mStr = String(calendarMonth + 1).padStart(2, '0');
+                      const dStr = String(selectedDay).padStart(2, '0');
+                      const targetIso = `${calendarYear}-${mStr}-${dStr}`;
+                      onEditMemory({
+                        id: `mem-${Date.now()}`,
+                        keepsakeNumber: memories.length + 1,
+                        volumeNumber: 1,
+                        dateISO: targetIso,
+                        timeFormatted: 'All Day',
+                        title: '',
+                        snippet: '',
+                        storyBody: '',
+                        quoteHighlight: '',
+                        signOffAuthor: profile.partner1Name,
+                        location: 'Bogo City, Cebu',
+                        weatherTemp: '',
+                        weatherConditions: '',
+                        moodVibe: '',
+                        vibeTags: [],
+                        categories: ['PHOTO'],
+                        dotIndicators: ['GOLD'],
+                        photos: [],
+                        partnerNotes: [],
+                        isSealed: false,
+                        isDraft: false,
+                        sealLabel: 'Capybara Wax Seal',
+                        sealIcon: 'verified',
+                        updatedAt: Date.now(),
+                        sortOrder: 0,
+                      });
+                    }
+                  });
                 }}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider font-semibold shadow-xs"
               >
@@ -1463,16 +1527,21 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               </button>
               <button
                 type="button"
-                onClick={() => setIsFullscreenDateOpen(false)}
+                onClick={() => closeDateOverlay()}
                 className="text-secondary hover:text-primary text-xs uppercase tracking-wider font-medium"
               >
                 Exit Fullscreen
               </button>
             </div>
+            {/* End Editorial Title & Ruled Note Card */}
           </div>
-        </div>,
-        document.body
-      )}
+          {/* End Date Content Card */}
+        </div>
+        {/* End Centered Column Wrapper */}
+      </div>
+    </div>,
+    document.body
+  )}
     </div>
   );
 };
