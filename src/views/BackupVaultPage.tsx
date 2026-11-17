@@ -188,7 +188,8 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
       )}
 
       {/* Top Sticky Header */}
-      <header className="sticky top-0 w-full z-40 bg-surface-bright/95 backdrop-blur-xl border-b border-outline-variant/30">
+      {/* (2026-07-13) Make header frosted glass less transparent vs /95 blur */}
+      <header className="sticky top-0 w-full z-40 bg-surface-bright/98 backdrop-blur-md border-b border-outline-variant/30">
         <div className="h-16 px-margin max-w-[760px] mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <img

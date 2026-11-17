@@ -386,7 +386,8 @@ export const App: React.FC = () => {
       )}
 
       {/* Top Sticky Stationery Header */}
-      <header className="fixed top-0 w-full z-50 pt-safe bg-surface-bright/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(74,59,50,0.04)] no-print">
+      {/* (2026-07-13) Make header frosted glass less transparent vs /90 blur */}
+      <header className="fixed top-0 w-full z-50 pt-safe bg-surface-bright/98 backdrop-blur-md shadow-[0_1px_8px_rgba(74,59,50,0.04)] no-print">
         <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-between">
           <div
             onClick={() => {
@@ -618,8 +619,8 @@ export const App: React.FC = () => {
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
       {/* Bottom Navigation Bar matching Stitch Design */}
-      // (2026-07-13) Fix navbar arch & contrast vs rounded-t-full dome
-      <nav className="fixed bottom-0 w-full z-50 pb-safe bg-surface-bright/95 backdrop-blur-xl border-t border-outline-variant/30 rounded-t-2xl shadow-[0_-4px_20px_rgba(74,59,50,0.08)] no-print">
+      {/* (2026-07-13) Make navbar frosted glass less transparent vs /95 blur */}
+      <nav className="fixed bottom-0 w-full z-50 pb-safe bg-surface-bright/98 backdrop-blur-md border-t border-outline-variant/30 rounded-t-2xl shadow-[0_-4px_20px_rgba(74,59,50,0.08)] no-print">
         <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-around">
           <button
             type="button"
