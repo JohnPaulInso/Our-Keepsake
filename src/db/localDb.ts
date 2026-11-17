@@ -467,6 +467,19 @@ class LocalDatabase {
     return record;
   }
 
+  // (2026-07-13) Add createManualDailyBackup method vs saveBackup snapshot only
+  async createManualDailyBackup(customLabel?: string): Promise<DailyBackupRecord> {
+    const snap = this.createSnapshot();
+    const record = await this.saveBackup(snap);
+    if (customLabel) {
+      record.label = customLabel;
+      await idbSet(record.id, record, STORE_BACKUPS);
+      memCache.dailyBackups = await idbGetAllBackups();
+      this.notify();
+    }
+    return record;
+  }
+
   getDailyBackups(): DailyBackupRecord[] {
     return memCache.dailyBackups;
   }

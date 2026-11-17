@@ -280,6 +280,29 @@ class FirebaseSyncManager {
     }, 900);
   }
 
+  // (2026-07-13) Sanitize snapshots and split large media for Firestore limits
+  private async sanitizeSnapshotForFirestore(snapshot: BackupSnapshot): Promise<BackupSnapshot> {
+    const cloned: BackupSnapshot = JSON.parse(JSON.stringify(snapshot));
+    if (Array.isArray(cloned.memories)) {
+      for (const mem of cloned.memories) {
+        if (Array.isArray(mem.photos)) {
+          for (const photo of mem.photos) {
+            if (photo.url && photo.url.length > 150000) {
+              const mediaDocId = `${mem.id}_${photo.id}`;
+              await idbSet(mediaDocId, photo.url, 'post_media');
+              if (this.db) {
+                const mediaRef = doc(this.db, 'post_media', mediaDocId);
+                await setDoc(mediaRef, { id: mediaDocId, dataUrl: photo.url, updatedAt: Date.now() });
+              }
+              photo.url = `split_media://${mediaDocId}`;
+            }
+          }
+        }
+      }
+    }
+    return cloned;
+  }
+
   async pushSnapshot(): Promise<void> {
     if (!this.db || this.isSyncing || this.isApplyingRemoteSnapshot || this.status === 'quota') {
       return;
@@ -289,19 +312,7 @@ class FirebaseSyncManager {
       this.status = 'syncing';
       this.notify();
       const snapshot = DB.createSnapshot();
-
-      const cloned: BackupSnapshot = JSON.parse(JSON.stringify(snapshot));
-      for (const mem of cloned.memories) {
-        for (const photo of mem.photos) {
-          if (photo.url && photo.url.length > 150000) {
-            const mediaDocId = `${mem.id}_${photo.id}`;
-            await idbSet(mediaDocId, photo.url, 'post_media');
-            const mediaRef = doc(this.db, 'post_media', mediaDocId);
-            await setDoc(mediaRef, { id: mediaDocId, dataUrl: photo.url, updatedAt: Date.now() });
-            photo.url = `split_media://${mediaDocId}`;
-          }
-        }
-      }
+      const cloned = await this.sanitizeSnapshotForFirestore(snapshot);
 
       const docRef = doc(this.db, 'couples', 'jp_zea_vault');
       // (2026-07-13) Set updatedAt timestamp on Firestore vault push vs missing date
@@ -351,8 +362,16 @@ class FirebaseSyncManager {
       return false;
     }
     try {
+      // (2026-07-13) Sanitize daily backup snapshot before Firestore write vs raw
+      const sanitizedSnapshot = await this.sanitizeSnapshotForFirestore(
+        record.snapshot || DB.createSnapshot()
+      );
+      const cloudRecord: DailyBackupRecord = {
+        ...updated,
+        snapshot: sanitizedSnapshot,
+      };
       const dailyRef = doc(this.db, 'couples', 'jp_zea_vault', 'daily_backups', record.id);
-      await setDoc(dailyRef, updated, { merge: true });
+      await setDoc(dailyRef, cloudRecord, { merge: true });
       return true;
     } catch {
       return false;

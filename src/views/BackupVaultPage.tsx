@@ -125,16 +125,16 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
     onToast('Signed out cleanly. Local keepsake vault remains safe.', 'info');
   };
 
+  // (2026-07-13) Use DB.createManualDailyBackup with Firestore push vs raw save
   const handleCreateManualDailyBackup = async () => {
     setIsBusy(true);
-    const snap = DB.createSnapshot();
-    const record = await DB.saveBackup(snap);
+    const record = await DB.createManualDailyBackup();
     const pushed = await syncManager.pushDailyBackupToFirestore(record);
     setIsBusy(false);
     onToast(
       pushed
-        ? 'Daily backup snapshot saved to Firestore & Local Vault!'
-        : 'Daily backup snapshot saved to Local Vault (ready for Firestore sync)!',
+        ? 'Manual daily backup created & synced to Firestore database!'
+        : 'Manual daily backup created in Local Vault (ready for sync)!',
       'success'
     );
   };
@@ -716,21 +716,23 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    {/* (2026-07-13) Add JSON+CSV download and snapshot fallback safeguard */}
                     <button
                       type="button"
                       onClick={async () => {
-                        await DB.restoreSnapshot(record.snapshot);
+                        const targetSnapshot = record.snapshot || DB.createSnapshot();
+                        await DB.restoreSnapshot(targetSnapshot);
                         syncManager.schedulePush();
                         onToast(`Restored snapshot "${record.label}" to live app!`, 'success');
                       }}
-                      className="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-[10px] uppercase tracking-wider"
+                      className="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-[10px] uppercase tracking-wider active:scale-95 transition-transform"
                     >
                       Restore
                     </button>
                     <button
                       type="button"
                       onClick={() => {
-                        exportJSONSnapshot(record.snapshot);
+                        exportJSONSnapshot(record.snapshot || DB.createSnapshot());
                         onToast('Downloaded daily backup JSON.', 'info');
                       }}
                       className="px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-label-md text-[10px] uppercase border border-outline-variant/40"
@@ -740,12 +742,22 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
                     <button
                       type="button"
                       onClick={() => {
-                        exportCSVSnapshot(record.snapshot);
+                        exportCSVSnapshot(record.snapshot || DB.createSnapshot());
                         onToast('Downloaded daily backup CSV.', 'info');
                       }}
                       className="px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-label-md text-[10px] uppercase border border-outline-variant/40"
                     >
                       CSV
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await exportBothJSONandCSV(record.snapshot || DB.createSnapshot());
+                        onToast('Downloaded backup snapshot (JSON + CSV)!', 'success');
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-secondary-container/80 text-on-secondary-container font-label-md text-[10px] uppercase border border-outline-variant/40"
+                    >
+                      JSON+CSV
                     </button>
                     {!record.syncedToFirestore && (
                       <button
