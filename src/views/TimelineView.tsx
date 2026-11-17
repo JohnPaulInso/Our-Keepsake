@@ -1,5 +1,6 @@
-// (2026-07-13) Build interactive Timeline, Calendar & Search view per PRD
+// (2026-07-13) Import createPortal for date overlay; was react only
 import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   DndContext,
   closestCenter,
@@ -329,6 +330,21 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const [overlaySwipeDeltaX, setOverlaySwipeDeltaX] = useState(0);
   const [isOverlaySwiping, setIsOverlaySwiping] = useState(false);
   const [overlaySlideAnim, setOverlaySlideAnim] = useState<'left' | 'right' | null>(null);
+
+  // (2026-07-13) Lock scroll and bind Escape for date overlay; was unmanaged
+  useEffect(() => {
+    if (!isFullscreenDateOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsFullscreenDateOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isFullscreenDateOpen]);
 
   const handleNextOverlayDate = () => {
     if (selectedDay === null) return;
@@ -1183,8 +1199,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         </p>
       </div>
 
-      {/* (2026-07-13) Add touch swipe left/right date switching in overlay; was none */}
-      {isFullscreenDateOpen && selectedDay !== null && (
+      {/* (2026-07-13) Portal fullscreen date overlay to document.body; was in main */}
+      {isFullscreenDateOpen && selectedDay !== null && typeof document !== 'undefined' && createPortal(
         <div
           id="specific-date-fullscreen-view"
           onTouchStart={(e) => {
@@ -1224,7 +1240,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               ? 'none'
               : 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease',
           }}
-          className={`fixed inset-0 z-[60] bg-background text-on-surface overflow-y-auto px-4 py-8 md:px-8 md:py-12 flex flex-col items-center select-text no-print ${
+          className={`fixed inset-0 z-[100] bg-background text-on-surface overflow-y-auto px-4 py-6 md:px-8 md:py-10 flex flex-col items-center select-text no-print ${
             overlaySlideAnim === 'left'
               ? '-translate-x-8 opacity-40'
               : overlaySlideAnim === 'right'
@@ -1236,7 +1252,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           <div className="fixed inset-0 pointer-events-none opacity-[0.035] bg-[radial-gradient(#4a3b32_1px,transparent_1px)] [background-size:20px_20px] -z-10" />
 
           {/* Top discreet bar with date switcher without navbars */}
-          <div className="w-full max-w-xl flex items-center justify-between mb-6">
+          <div className="w-full max-w-xl flex items-center justify-between mb-4 sticky top-0 z-30 pt-2 pb-2 bg-background/95 backdrop-blur-md">
             <button
               type="button"
               onClick={() => setIsFullscreenDateOpen(false)}
@@ -1264,6 +1280,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90"
               >
                 <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsFullscreenDateOpen(false)}
+                title="Close overlay"
+                className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 ml-1"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
           </div>
@@ -1446,7 +1470,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -159,14 +159,14 @@ export const App: React.FC = () => {
     };
   }, [activeTab, studioModalOpen, switchTab, addToast]);
 
+  // (2026-07-13) Suppress synchronized toast; was addToast on refresh
   const triggerInAppRefresh = useCallback(() => {
     setIsSkeletonRefreshing(true);
     syncManager.pullSnapshot();
     setTimeout(() => {
       setIsSkeletonRefreshing(false);
-      addToast('Keepsake ledger synchronized.', 'info');
     }, 650);
-  }, [addToast]);
+  }, []);
 
   // Touch pull-to-refresh handlers
   const handleTouchStart = (e: React.TouchEvent) => {
