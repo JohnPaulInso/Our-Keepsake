@@ -21,6 +21,8 @@ import { SecretYearLettersView } from './views/SecretYearLettersView';
 import { BackupVaultPage } from './views/BackupVaultPage';
 import { ToastContainer, ToastItem } from './components/ToastContainer';
 import { CoupleStudioModal } from './components/CoupleStudioModal';
+// (2026-07-13) Import formatStandardDate for responsive desktop sidebar vs none
+import { formatStandardDate } from './utils/dateFormat';
 
 export const App: React.FC = () => {
   const location = useLocation();
@@ -385,9 +387,183 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* Top Sticky Stationery Header */}
-      {/* (2026-07-13) Make header frosted glass less transparent vs /90 blur */}
-      <header className="fixed top-0 w-full z-50 pt-safe bg-surface-bright/98 backdrop-blur-md shadow-[0_1px_8px_rgba(74,59,50,0.04)] no-print">
+      {/* (2026-07-13) Add responsive left sidebar for tablet/desktop vs mobile only */}
+      <aside className="hidden md:flex flex-col w-64 lg:w-72 fixed inset-y-0 left-0 z-40 bg-surface-bright/98 backdrop-blur-md border-r border-outline-variant/30 p-5 justify-between no-print overflow-y-auto">
+        <div className="flex flex-col gap-6">
+          <div
+            onClick={() => {
+              setEditingMemory(null);
+              switchTab('timeline');
+            }}
+            className="flex items-center gap-3 cursor-pointer group"
+          >
+            <img
+              alt="Capybara Wax Seal Monogram"
+              className="h-10 w-10 object-contain shrink-0 group-hover:scale-105 transition-transform"
+              src={CAPYBARA_SEAL_LOGO}
+            />
+            <div className="flex flex-col min-w-0">
+              <span className="font-headline-sm text-headline-sm text-primary tracking-normal leading-tight font-serif truncate">
+                Our Keepsake
+              </span>
+              <span className="font-label-md text-label-md uppercase tracking-wider text-secondary truncate">
+                For {profile.partner2Name} • {profile.partner1Name} &amp; {profile.partner2Name}
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setEditingMemory(null);
+              switchTab('new-date');
+            }}
+            className={`w-full py-3 px-4 rounded-xl font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 ${
+              activeTab === 'new-date'
+                ? 'bg-primary text-on-primary ring-2 ring-primary-container'
+                : 'bg-gradient-to-r from-secondary to-primary text-surface-bright hover:shadow-md'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[20px]">add_circle</span>
+            <span>Record New Date</span>
+          </button>
+
+          <nav className="flex flex-col gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                setEditingMemory(null);
+                switchTab('timeline');
+              }}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md tracking-wide transition-all ${
+                activeTab === 'timeline'
+                  ? 'bg-secondary-container/70 text-on-secondary-container font-bold shadow-xs'
+                  : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-[22px]">auto_stories</span>
+                <span>Timeline</span>
+              </div>
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-surface-container-high/60 text-secondary">
+                {memories.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setEditingMemory(null);
+                switchTab('story');
+              }}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md tracking-wide transition-all ${
+                activeTab === 'story'
+                  ? 'bg-secondary-container/70 text-on-secondary-container font-bold shadow-xs'
+                  : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-[22px]">menu_book</span>
+                <span>Story Reader</span>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setEditingMemory(null);
+                switchTab('capsule');
+              }}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md tracking-wide transition-all ${
+                activeTab === 'capsule'
+                  ? 'bg-secondary-container/70 text-on-secondary-container font-bold shadow-xs'
+                  : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-[22px]">inventory_2</span>
+                <span>Time Capsule</span>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setEditingMemory(null);
+                switchTab('letters');
+              }}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md tracking-wide transition-all ${
+                activeTab === 'letters'
+                  ? 'bg-secondary-container/70 text-on-secondary-container font-bold shadow-xs'
+                  : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-[22px]">mail</span>
+                <span>Love Letters</span>
+              </div>
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-surface-container-high/60 text-secondary">
+                {digitalLoveLetters.length + secretNotes.length}
+              </span>
+            </button>
+
+            <div className="my-2 border-t border-outline-variant/25" />
+
+            <button
+              type="button"
+              onClick={() => navigate('/backup')}
+              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md tracking-wide text-secondary hover:bg-surface-container-low hover:text-primary transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-[20px]">folder_zip</span>
+                <span>Vault &amp; Backups</span>
+              </div>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-secondary-container/50 text-secondary uppercase tracking-widest font-bold">
+                /backup
+              </span>
+            </button>
+          </nav>
+        </div>
+
+        <div className="pt-4 border-t border-outline-variant/30 flex flex-col gap-3">
+          <div
+            onClick={() => navigate('/backup')}
+            className="flex items-center gap-3 p-2 rounded-xl hover:bg-surface-container-low cursor-pointer transition-colors"
+          >
+            <img
+              alt="Couple Profile"
+              className="w-10 h-10 rounded-full object-cover ring-2 ring-tertiary-fixed-dim shrink-0"
+              src={profile.avatarUrl}
+            />
+            <div className="flex flex-col min-w-0">
+              <span className="font-label-md text-label-md font-bold text-primary truncate">
+                {profile.partner1Name} &amp; {profile.partner2Name}
+              </span>
+              <span className="text-[11px] text-on-surface-variant truncate">
+                Since {formatStandardDate(profile.relationshipStartDateISO)}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-[11px] px-2 text-secondary font-label-md">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Cloud Sync Active</span>
+            </div>
+            <button
+              type="button"
+              onClick={triggerInAppRefresh}
+              title="Refresh Vault Data"
+              className="hover:text-primary transition-colors"
+            >
+              <span className="material-symbols-outlined text-[16px]">refresh</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Top Sticky Stationery Header (Mobile) */}
+      <header className="md:hidden fixed top-0 w-full z-50 pt-safe bg-surface-bright/98 backdrop-blur-md shadow-[0_1px_8px_rgba(74,59,50,0.04)] no-print">
         <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-between">
           <div
             onClick={() => {
@@ -493,7 +669,8 @@ export const App: React.FC = () => {
       </header>
 
       {/* Main Content Area with Exact-Position Shimmering Skeleton Loaders */}
-      <main className="flex flex-col relative w-full pt-20 pb-28 bg-transparent z-10 flex-1">
+      {/* (2026-07-13) Responsive main container padding for sidebar vs full mobile */}
+      <main className="flex flex-col relative w-full md:pl-64 lg:pl-72 pt-20 md:pt-6 pb-28 md:pb-12 bg-transparent z-10 flex-1 min-w-0">
         {isHydrating || isSkeletonRefreshing ? (
           <div className="flex flex-col w-full px-margin pb-space-xl max-w-[760px] mx-auto gap-space-lg">
             <div className="flex flex-col items-center gap-2 mt-2">
@@ -619,9 +796,9 @@ export const App: React.FC = () => {
       {/* Global Toast Container above Bottom Navigation */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-      {/* Bottom Navigation Bar matching Stitch Design */}
-      {/* (2026-07-13) Make navbar frosted glass less transparent vs /95 blur */}
-      <nav className="fixed bottom-0 w-full z-50 pb-safe bg-surface-bright/98 backdrop-blur-md border-t border-outline-variant/30 rounded-t-2xl shadow-[0_-4px_20px_rgba(74,59,50,0.08)] no-print">
+      {/* Bottom Navigation Bar matching Stitch Design (Mobile Only) */}
+      {/* (2026-07-13) Hide bottom navbar on tablet and desktop vs mobile only */}
+      <nav className="md:hidden fixed bottom-0 w-full z-50 pb-safe bg-surface-bright/98 backdrop-blur-md border-t border-outline-variant/30 rounded-t-2xl shadow-[0_-4px_20px_rgba(74,59,50,0.08)] no-print">
         <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-around">
           <button
             type="button"
