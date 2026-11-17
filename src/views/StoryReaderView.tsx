@@ -4,6 +4,22 @@ import { CoupleProfile, KeepsakeMemory, PolaroidPhoto } from '../types';
 import { formatDuration, formatStandardDate } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 
+// (2026-07-13) Format date with 3-letter weekday like THU; was standard date
+function formatWeekdayDate(dateInput: string | undefined): string {
+  if (!dateInput) return 'JAN 1, 2026';
+  try {
+    const [y, m, d] = dateInput.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    const weekday = dt.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+    const month = dt.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+    const day = dt.getDate();
+    const year = dt.getFullYear();
+    return `${weekday}, ${month} ${day}, ${year}`;
+  } catch {
+    return (dateInput || 'JAN 1, 2026').toUpperCase();
+  }
+}
+
 interface StoryReaderViewProps {
   profile: CoupleProfile;
   memory: KeepsakeMemory;
@@ -256,12 +272,23 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
       <div className="relative bg-surface-container-lowest rounded-xl p-space-md shadow-sm mb-space-md overflow-hidden border border-outline-variant/25">
         <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-16 h-4 bg-secondary-fixed/50 backdrop-blur-sm rounded-sm rotate-1 shadow-xs pointer-events-none" />
         <div className="flex flex-col gap-space-xs pt-1">
-          <div className="flex items-center justify-between text-secondary">
-            <span className="font-label-md text-label-md uppercase tracking-widest text-secondary font-semibold">
-              Vol. {memory.volumeNumber || 14} • {formatStandardDate(memory.dateISO)}
-            </span>
-            <span className="font-label-md text-label-md text-on-surface-variant/80">
-              {memory.timeFormatted || '9:42 PM PST'}
+          {/* (2026-07-13) Format date with 3-letter weekday like THU; was standard date */}
+          <div className="flex items-center justify-between text-secondary gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
+              <span className="font-label-md text-label-md uppercase tracking-wider text-secondary font-semibold">
+                Vol. {memory.volumeNumber || 1}
+              </span>
+              <span className="text-outline-variant/60">•</span>
+              <span
+                id="editorial-date-weekday-badge" // Weekday and date banner badge
+                className="px-2.5 py-0.5 rounded-md bg-secondary-container/40 text-primary font-bold text-xs uppercase tracking-wider border border-outline-variant/40 flex items-center gap-1.5 shadow-2xs"
+              >
+                <span className="material-symbols-outlined text-[13px] text-secondary">calendar_today</span>
+                <span>{formatWeekdayDate(memory.dateISO)}</span>
+              </span>
+            </div>
+            <span className="font-label-md text-label-md text-on-surface-variant/80 font-medium shrink-0">
+              {memory.timeFormatted || 'All Day'}
             </span>
           </div>
           <div className="flex items-center justify-between gap-2 mt-0.5">
