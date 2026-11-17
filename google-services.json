@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "545529586713",
+    "project_id": "our-keepsake",
+    "storage_bucket": "our-keepsake.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:545529586713:android:16c5cfc28ef369410bb688",
+        "android_client_info": {
+          "package_name": "com.ourkeepsake"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPDlWQlj9awT7JpEOBTvhemNErs3ubLJU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

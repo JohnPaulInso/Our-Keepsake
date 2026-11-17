@@ -337,35 +337,7 @@ export const App: React.FC = () => {
     letters: `For ${profile.partner2Name}`,
   };
 
-  // (2026-07-13) Render full-page /backup settings & daily Firestore backups
-  if (location.pathname === '/backup') {
-    return (
-      <>
-        <BackupVaultPage
-          profile={profile}
-          memories={memories}
-          secretNotes={secretNotes}
-          digitalLoveLetters={digitalLoveLetters}
-          timeCapsule={timeCapsule}
-          dailyBackups={dailyBackups}
-          onUpdateProfile={handleUpdateProfile}
-          onResetToCleanSlate={async () => {
-            await DB.resetToCleanSlate();
-            syncManager.schedulePush();
-          }}
-          onRestoreShowcaseArchive={async () => {
-            await DB.restoreShowcaseArchive();
-            syncManager.schedulePush();
-          }}
-          onTriggerSkeletonReload={triggerInAppRefresh}
-          onToast={addToast}
-        />
-        <ToastContainer toasts={toasts} onDismiss={dismissToast} />
-      </>
-    );
-  }
-
-  // (2026-07-13) Render full-page /backup settings & daily Firestore backups
+  // (2026-07-13) Render full-page /backup settings & daily backups vs 404
   if (location.pathname === '/backup') {
     return (
       <>

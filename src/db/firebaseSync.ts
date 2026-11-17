@@ -171,6 +171,12 @@ class FirebaseSyncManager {
       for (const b of localBackups) {
         this.pushDailyBackupToFirestore(b).catch(() => {});
       }
+      // (2026-07-13) Auto-sync local DB mutations to Firestore vs manual push only
+      DB.subscribe(() => {
+        if (!this.isApplyingRemoteSnapshot && this.db && this.status !== 'quota') {
+          this.schedulePush();
+        }
+      });
       this.startRealtimeListener();
       this.startDailyBackupsListener();
     } catch {
@@ -242,8 +248,10 @@ class FirebaseSyncManager {
       const snap = await getDoc(docRef);
       if (snap.exists()) {
         const remote = snap.data() as BackupSnapshot & { updatedAt?: number };
+        // (2026-07-13) Support updatedAt fallback for Firestore pull vs exportedAt only
+        const remoteTime = remote.exportedAt || remote.updatedAt || 0;
         const localBaseline = Number(localStorage.getItem('ok_sync_baseline') || 0);
-        if ((remote.exportedAt || 0) > localBaseline) {
+        if (remoteTime > localBaseline) {
           this.isApplyingRemoteSnapshot = true;
           await DB.restoreSnapshot(remote);
           this.isApplyingRemoteSnapshot = false;
@@ -296,7 +304,8 @@ class FirebaseSyncManager {
       }
 
       const docRef = doc(this.db, 'couples', 'jp_zea_vault');
-      await setDoc(docRef, cloned, { merge: true });
+      // (2026-07-13) Set updatedAt timestamp on Firestore vault push vs missing date
+      await setDoc(docRef, { ...cloned, updatedAt: Date.now() }, { merge: true });
 
       // Also update today's automated daily backup in Firestore
       const todayISO = new Date().toISOString().slice(0, 10);
@@ -397,8 +406,10 @@ class FirebaseSyncManager {
       async (snap) => {
         if (!snap.exists() || this.isSyncing) return;
         const data = snap.data() as BackupSnapshot;
+        // (2026-07-13) Check remote exportedAt/updatedAt vs local baseline comparison
+        const remoteTime = data.exportedAt || (data as { updatedAt?: number }).updatedAt || 0;
         const localBaseline = Number(localStorage.getItem('ok_sync_baseline') || 0);
-        if ((data.exportedAt || 0) <= localBaseline) return;
+        if (remoteTime <= localBaseline) return;
 
         this.isApplyingRemoteSnapshot = true;
         if (Array.isArray(data.memories)) {

@@ -27,6 +27,10 @@ if not exist "android" (
     call npx cap add android
 )
 
+if exist "google-services.json" (
+    copy /Y "google-services.json" "android\app\google-services.json" >nul
+)
+
 echo [2/4] Syncing web assets to Capacitor Android...
 call npx cap sync android
 if %ERRORLEVEL% NEQ 0 (
