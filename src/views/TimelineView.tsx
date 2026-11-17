@@ -313,7 +313,28 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const [calendarYear, setCalendarYear] = useState<number>(2026);
   const [calendarMonth, setCalendarMonth] = useState<number>(9); // 0-indexed: 9 = October
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  // (2026-07-13) Add state for day overlay modal; was filter state only
+  const [isDayOverlayOpen, setIsDayOverlayOpen] = useState<boolean>(false);
   const [audioState, setAudioState] = useState(audioEngine.getState());
+
+  const selectedDayFormatted = useMemo(() => {
+    if (selectedDay === null) return '';
+    const d = new Date(calendarYear, calendarMonth, selectedDay);
+    return d.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }, [calendarYear, calendarMonth, selectedDay]);
+
+  const selectedDayMemories = useMemo(() => {
+    if (selectedDay === null) return [];
+    const mStr = String(calendarMonth + 1).padStart(2, '0');
+    const dStr = String(selectedDay).padStart(2, '0');
+    const targetIso = `${calendarYear}-${mStr}-${dStr}`;
+    return memories.filter((m) => m.dateISO === targetIso);
+  }, [calendarYear, calendarMonth, selectedDay, memories]);
 
   useEffect(() => {
     return audioEngine.subscribe(() => {
@@ -917,6 +938,53 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         </div>
       </section>
 
+      {/* (2026-07-13) Add specific day card with overlay trigger; was none */}
+      {selectedDay !== null && (
+        <div
+          id="specific-day-highlight-card"
+          className="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 border-2 border-primary/20 shadow-md mb-space-lg flex flex-col gap-3 relative overflow-hidden"
+        >
+          {/* Specific day highlight banner */}
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-secondary-container/70 text-primary flex items-center justify-center flex-shrink-0 shadow-inner">
+                <span className="material-symbols-outlined text-[24px]">event_available</span>
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full bg-primary text-on-primary">
+                    Specific Day Only
+                  </span>
+                  <span className="text-secondary text-[12px] font-medium">
+                    {selectedDayMemories.length} {selectedDayMemories.length === 1 ? 'Keepsake' : 'Keepsakes'}
+                  </span>
+                </div>
+                <h3 className="font-headline-sm text-headline-sm text-primary font-serif mt-0.5">
+                  {selectedDayFormatted}
+                </h3>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsDayOverlayOpen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-on-primary text-[12px] font-semibold uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all shadow-sm"
+              >
+                <span className="material-symbols-outlined text-[16px]">fullscreen</span>
+                <span>Open Day Overlay</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedDay(null)}
+                className="px-3 py-2 rounded-xl border border-outline-variant/50 text-secondary hover:text-primary hover:bg-surface-container text-[12px] font-medium uppercase tracking-wider transition-colors"
+              >
+                Clear Day
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Tactile Botanical Filter Ribbon */}
       <section className="flex items-center gap-space-xs overflow-x-auto no-scrollbar -mx-margin px-margin mb-space-lg">
         {[
@@ -1020,6 +1088,90 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           together.
         </p>
       </div>
+
+      {/* (2026-07-13) Add modal overlay for specific day; was feed list only */}
+      {isDayOverlayOpen && selectedDay !== null && (
+        <div
+          id="specific-day-overlay-backdrop"
+          onClick={() => setIsDayOverlayOpen(false)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto no-print"
+        >
+          <div
+            id="specific-day-overlay-dialog"
+            onClick={(e) => e.stopPropagation()}
+            className="bg-surface-bright rounded-3xl max-w-xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-outline-variant/40"
+          >
+            {/* Modal header with date */}
+            <div className="p-5 border-b border-outline-variant/30 flex items-center justify-between bg-surface-container-low/60">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-secondary-container text-primary flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[22px]">calendar_today</span>
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold tracking-wider uppercase text-secondary">
+                    Specific Day Overlay
+                  </span>
+                  <h2 className="font-headline-sm text-headline-sm text-primary font-serif">
+                    {selectedDayFormatted}
+                  </h2>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsDayOverlayOpen(false)}
+                className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-secondary hover:text-primary transition-colors"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+
+            {/* Modal body with keepsakes */}
+            <div className="p-5 overflow-y-auto flex flex-col gap-4">
+              {selectedDayMemories.length === 0 ? (
+                <div className="text-center py-10 flex flex-col items-center gap-2">
+                  <span className="material-symbols-outlined text-[36px] text-outline">event_busy</span>
+                  <p className="font-headline-sm text-headline-sm text-primary font-serif">
+                    No Keepsakes Recorded
+                  </p>
+                  <p className="text-body-sm text-on-surface-variant max-w-xs">
+                    No memories were recorded for {selectedDayFormatted}.
+                  </p>
+                </div>
+              ) : (
+                selectedDayMemories.map((memory) => (
+                  <SortableMemoryCard
+                    key={memory.id}
+                    memory={memory}
+                    audioState={audioState}
+                    onOpenMemory={(id) => {
+                      setIsDayOverlayOpen(false);
+                      onOpenMemory(id);
+                    }}
+                    onEditMemory={(mem) => {
+                      setIsDayOverlayOpen(false);
+                      onEditMemory(mem);
+                    }}
+                  />
+                ))
+              )}
+            </div>
+
+            {/* Modal footer with action */}
+            <div className="p-4 border-t border-outline-variant/30 flex items-center justify-between bg-surface-container-lowest">
+              <span className="text-[12px] text-secondary font-medium">
+                {selectedDayMemories.length} {selectedDayMemories.length === 1 ? 'Keepsake found' : 'Keepsakes found'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsDayOverlayOpen(false)}
+                className="px-4 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider font-semibold"
+              >
+                Close Overlay
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
