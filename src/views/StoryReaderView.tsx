@@ -272,7 +272,7 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
       <div className="relative bg-surface-container-lowest rounded-xl p-space-md shadow-sm mb-space-md overflow-hidden border border-outline-variant/25">
         <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-16 h-4 bg-secondary-fixed/50 backdrop-blur-sm rounded-sm rotate-1 shadow-xs pointer-events-none" />
         <div className="flex flex-col gap-space-xs pt-1">
-          {/* (2026-07-13) Format date with 3-letter weekday like THU; was standard date */}
+          {/* (2026-07-13) Enlarge edit/delete, icon-only link, remove All Day; was cramped */}
           <div className="flex items-center justify-between text-secondary gap-2 flex-wrap">
             <div className="flex items-center gap-2 flex-wrap min-w-0">
               <span className="font-label-md text-label-md uppercase tracking-wider text-secondary font-semibold">
@@ -287,11 +287,14 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                 <span>{formatWeekdayDate(memory.dateISO)}</span>
               </span>
             </div>
-            <span className="font-label-md text-label-md text-on-surface-variant/80 font-medium shrink-0">
-              {memory.timeFormatted || 'All Day'}
-            </span>
+            {memory.timeFormatted &&
+              memory.timeFormatted.toLowerCase() !== 'all day' && (
+                <span className="font-label-md text-label-md text-on-surface-variant/80 font-medium shrink-0">
+                  {memory.timeFormatted}
+                </span>
+              )}
           </div>
-          <div className="flex items-center justify-between gap-2 mt-0.5">
+          <div className="flex items-center justify-between gap-2 mt-1">
             <div className="flex items-center gap-1.5 text-primary min-w-0">
               <span className="material-symbols-outlined text-[16px] text-secondary shrink-0">
                 near_me
@@ -300,38 +303,43 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                 {memory.location || 'San Francisco, CA'}
               </span>
             </div>
-            {/* (2026-07-13) Add date routing link & remove weather badges; was weather pills */}
-            <div className="flex items-center gap-2 shrink-0 no-print">
+            <div
+              id="editorial-reader-actions-toolbar" // Reader actions toolbar for editing and links
+              className="flex items-center gap-1.5 shrink-0 no-print"
+            >
               <button
                 type="button"
                 onClick={() => {
                   const url = `${window.location.origin}/date/${memory.dateISO}`;
-                  navigator.clipboard.writeText(url).then(() => {
-                    onToast(`Link copied: /date/${memory.dateISO}`, 'info');
-                  }).catch(() => {
-                    onToast(`/date/${memory.dateISO}`, 'info');
-                  });
+                  navigator.clipboard
+                    .writeText(url)
+                    .then(() => {
+                      onToast(`Link copied: /date/${memory.dateISO}`, 'info');
+                    })
+                    .catch(() => {
+                      onToast(`/date/${memory.dateISO}`, 'info');
+                    });
                 }}
                 title="Copy direct link for this date"
-                className="px-2 py-0.5 rounded-md bg-surface-container-low text-secondary hover:text-primary font-label-md text-[10px] uppercase tracking-wider flex items-center gap-1"
+                className="w-8 h-8 rounded-lg bg-surface-container-low text-secondary hover:text-primary flex items-center justify-center border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
               >
-                <span className="material-symbols-outlined text-[13px]">link</span>
-                <span>/date/{memory.dateISO}</span>
+                <span className="material-symbols-outlined text-[18px]">link</span>
               </button>
               <button
                 type="button"
                 onClick={() => onEditMemory(memory)}
-                className="px-2 py-0.5 rounded-md bg-surface-container-low text-secondary hover:text-primary font-label-md text-[10px] uppercase tracking-wider flex items-center gap-1"
+                className="px-3.5 py-1.5 rounded-lg bg-surface-container-low text-primary hover:bg-surface-container font-label-md text-xs uppercase tracking-wider flex items-center gap-1.5 border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
               >
-                <span className="material-symbols-outlined text-[13px]">edit</span>
+                <span className="material-symbols-outlined text-[16px]">edit</span>
                 <span>Edit</span>
               </button>
               <button
                 type="button"
                 onClick={() => setDeleteConfirmOpen(true)}
-                className="px-2 py-0.5 rounded-md bg-surface-container-low text-error font-label-md text-[10px] uppercase tracking-wider flex items-center gap-1"
+                title="Delete memory"
+                className="w-8 h-8 rounded-lg bg-surface-container-low text-error hover:bg-error/10 flex items-center justify-center border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
               >
-                <span className="material-symbols-outlined text-[13px]">delete</span>
+                <span className="material-symbols-outlined text-[18px]">delete</span>
               </button>
             </div>
           </div>
