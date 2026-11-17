@@ -718,6 +718,35 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     [profile.relationshipStartDateISO]
   );
 
+  // (2026-07-13) Compute past milestone for showcase; was next rendezvous only
+  const pastMilestone = useMemo(() => {
+    const found = memories.find(
+      (m) =>
+        m.categories?.includes('ANNIVERSARY') ||
+        m.dotIndicators?.includes('ROSE') ||
+        m.vibeTags?.some(
+          (t) =>
+            t.toLowerCase().includes('milestone') ||
+            t.toLowerCase().includes('anniversary')
+        )
+    );
+    if (found) {
+      return {
+        id: found.id,
+        title: found.title,
+        dateFormatted: formatStandardDate(found.dateISO),
+        tag: 'Milestone',
+      };
+    }
+    return {
+      id: null,
+      title: profile.milestoneTitle || 'First Chapter • The Day We Officially Began',
+      dateFormatted:
+        profile.milestoneDateLabel || formatStandardDate(profile.relationshipStartDateISO),
+      tag: profile.milestoneTag || 'Anniversary',
+    };
+  }, [memories, profile]);
+
   // Build calendar days for calendarYear & calendarMonth
   const calendarDays = useMemo(() => {
     const firstDayOfWeek = new Date(calendarYear, calendarMonth, 1).getDay();
@@ -917,39 +946,76 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           “{profile.heroQuote && !profile.heroQuote.includes('no heart for me like yours') ? profile.heroQuote : "You're an answered prayer, baby."}”
         </p>
 
-        {/* (2026-07-13) Boost Next Rendezvous card contrast & visibility; was faint */}
-        <div
-          id="next-rendezvous-card"
-          onClick={onOpenProfileModal}
-          className="mt-space-md w-full bg-[#fbf5ee] rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-md relative overflow-hidden cursor-pointer border-2 border-[#dfcbb7] hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.99] group"
-        >
-          <div className="absolute -right-3 -bottom-3 opacity-10 text-primary pointer-events-none group-hover:opacity-20 transition-opacity">
-            <span className="material-symbols-outlined text-[64px]">wb_twilight</span>
-          </div>
-
-          <div className="flex items-center gap-3.5 min-w-0 z-10">
-            <div className="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-md flex-shrink-0 group-hover:scale-105 transition-transform">
-              <span className="material-symbols-outlined text-[24px]">wb_twilight</span>
+        {/* (2026-07-13) Support past milestone banner card; was static rendezvous only */}
+        {profile.showNextRendezvous ? (
+          <div
+            id="next-rendezvous-card"
+            onClick={onOpenProfileModal}
+            className="mt-space-md w-full bg-[#fbf5ee] rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-md relative overflow-hidden cursor-pointer border-2 border-[#dfcbb7] hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.99] group"
+          >
+            <div className="absolute -right-3 -bottom-3 opacity-10 text-primary pointer-events-none group-hover:opacity-20 transition-opacity">
+              <span className="material-symbols-outlined text-[64px]">wb_twilight</span>
             </div>
-            <div className="flex flex-col text-left min-w-0">
-              <span className="font-label-md text-[11px] font-bold text-secondary tracking-widest uppercase">
-                Next Rendezvous • {profile.partner1Name} &amp; {profile.partner2Name}
+
+            <div className="flex items-center gap-3.5 min-w-0 z-10">
+              <div className="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-md flex-shrink-0 group-hover:scale-105 transition-transform">
+                <span className="material-symbols-outlined text-[24px]">wb_twilight</span>
+              </div>
+              <div className="flex flex-col text-left min-w-0">
+                <span className="font-label-md text-[11px] font-bold text-secondary tracking-widest uppercase">
+                  Next Rendezvous • {profile.partner1Name} &amp; {profile.partner2Name}
+                </span>
+                <span className="font-headline-sm text-headline-sm text-primary font-bold truncate-single font-serif mt-0.5">
+                  {profile.nextRendezvousTitle}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-end flex-shrink-0 pl-3 z-10">
+              <span className="px-3 py-1 rounded-full bg-primary text-on-primary font-label-md text-xs font-semibold shadow-xs">
+                {profile.nextRendezvousDayLabel}
               </span>
-              <span className="font-headline-sm text-headline-sm text-primary font-bold truncate-single font-serif mt-0.5">
-                {profile.nextRendezvousTitle}
+              <span className="font-body-sm text-xs font-semibold text-secondary mt-1">
+                {profile.nextRendezvousTimeLabel}
               </span>
             </div>
           </div>
+        ) : (
+          <div
+            id="past-milestone-card" // Cherished past milestone banner card
+            onClick={() =>
+              pastMilestone.id ? onOpenMemory(pastMilestone.id) : onOpenProfileModal()
+            }
+            className="mt-space-md w-full bg-[#fbf5ee] rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-md relative overflow-hidden cursor-pointer border-2 border-[#dfcbb7] hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.99] group"
+          >
+            <div className="absolute -right-3 -bottom-3 opacity-10 text-primary pointer-events-none group-hover:opacity-20 transition-opacity">
+              <span className="material-symbols-outlined text-[64px]">celebration</span>
+            </div>
 
-          <div className="flex flex-col items-end flex-shrink-0 pl-3 z-10">
-            <span className="px-3 py-1 rounded-full bg-primary text-on-primary font-label-md text-xs font-semibold shadow-xs">
-              {profile.nextRendezvousDayLabel}
-            </span>
-            <span className="font-body-sm text-xs font-semibold text-secondary mt-1">
-              {profile.nextRendezvousTimeLabel}
-            </span>
+            <div className="flex items-center gap-3.5 min-w-0 z-10">
+              <div className="w-12 h-12 rounded-xl bg-[#c58a69] text-white flex items-center justify-center shadow-md flex-shrink-0 group-hover:scale-105 transition-transform">
+                <span className="material-symbols-outlined text-[24px]">celebration</span>
+              </div>
+              <div className="flex flex-col text-left min-w-0">
+                <span className="font-label-md text-[11px] font-bold text-secondary tracking-widest uppercase">
+                  Past Milestone • {profile.partner1Name} &amp; {profile.partner2Name}
+                </span>
+                <span className="font-headline-sm text-headline-sm text-primary font-bold truncate-single font-serif mt-0.5">
+                  {pastMilestone.title}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-end flex-shrink-0 pl-3 z-10">
+              <span className="px-3 py-1 rounded-full bg-[#c58a69] text-white font-label-md text-xs font-semibold shadow-xs">
+                {pastMilestone.dateFormatted}
+              </span>
+              <span className="font-body-sm text-xs font-semibold text-secondary mt-1">
+                {pastMilestone.tag}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </section>
 
       {/* Instant Search & Filter Sanctuary Bar */}

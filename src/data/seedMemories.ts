@@ -26,6 +26,11 @@ export const DEFAULT_COUPLE_PROFILE: CoupleProfile = {
   nextRendezvousDayLabel: 'This Sat',
   nextRendezvousTimeLabel: '5:30 PM',
   nextRendezvousLocation: 'Presidio Overlook Lawn',
+  // (2026-07-13) Set showNextRendezvous false & add milestone; was true always
+  showNextRendezvous: false,
+  milestoneTitle: 'First Chapter • The Day We Officially Began',
+  milestoneDateLabel: 'Sep 14, 2025',
+  milestoneTag: 'Anniversary',
   theme: 'light',
   updatedAt: 1730000000000,
 };

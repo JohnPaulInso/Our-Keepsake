@@ -447,39 +447,82 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
               />
             </div>
 
+            {/* (2026-07-13) Showcase banner toggle & milestone inputs; was rendezvous only */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 bg-surface-container-low/60 p-3.5 rounded-xl border border-outline-variant/30">
-              <div className="sm:col-span-3">
+              <div className="sm:col-span-3 flex items-center justify-between">
                 <span className="font-label-md text-label-md uppercase tracking-wider text-secondary">
-                  Next Rendezvous Teaser Strip
+                  Top Showcase Banner
                 </span>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, showNextRendezvous: !form.showNextRendezvous })}
+                  className="px-2.5 py-1 rounded-lg text-xs font-label-md uppercase tracking-wider flex items-center gap-1.5 transition-colors border border-outline-variant/40 bg-surface-container-lowest text-primary shadow-xs"
+                >
+                  <span className="material-symbols-outlined text-[15px] text-secondary">
+                    {form.showNextRendezvous ? 'wb_twilight' : 'celebration'}
+                  </span>
+                  <span>{form.showNextRendezvous ? 'Next Rendezvous (On)' : 'Past Milestone (On)'}</span>
+                </button>
               </div>
-              <div className="sm:col-span-2">
-                <input
-                  type="text"
-                  value={form.nextRendezvousTitle}
-                  onChange={(e) => setForm({ ...form, nextRendezvousTitle: e.target.value })}
-                  placeholder="Sunset Picnic at Presidio"
-                  className="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-1.5">
-                <input
-                  type="text"
-                  value={form.nextRendezvousDayLabel}
-                  onChange={(e) => setForm({ ...form, nextRendezvousDayLabel: e.target.value })}
-                  placeholder="This Sat"
-                  className="w-full px-2.5 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
-                />
-                <input
-                  type="text"
-                  value={form.nextRendezvousTimeLabel}
-                  onChange={(e) =>
-                    setForm({ ...form, nextRendezvousTimeLabel: e.target.value })
-                  }
-                  placeholder="5:30 PM"
-                  className="w-full px-2.5 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
-                />
-              </div>
+              {form.showNextRendezvous ? (
+                <>
+                  <div className="sm:col-span-2">
+                    <input
+                      type="text"
+                      value={form.nextRendezvousTitle}
+                      onChange={(e) => setForm({ ...form, nextRendezvousTitle: e.target.value })}
+                      placeholder="Sunset Picnic at Presidio"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <input
+                      type="text"
+                      value={form.nextRendezvousDayLabel}
+                      onChange={(e) => setForm({ ...form, nextRendezvousDayLabel: e.target.value })}
+                      placeholder="This Sat"
+                      className="w-full px-2.5 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                    />
+                    <input
+                      type="text"
+                      value={form.nextRendezvousTimeLabel}
+                      onChange={(e) =>
+                        setForm({ ...form, nextRendezvousTimeLabel: e.target.value })
+                      }
+                      placeholder="5:30 PM"
+                      className="w-full px-2.5 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="sm:col-span-2">
+                    <input
+                      type="text"
+                      value={form.milestoneTitle || ''}
+                      onChange={(e) => setForm({ ...form, milestoneTitle: e.target.value })}
+                      placeholder="First Chapter • The Day We Began"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <input
+                      type="text"
+                      value={form.milestoneDateLabel || ''}
+                      onChange={(e) => setForm({ ...form, milestoneDateLabel: e.target.value })}
+                      placeholder="Sep 14, 2025"
+                      className="w-full px-2.5 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                    />
+                    <input
+                      type="text"
+                      value={form.milestoneTag || ''}
+                      onChange={(e) => setForm({ ...form, milestoneTag: e.target.value })}
+                      placeholder="Anniversary"
+                      className="w-full px-2.5 py-2 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             <button

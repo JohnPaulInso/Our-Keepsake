@@ -112,6 +112,11 @@ export interface CoupleProfile {
   nextRendezvousDayLabel: string;
   nextRendezvousTimeLabel: string;
   nextRendezvousLocation: string;
+  // (2026-07-13) Add milestone & rendezvous toggle; was next rendezvous only
+  showNextRendezvous?: boolean;
+  milestoneTitle?: string;
+  milestoneDateLabel?: string;
+  milestoneTag?: string;
   theme: 'light' | 'dark';
   updatedAt: number;
 }

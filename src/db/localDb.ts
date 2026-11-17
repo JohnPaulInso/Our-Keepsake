@@ -241,6 +241,14 @@ class LocalDatabase {
         savedProfile.heroQuote = "You're an answered prayer, baby.";
         await idbSet('coupleProfile', savedProfile);
       }
+      // (2026-07-13) Turn off showNextRendezvous by default; was undefined/active
+      if (savedProfile.showNextRendezvous === undefined) {
+        savedProfile.showNextRendezvous = false;
+        savedProfile.milestoneTitle = 'First Chapter • The Day We Officially Began';
+        savedProfile.milestoneDateLabel = 'Sep 14, 2025';
+        savedProfile.milestoneTag = 'Anniversary';
+        await idbSet('coupleProfile', savedProfile);
+      }
       memCache.coupleProfile = savedProfile;
     } else {
       await idbSet('coupleProfile', DEFAULT_COUPLE_PROFILE);
