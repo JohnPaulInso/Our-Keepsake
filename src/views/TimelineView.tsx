@@ -178,8 +178,8 @@ const SortableMemoryCard: React.FC<SortableMemoryCardProps> = ({
         </div>
       ) : null}
 
-      {/* Voicenote Audio Pill */}
-      {memory.audioMemo && (
+      {/* (2026-07-13) Only show audio player if user uploaded real voice memo URL */}
+      {memory.audioMemo && Boolean(memory.audioMemo.url) && (
         <div className="w-full bg-surface-container-low rounded-xl p-space-sm flex items-center gap-space-sm mb-space-md shadow-inner">
           <button
             type="button"

@@ -221,7 +221,24 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                 {memory.location || 'San Francisco, CA'}
               </span>
             </div>
+            {/* (2026-07-13) Add date routing link & remove weather badges; was weather pills */}
             <div className="flex items-center gap-2 shrink-0 no-print">
+              <button
+                type="button"
+                onClick={() => {
+                  const url = `${window.location.origin}/date/${memory.dateISO}`;
+                  navigator.clipboard.writeText(url).then(() => {
+                    onToast(`Link copied: /date/${memory.dateISO}`, 'info');
+                  }).catch(() => {
+                    onToast(`/date/${memory.dateISO}`, 'info');
+                  });
+                }}
+                title="Copy direct link for this date"
+                className="px-2 py-0.5 rounded-md bg-surface-container-low text-secondary hover:text-primary font-label-md text-[10px] uppercase tracking-wider flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-[13px]">link</span>
+                <span>/date/{memory.dateISO}</span>
+              </button>
               <button
                 type="button"
                 onClick={() => onEditMemory(memory)}
@@ -237,28 +254,6 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
               >
                 <span className="material-symbols-outlined text-[13px]">delete</span>
               </button>
-            </div>
-          </div>
-          {/* Curated Meta Badges */}
-          <div className="flex flex-wrap gap-2 mt-2 pt-2 bg-surface-container-low/50 rounded-lg p-2">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-lowest shadow-xs text-on-surface-variant">
-              <span className="material-symbols-outlined text-[14px] text-secondary">
-                wb_twilight
-              </span>
-              <span className="font-label-md text-label-md">
-                {memory.weatherTemp || 'Crisp 58°'} • {memory.weatherConditions || 'Clear Skies'}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-container/60 text-on-secondary-container shadow-xs">
-              <span
-                className="material-symbols-outlined text-[14px] text-secondary"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                auto_awesome
-              </span>
-              <span className="font-label-md text-label-md font-semibold">
-                Mood: {memory.moodVibe || 'Warm & Infinite'}
-              </span>
             </div>
           </div>
         </div>
@@ -339,15 +334,72 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
       </article>
 
       {/* Interactive Media Section Header */}
-      <div className="flex items-center gap-space-xs mb-space-sm px-1">
-        <span className="material-symbols-outlined text-[18px] text-secondary">attachment</span>
-        <h2 className="font-headline-sm text-headline-sm text-primary tracking-tight font-serif">
-          Keepsake Vault Elements
-        </h2>
+      <div className="flex items-center justify-between mb-space-sm px-1 flex-wrap gap-2">
+        <div className="flex items-center gap-space-xs">
+          <span className="material-symbols-outlined text-[18px] text-secondary">attachment</span>
+          <h2 className="font-headline-sm text-headline-sm text-primary tracking-tight font-serif">
+            Keepsake Vault Elements
+          </h2>
+        </div>
+        <button
+          type="button"
+          onClick={() => onEditMemory(memory)}
+          className="flex items-center gap-1 text-[11px] font-semibold text-primary uppercase tracking-wider bg-secondary-container/60 hover:bg-secondary-container px-2.5 py-1 rounded-full transition-colors"
+        >
+          <span className="material-symbols-outlined text-[14px]">edit</span>
+          <span>Edit Elements</span>
+        </button>
       </div>
 
+      {/* (2026-07-13) Add quick media add buttons & only render audio if URL exists */}
+      <div className="flex flex-wrap items-center gap-2 mb-space-md">
+        <button
+          type="button"
+          onClick={() => onEditMemory(memory)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-primary font-label-md text-label-md uppercase tracking-wider transition-colors shadow-xs"
+        >
+          <span className="material-symbols-outlined text-[16px]">add_photo_alternate</span>
+          <span>+ Photos</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onEditMemory(memory)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-primary font-label-md text-label-md uppercase tracking-wider transition-colors shadow-xs"
+        >
+          <span className="material-symbols-outlined text-[16px]">mic</span>
+          <span>+ Voice Memo</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onEditMemory(memory)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-primary font-label-md text-label-md uppercase tracking-wider transition-colors shadow-xs"
+        >
+          <span className="material-symbols-outlined text-[16px]">videocam</span>
+          <span>+ Video</span>
+        </button>
+      </div>
+
+      {(!memory.photos.length && (!memory.audioMemo || !memory.audioMemo.url) && (!memory.videoCapsule || !memory.videoCapsule.url)) && (
+        <div className="bg-surface-container-lowest rounded-xl p-5 border border-dashed border-outline-variant/40 text-center flex flex-col items-center gap-2 mb-space-md">
+          <span className="material-symbols-outlined text-[28px] text-outline">perm_media</span>
+          <p className="font-headline-sm text-headline-sm text-primary font-serif">
+            No Media Attached Yet
+          </p>
+          <p className="font-body-sm text-body-sm text-on-surface-variant max-w-xs">
+            Add polaroid photos, whispered voice notes, or candid video capsules to this date.
+          </p>
+          <button
+            type="button"
+            onClick={() => onEditMemory(memory)}
+            className="mt-1 px-4 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider font-semibold shadow-xs hover:opacity-90 transition-opacity"
+          >
+            Add Media &amp; Edit
+          </button>
+        </div>
+      )}
+
       {/* Luxury Voicenote Audio Player Card */}
-      {memory.audioMemo && (
+      {memory.audioMemo && Boolean(memory.audioMemo.url) && (
         <div className="bg-primary-container text-on-primary rounded-xl p-space-md shadow-md mb-space-md relative overflow-hidden">
           <div className="flex items-center justify-between mb-space-xs">
             <div className="flex items-center gap-1.5">

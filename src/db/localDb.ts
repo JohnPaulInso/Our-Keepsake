@@ -217,7 +217,15 @@ class LocalDatabase {
         // Ignore
       }
     } else {
-      memCache.memories = savedMemories && Array.isArray(savedMemories) ? savedMemories : [];
+      // (2026-07-13) Strip dummy audioMemo lacking URL from memories; was showing VM
+      const rawList = savedMemories && Array.isArray(savedMemories) ? savedMemories : [];
+      memCache.memories = rawList.map((m) => {
+        if (m.audioMemo && !m.audioMemo.url) {
+          const { audioMemo, ...clean } = m;
+          return clean as KeepsakeMemory;
+        }
+        return m;
+      });
       memCache.secretYearNotes = savedNotes && Array.isArray(savedNotes) ? savedNotes : [];
       memCache.digitalLoveLetters = savedLetters && Array.isArray(savedLetters) ? savedLetters : [];
     }
@@ -302,7 +310,15 @@ class LocalDatabase {
         idbGet<CoupleProfile>('coupleProfile'),
         idbGet<TimeCapsuleItem>('timeCapsule'),
       ]);
-    if (savedMemories) memCache.memories = savedMemories;
+    if (savedMemories) {
+      memCache.memories = savedMemories.map((m) => {
+        if (m.audioMemo && !m.audioMemo.url) {
+          const { audioMemo, ...clean } = m;
+          return clean as KeepsakeMemory;
+        }
+        return m;
+      });
+    }
     if (savedNotes) memCache.secretYearNotes = savedNotes;
     if (savedLetters) memCache.digitalLoveLetters = savedLetters;
     if (savedProfile) memCache.coupleProfile = savedProfile;

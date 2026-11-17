@@ -191,11 +191,31 @@ export const App: React.FC = () => {
     pullStartYRef.current = null;
   };
 
+  // (2026-07-13) Support routing links for each date (/date/:dateISO); was unrouted
+  useEffect(() => {
+    if (location.pathname.startsWith('/date/')) {
+      const targetDate = location.pathname.replace('/date/', '').trim();
+      if (targetDate) {
+        const found = memories.find((m) => m.dateISO === targetDate);
+        if (found) {
+          setSelectedMemoryId(found.id);
+          DB.setSelectedMemoryId(found.id);
+          setActiveTab('story');
+          DB.setActiveTab('story');
+        }
+      }
+    }
+  }, [location.pathname, memories]);
+
   // CRUD handlers with Optimistic UI Updates + Background Cloud Sync
   const handleOpenMemory = (id: string) => {
     setSelectedMemoryId(id);
     DB.setSelectedMemoryId(id);
     switchTab('story');
+    const mem = memories.find((m) => m.id === id);
+    if (mem?.dateISO) {
+      navigate(`/date/${mem.dateISO}`);
+    }
   };
 
   const handleStartEditMemory = (memory: KeepsakeMemory) => {
@@ -786,7 +806,10 @@ export const App: React.FC = () => {
                     DB.setSelectedMemoryId(id);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  onBackToTimeline={() => switchTab('timeline')}
+                  onBackToTimeline={() => {
+                    navigate('/');
+                    switchTab('timeline');
+                  }}
                   onEditMemory={handleStartEditMemory}
                   onDeleteMemory={handleDeleteMemory}
                   onAddPartnerNote={handleAddPartnerNote}

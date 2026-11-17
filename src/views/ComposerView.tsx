@@ -229,8 +229,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       `Another unforgettable day with ${profile.partner2Name} in ${location}. I wrote this down so we never forget how warm and peaceful this moment felt.`;
     const categories: MemoryCategory[] = ['EVENT'];
     if (photos.length > 0) categories.push('PHOTO');
-    if (voiceTitle.trim()) categories.push('VOICE_MEMO');
-    if (hasVideo) categories.push('VIDEO');
+    if (voiceDataUrl) categories.push('VOICE_MEMO');
+    if (hasVideo && videoUrl) categories.push('VIDEO');
     if (selectedDots.includes('ROSE') || selectedTags.includes('Anniversary')) {
       categories.push('ANNIVERSARY');
     }
@@ -255,15 +255,18 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       categories,
       dotIndicators: selectedDots,
       photos,
-      audioMemo: {
-        id: editingMemory?.audioMemo?.id || `aud-${Date.now()}`,
-        title: voiceTitle.trim() || 'Sweet voice note',
-        url: voiceDataUrl,
-        durationSeconds: voiceDurationSec,
-        durationFormatted: formatDuration(voiceDurationSec),
-        waveformPeaks: [35, 65, 90, 50, 80, 60, 95, 70, 45, 75, 85, 55, 40, 65, 45, 30],
-        isFavorite: editingMemory?.audioMemo?.isFavorite ?? true,
-      },
+      // (2026-07-13) Only attach audioMemo if user actually uploaded audio vs dummy
+      audioMemo: voiceDataUrl
+        ? {
+            id: editingMemory?.audioMemo?.id || `aud-${Date.now()}`,
+            title: voiceTitle.trim() || `Whispered note for ${profile.partner2Name}`,
+            url: voiceDataUrl,
+            durationSeconds: voiceDurationSec,
+            durationFormatted: formatDuration(voiceDurationSec),
+            waveformPeaks: [35, 65, 90, 50, 80, 60, 95, 70, 45, 75, 85, 55, 40, 65, 45, 30],
+            isFavorite: editingMemory?.audioMemo?.isFavorite ?? true,
+          }
+        : undefined,
       videoCapsule: hasVideo
         ? {
             id: editingMemory?.videoCapsule?.id || `vid-${Date.now()}`,
@@ -468,12 +471,13 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                 Optional
               </span>
             </div>
+            {/* (2026-07-13) Update quote placeholder to natural optional prompt vs dummy */}
             <input
               id="memory-quote"
               type="text"
               value={quoteHighlight}
               onChange={(e) => setQuoteHighlight(e.target.value)}
-              placeholder={`E.g., "You whispered that this felt like forever..." (Optional)`}
+              placeholder={`E.g., What ${profile.partner2Name} said or whispered today (leave blank if none)...`}
               className="w-full bg-transparent font-italic-quote text-body-md italic text-secondary placeholder:text-outline-variant/80 focus:outline-none pb-space-xs font-serif"
             />
             <div className="w-full h-px bg-surface-container-high" />
