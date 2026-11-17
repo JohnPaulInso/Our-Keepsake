@@ -11,6 +11,7 @@ import {
   TimeCapsuleItem,
 } from '../types';
 import {
+  COUPLE_AVATAR_URL,
   DEFAULT_COUPLE_PROFILE,
   INITIAL_DIGITAL_LOVE_LETTERS,
   INITIAL_MEMORIES,
@@ -221,7 +222,12 @@ class LocalDatabase {
       memCache.digitalLoveLetters = savedLetters && Array.isArray(savedLetters) ? savedLetters : [];
     }
 
+    // (2026-07-13) Upgrade saved avatar to COUPLE_AVATAR_URL; was google placeholder
     if (savedProfile && savedProfile.partner1Name) {
+      if (!savedProfile.avatarUrl || savedProfile.avatarUrl.includes('googleusercontent.com')) {
+        savedProfile.avatarUrl = COUPLE_AVATAR_URL;
+        await idbSet('coupleProfile', savedProfile);
+      }
       memCache.coupleProfile = savedProfile;
     } else {
       await idbSet('coupleProfile', DEFAULT_COUPLE_PROFILE);

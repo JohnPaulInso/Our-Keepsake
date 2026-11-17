@@ -10,7 +10,7 @@ import {
   SecretYearNote,
   TimeCapsuleItem,
 } from './types';
-import { CAPYBARA_SEAL_LOGO } from './data/seedMemories';
+import { CAPYBARA_SEAL_LOGO, COUPLE_AVATAR_URL } from './data/seedMemories';
 import { DB } from './db/localDb';
 import { syncManager } from './db/firebaseSync';
 import { TimelineView } from './views/TimelineView';
@@ -604,10 +604,11 @@ export const App: React.FC = () => {
             onClick={() => navigate('/backup')}
             className="flex items-center gap-3 p-2 rounded-xl hover:bg-surface-container-low cursor-pointer transition-colors"
           >
+            {/* (2026-07-13) Use meandzea.png as couple avatar vs google placeholder */}
             <img
               alt="Couple Profile"
               className="w-10 h-10 rounded-full object-cover ring-2 ring-tertiary-fixed-dim shrink-0"
-              src={profile.avatarUrl}
+              src={profile.avatarUrl && !profile.avatarUrl.includes('googleusercontent.com') ? profile.avatarUrl : COUPLE_AVATAR_URL}
             />
             <div className="flex flex-col min-w-0">
               <span className="font-label-md text-label-md font-bold text-primary truncate">
@@ -732,10 +733,11 @@ export const App: React.FC = () => {
               aria-label="Loving Couple Profile & Backup Studio"
               className="p-0.5 rounded-full ring-1 ring-tertiary-fixed-dim/70 shadow-sm transition-transform active:scale-95"
             >
+              {/* (2026-07-13) Use meandzea.png as couple avatar vs google placeholder */}
               <img
                 alt="Couple Profile"
                 className="w-8 h-8 rounded-full object-cover"
-                src={profile.avatarUrl}
+                src={profile.avatarUrl && !profile.avatarUrl.includes('googleusercontent.com') ? profile.avatarUrl : COUPLE_AVATAR_URL}
               />
             </button>
           </div>
