@@ -35,6 +35,19 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [lockscreenModalOpen, setLockscreenModalOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  // (2026-07-13) Add swipe in/out animation state; was static reader
+  const [isDismissing, setIsDismissing] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [dragOffsetX, setDragOffsetX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleCloseWithAnimation = () => {
+    if (isDismissing) return;
+    setIsDismissing(true);
+    setTimeout(() => {
+      onBackToTimeline();
+    }, 240);
+  };
 
   useEffect(() => {
     return audioEngine.subscribe(() => {
@@ -151,13 +164,52 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
     onToast('Lockscreen Keepsake Wallpaper downloaded!', 'success');
   };
 
+  // (2026-07-13) Add swipe in/out gesture & slide animations; was static div
   return (
-    <div className="flex flex-col w-full px-margin pb-space-xl max-w-[760px] mx-auto">
+    <div
+      onTouchStart={(e) => {
+        if (e.touches.length === 1) {
+          setTouchStartX(e.touches[0].clientX);
+          setIsDragging(true);
+        }
+      }}
+      onTouchMove={(e) => {
+        if (touchStartX !== null && e.touches.length === 1) {
+          const deltaX = e.touches[0].clientX - touchStartX;
+          if (deltaX > 0) {
+            setDragOffsetX(deltaX);
+          }
+        }
+      }}
+      onTouchEnd={() => {
+        setIsDragging(false);
+        if (dragOffsetX > 80) {
+          handleCloseWithAnimation();
+        } else {
+          setDragOffsetX(0);
+        }
+        setTouchStartX(null);
+      }}
+      style={{
+        transform: isDismissing
+          ? 'translateX(100%)'
+          : dragOffsetX > 0
+          ? `translateX(${dragOffsetX}px)`
+          : undefined,
+        transition: isDragging
+          ? 'none'
+          : 'transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease',
+        opacity: dragOffsetX > 0 ? Math.max(0.35, 1 - dragOffsetX / 400) : undefined,
+      }}
+      className={`flex flex-col w-full px-margin pb-space-xl max-w-[760px] mx-auto will-change-transform ${
+        isDismissing ? 'envelope-slide-out' : 'envelope-slide-in'
+      }`}
+    >
       {/* Top Navigation & Context Bar */}
       <div className="flex items-center justify-between py-space-sm mb-space-sm no-print">
         <button
           type="button"
-          onClick={onBackToTimeline}
+          onClick={handleCloseWithAnimation}
           aria-label="Return to timeline"
           className="flex items-center gap-space-xs text-secondary hover:text-primary transition-colors py-1 px-2.5 rounded-full bg-surface-container-low/80 active:scale-95"
         >
@@ -379,7 +431,8 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
         </button>
       </div>
 
-      {(!memory.photos.length && (!memory.audioMemo || !memory.audioMemo.url) && (!memory.videoCapsule || !memory.videoCapsule.url)) && (
+      {/* (2026-07-13) Filter mock audio URL in story reader; was showing fake VM */}
+      {(!memory.photos.length && (!memory.audioMemo || !memory.audioMemo.url || memory.audioMemo.url.startsWith('mock-')) && (!memory.videoCapsule || !memory.videoCapsule.url)) && (
         <div className="bg-surface-container-lowest rounded-xl p-5 border border-dashed border-outline-variant/40 text-center flex flex-col items-center gap-2 mb-space-md">
           <span className="material-symbols-outlined text-[28px] text-outline">perm_media</span>
           <p className="font-headline-sm text-headline-sm text-primary font-serif">
@@ -399,7 +452,7 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
       )}
 
       {/* Luxury Voicenote Audio Player Card */}
-      {memory.audioMemo && Boolean(memory.audioMemo.url) && (
+      {memory.audioMemo && memory.audioMemo.url && !memory.audioMemo.url.startsWith('mock-') && (
         <div className="bg-primary-container text-on-primary rounded-xl p-space-md shadow-md mb-space-md relative overflow-hidden">
           <div className="flex items-center justify-between mb-space-xs">
             <div className="flex items-center gap-1.5">

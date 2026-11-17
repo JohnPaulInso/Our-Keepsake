@@ -178,8 +178,8 @@ const SortableMemoryCard: React.FC<SortableMemoryCardProps> = ({
         </div>
       ) : null}
 
-      {/* (2026-07-13) Only show audio player if user uploaded real voice memo URL */}
-      {memory.audioMemo && Boolean(memory.audioMemo.url) && (
+      {/* (2026-07-13) Hide audio player if mock voice memo URL; was showing fake VM */}
+      {memory.audioMemo && memory.audioMemo.url && !memory.audioMemo.url.startsWith('mock-') && (
         <div className="w-full bg-surface-container-low rounded-xl p-space-sm flex items-center gap-space-sm mb-space-md shadow-inner">
           <button
             type="button"
@@ -553,29 +553,35 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           “{profile.heroQuote}”
         </p>
 
-        {/* Next Rendezvous Memo Strip */}
+        {/* (2026-07-13) Boost Next Rendezvous card contrast & visibility; was faint */}
         <div
+          id="next-rendezvous-card"
           onClick={onOpenProfileModal}
-          className="mt-space-md w-full bg-secondary-container/40 rounded-xl p-space-md flex items-center justify-between shadow-sm relative overflow-hidden cursor-pointer border border-outline-variant/30 hover-lift"
+          className="mt-space-md w-full bg-[#fbf5ee] rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-md relative overflow-hidden cursor-pointer border-2 border-[#dfcbb7] hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.99] group"
         >
-          <div className="flex items-center gap-space-sm min-w-0">
-            <div className="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-secondary shadow-sm flex-shrink-0">
-              <span className="material-symbols-outlined text-[20px]">wb_twilight</span>
+          <div className="absolute -right-3 -bottom-3 opacity-10 text-primary pointer-events-none group-hover:opacity-20 transition-opacity">
+            <span className="material-symbols-outlined text-[64px]">wb_twilight</span>
+          </div>
+
+          <div className="flex items-center gap-3.5 min-w-0 z-10">
+            <div className="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-md flex-shrink-0 group-hover:scale-105 transition-transform">
+              <span className="material-symbols-outlined text-[24px]">wb_twilight</span>
             </div>
             <div className="flex flex-col text-left min-w-0">
-              <span className="font-label-md text-label-md text-on-secondary-container uppercase tracking-wider">
+              <span className="font-label-md text-[11px] font-bold text-secondary tracking-widest uppercase">
                 Next Rendezvous • {profile.partner1Name} &amp; {profile.partner2Name}
               </span>
-              <span className="font-headline-sm text-headline-sm text-primary truncate-single font-serif">
+              <span className="font-headline-sm text-headline-sm text-primary font-bold truncate-single font-serif mt-0.5">
                 {profile.nextRendezvousTitle}
               </span>
             </div>
           </div>
-          <div className="flex flex-col items-end flex-shrink-0 pl-2">
-            <span className="px-2 py-0.5 rounded-full bg-surface-container-lowest text-primary font-label-md text-label-md shadow-sm">
+
+          <div className="flex flex-col items-end flex-shrink-0 pl-3 z-10">
+            <span className="px-3 py-1 rounded-full bg-primary text-on-primary font-label-md text-xs font-semibold shadow-xs">
               {profile.nextRendezvousDayLabel}
             </span>
-            <span className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+            <span className="font-body-sm text-xs font-semibold text-secondary mt-1">
               {profile.nextRendezvousTimeLabel}
             </span>
           </div>

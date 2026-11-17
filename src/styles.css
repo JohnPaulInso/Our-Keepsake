@@ -69,6 +69,37 @@
   animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* (2026-07-13) Add swipe in/out animation keyframes; was static switch */
+@keyframes envelopeSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0.7;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes envelopeSlideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.envelope-slide-in {
+  animation: envelopeSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.envelope-slide-out {
+  animation: envelopeSlideOut 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* Ruled notebook lines for composer */
 .ruled-notebook {
   background-image: repeating-linear-gradient(

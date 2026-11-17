@@ -217,10 +217,10 @@ class LocalDatabase {
         // Ignore
       }
     } else {
-      // (2026-07-13) Strip dummy audioMemo lacking URL from memories; was showing VM
+      // (2026-07-13) Purge mock audio memos from cache; was retaining mock audio
       const rawList = savedMemories && Array.isArray(savedMemories) ? savedMemories : [];
       memCache.memories = rawList.map((m) => {
-        if (m.audioMemo && !m.audioMemo.url) {
+        if (m.audioMemo && (!m.audioMemo.url || m.audioMemo.url.startsWith('mock-') || !m.audioMemo.url.trim())) {
           const { audioMemo, ...clean } = m;
           return clean as KeepsakeMemory;
         }
@@ -311,8 +311,9 @@ class LocalDatabase {
         idbGet<TimeCapsuleItem>('timeCapsule'),
       ]);
     if (savedMemories) {
+      // (2026-07-13) Filter mock audio URLs from memories; was retaining mock audio
       memCache.memories = savedMemories.map((m) => {
-        if (m.audioMemo && !m.audioMemo.url) {
+        if (m.audioMemo && (!m.audioMemo.url || m.audioMemo.url.startsWith('mock-') || !m.audioMemo.url.trim())) {
           const { audioMemo, ...clean } = m;
           return clean as KeepsakeMemory;
         }
