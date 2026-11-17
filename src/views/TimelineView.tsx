@@ -16,13 +16,16 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+// (2026-07-13) Import AudioMemo and VideoCapsule; was missing
 import {
+  AudioMemo,
   CoupleProfile,
   DigitalLoveLetter,
   DotIndicator,
   KeepsakeMemory,
   PolaroidPhoto,
   SecretYearNote,
+  VideoCapsule,
 } from '../types';
 import { calculateDaysTogether, formatDuration, formatStandardDate } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
@@ -442,6 +445,23 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
   const primaryDateMemory = selectedDayMemories[0] || null;
 
+  // (2026-07-13) Aggregate polaroids, VMs, and videos for date; was photos only
+  const allDatePhotos = useMemo(() => {
+    return selectedDayMemories.flatMap((m) => m.photos || []);
+  }, [selectedDayMemories]);
+
+  const allDateAudio = useMemo(() => {
+    return selectedDayMemories
+      .map((m) => m.audioMemo)
+      .filter((a): a is AudioMemo => !!a && (!!a.url || (!!a.synthNotes && a.synthNotes.length > 0)));
+  }, [selectedDayMemories]);
+
+  const allDateVideos = useMemo(() => {
+    return selectedDayMemories
+      .map((m) => m.videoCapsule)
+      .filter((v): v is VideoCapsule => !!v && !!v.url);
+  }, [selectedDayMemories]);
+
   useEffect(() => {
     return audioEngine.subscribe(() => {
       setAudioState(audioEngine.getState());
@@ -828,29 +848,40 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         id="keepsake-monthly-calendar-card" // Monthly calendar card with Google Fonts
         className="relative bg-surface-container-lowest rounded-2xl shadow-md p-space-md mb-space-lg overflow-hidden border border-outline-variant/35"
       >
-        <div className="flex items-center justify-between pb-space-sm border-b border-outline-variant/40 mb-space-sm">
-          <button
-            type="button"
-            onClick={handlePrevMonth}
-            aria-label="Previous Month"
-            className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-95"
-          >
-            <span className="material-symbols-outlined text-[18px]">chevron_left</span>
-          </button>
-          <div className="flex items-center gap-2">
+        {/* (2026-07-13) Responsive single-row calendar header; was broken line break */}
+        <div className="flex items-center justify-between pb-space-sm border-b border-outline-variant/40 mb-space-sm gap-1.5">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <button
+              type="button"
+              onClick={handlePrevMonth}
+              aria-label="Previous Month"
+              className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-95 flex-shrink-0"
+            >
+              <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+            </button>
             <span
-              className="material-symbols-outlined text-[16px] text-secondary"
+              className="material-symbols-outlined text-[15px] text-secondary flex-shrink-0"
               style={{ fontVariationSettings: "'FILL' 1" }}
             >
               favorite
             </span>
-            <span className="calendar-header-font text-[22px] font-semibold text-primary tracking-tight">
+            <span className="calendar-header-font text-base sm:text-[21px] font-semibold text-primary tracking-tight whitespace-nowrap">
               {monthLabel}
             </span>
             <button
               type="button"
+              onClick={handleNextMonth}
+              aria-label="Next Month"
+              className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-95 flex-shrink-0"
+            >
+              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+            </button>
+          </div>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <button
+              type="button"
               onClick={() => setSelectedDay(null)}
-              className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container calendar-num-font text-[10px] font-semibold tracking-widest uppercase ml-0.5"
+              className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container calendar-num-font text-[10px] font-semibold tracking-widest uppercase whitespace-nowrap"
             >
               <span>{selectedDay ? 'Show All' : 'Keepsake'}</span>
             </button>
@@ -860,20 +891,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 type="button"
                 onClick={onOpenMonthlyNotepad}
                 title="Open Monthly Notepad"
-                className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-surface-container-low text-secondary hover:text-primary transition-colors active:scale-95 ml-1"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-low text-secondary hover:text-primary transition-colors active:scale-95"
               >
-                <span className="material-symbols-outlined text-[15px]">sticky_note_2</span>
+                <span className="material-symbols-outlined text-[16px]">sticky_note_2</span>
               </button>
             )}
           </div>
-          <button
-            type="button"
-            onClick={handleNextMonth}
-            aria-label="Next Month"
-            className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-95"
-          >
-            <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-          </button>
         </div>
 
         {/* 7-Column Day-of-Week Headers in Plus Jakarta Sans */}
@@ -1376,16 +1399,17 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 auto_awesome
               </span>
             </div>
-            <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight font-serif text-2xl md:text-3xl">
+            {/* (2026-07-13) Add polaroids, VMs, videos, Google Fonts & Edit; was text only */}
+            <h2 className="font-['Playfair_Display',Georgia,serif] text-primary tracking-tight font-semibold text-2xl md:text-3xl">
               {primaryDateMemory ? primaryDateMemory.title || "Preserve Today's Chapter" : "Preserve Today's Chapter"}
             </h2>
-            <p className="text-secondary mt-1 max-w-xs leading-relaxed font-serif italic text-sm">
+            <p className="text-secondary mt-1 max-w-xs leading-relaxed font-['Cormorant_Garamond',serif] italic text-base">
               Every little moment with {profile.partner2Name} is worth remembering forever.
             </p>
           </div>
 
           {/* Context Pills: Date & Time and Location & Vibe matching screenshot */}
-          <div className="w-full max-w-xl grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+          <div className="w-full max-w-xl grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5 font-['Plus_Jakarta_Sans',sans-serif]">
             <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low text-primary rounded-full shadow-sm border border-outline-variant/30">
               <div className="flex items-center gap-2.5 min-w-0">
                 <span className="material-symbols-outlined text-[20px] text-secondary">
@@ -1420,7 +1444,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           </div>
 
           {/* Editorial Title & Ruled Note Card matching screenshot */}
-          <div className="w-full max-w-xl bg-surface-container-lowest rounded-2xl p-6 sm:p-7 shadow-md relative overflow-hidden flex flex-col border border-outline-variant/30 mb-8">
+          <div className="w-full max-w-xl bg-surface-container-lowest rounded-2xl p-6 sm:p-7 shadow-md relative overflow-hidden flex flex-col border border-outline-variant/30 mb-8 font-['Plus_Jakarta_Sans',sans-serif]">
             {/* Watermark in corner */}
             <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-[0.05] pointer-events-none text-primary">
               <svg fill="currentColor" viewBox="0 0 100 100">
@@ -1435,7 +1459,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
                 Title of this moment
               </span>
-              <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+              <h3 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-primary font-semibold">
                 {primaryDateMemory?.title || "Sunday morning pastries and warm coffee..."}
               </h3>
             </div>
@@ -1445,7 +1469,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-2">
                 The Heartfelt Note
               </span>
-              <div className="min-h-[160px] text-on-surface-variant font-serif text-base leading-[2rem] bg-[linear-gradient(transparent_31px,#e5ded8_32px)] bg-[size:100%_32px]">
+              <div className="min-h-[160px] text-on-surface-variant font-['Cormorant_Garamond',serif] text-[18px] leading-[2.1rem] bg-[linear-gradient(transparent_31px,#e5ded8_32px)] bg-[size:100%_32px]">
                 <p className="whitespace-pre-wrap">
                   {primaryDateMemory?.storyBody || primaryDateMemory?.snippet || "Write down how Zea smiled, what she said, the quiet moments you never want to forget..."}
                 </p>
@@ -1458,26 +1482,145 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
                   What {profile.partner2Name} Said (Highlighted Quote)
                 </span>
-                <p className="font-serif italic text-secondary text-base">
+                <p className="font-['Cormorant_Garamond',serif] italic text-secondary text-lg">
                   “{primaryDateMemory.quoteHighlight}”
                 </p>
               </div>
             )}
 
-            {/* Photos if any */}
-            {primaryDateMemory?.photos && primaryDateMemory.photos.length > 0 && (
-              <div className="mt-5 grid grid-cols-2 gap-2">
-                {/* (2026-07-13) Type map params for PolaroidPhoto; was implicit any */}
-                {primaryDateMemory.photos.map((p: PolaroidPhoto, idx: number) => (
-                  <div key={idx} className="relative rounded-xl overflow-hidden h-40">
-                    <img src={p.url} alt={p.caption || ''} className="w-full h-full object-cover" />
+            {/* Polaroids Attached */}
+            {allDatePhotos.length > 0 && (
+              <div className="mt-6 flex flex-col gap-4 w-full">
+                <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block">
+                  Polaroid Keepsakes ({allDatePhotos.length})
+                </span>
+                {allDatePhotos.map((photo, idx) => (
+                  <div
+                    key={photo.id || idx}
+                    className="bg-[#faf8f5] p-3.5 pb-5 rounded-xl shadow-sm border border-outline-variant/35 text-center flex flex-col items-center"
+                  >
+                    <div className="w-full overflow-hidden rounded-lg bg-surface-container-high aspect-[4/3] mb-3">
+                      <img
+                        src={photo.url}
+                        alt={photo.caption || 'Polaroid'}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    {photo.caption && (
+                      <p className="font-['Cormorant_Garamond',serif] italic text-base text-primary/90 font-medium px-2">
+                        “{photo.caption}”
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Action buttons */}
-            <div className="mt-6 pt-4 border-t border-outline-variant/20 flex items-center justify-between w-full">
+            {/* Voice Notes Attached */}
+            {allDateAudio.length > 0 && (
+              <div className="mt-6 flex flex-col gap-3 w-full">
+                <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block">
+                  Voice Memories &amp; Audio Notes
+                </span>
+                {allDateAudio.map((memo, idx) => {
+                  const isCurrentTrack = audioState.currentTrackId === memo.id;
+                  const isPlaying = isCurrentTrack && audioState.isPlaying;
+                  return (
+                    <div
+                      key={memo.id || idx}
+                      className="bg-[#342721] text-[#fbf9f4] rounded-2xl p-4 shadow-sm border border-[#48372e]"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-1.5 text-[#cca440] text-[11px] font-bold uppercase tracking-wider">
+                          <span className="material-symbols-outlined text-[16px]">mic</span>
+                          <span>Voice Note</span>
+                        </div>
+                        <span className="text-[10px] text-[#cca440]/90 font-mono uppercase tracking-wider">
+                          WAV • Mastered
+                        </span>
+                      </div>
+                      <p className="text-sm italic font-['Cormorant_Garamond',serif] text-[#f0e8e2] mb-3">
+                        “{memo.title || 'Whispered note for Zea'}”
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            audioEngine.toggleTrack(
+                              memo.id,
+                              memo.durationSeconds || 42,
+                              memo.url,
+                              memo.synthNotes
+                            );
+                          }}
+                          className="w-10 h-10 rounded-full bg-[#cca440] text-[#342721] flex items-center justify-center shadow-md active:scale-95 flex-shrink-0 transition-transform"
+                        >
+                          <span className="material-symbols-outlined text-[22px]">
+                            {isPlaying ? 'pause' : 'play_arrow'}
+                          </span>
+                        </button>
+                        <div className="flex-1 flex flex-col gap-1.5 min-w-0">
+                          <div className="flex items-center justify-between text-[11px] font-mono text-[#dcd4cd]">
+                            <span>
+                              {isCurrentTrack ? formatDuration(audioState.currentTime) : '00:00'}
+                              {' / '}
+                              {memo.durationFormatted || '00:42'}
+                            </span>
+                            <span className="text-[10px] text-[#a4968d]">128 kbps</span>
+                          </div>
+                          <div className="h-1.5 bg-[#201814] rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-[#cca440] transition-all duration-150"
+                              style={{
+                                width: `${
+                                  isCurrentTrack
+                                    ? (audioState.currentTime / Math.max(1, audioState.duration)) * 100
+                                    : 0
+                                }%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Videos Attached */}
+            {allDateVideos.length > 0 && (
+              <div className="mt-6 flex flex-col gap-3 w-full">
+                <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block">
+                  Video Capsules
+                </span>
+                {allDateVideos.map((vid, idx) => (
+                  <div
+                    key={vid.id || idx}
+                    className="rounded-2xl overflow-hidden shadow-sm border border-outline-variant/35 bg-surface-container-low"
+                  >
+                    <div className="px-4 py-2 flex items-center justify-between bg-surface-container-high/60 border-b border-outline-variant/20">
+                      <div className="flex items-center gap-1.5 text-primary text-xs font-semibold uppercase tracking-wider">
+                        <span className="material-symbols-outlined text-[16px]">videocam</span>
+                        <span>{vid.title || 'Video Memory'}</span>
+                      </div>
+                      <span className="text-[10px] text-secondary font-mono">
+                        {vid.durationFormatted || 'HD'}
+                      </span>
+                    </div>
+                    <video
+                      src={vid.url}
+                      controls
+                      className="w-full max-h-[300px] bg-black object-cover"
+                      poster={vid.thumbnailUrl}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Action buttons: Single Edit button without exit fullscreen button */}
+            <div className="mt-7 pt-4 border-t border-outline-variant/20 flex items-center justify-end w-full">
               <button
                 type="button"
                 onClick={() => {
@@ -1518,19 +1661,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     }
                   });
                 }}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider font-semibold shadow-xs"
+                className="flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-primary text-on-primary font-['Plus_Jakarta_Sans',sans-serif] text-xs uppercase tracking-wider font-semibold shadow-sm hover:bg-primary/95 transition-all active:scale-95"
               >
-                <span className="material-symbols-outlined text-[16px]">
-                  {primaryDateMemory ? 'edit' : 'add_circle'}
-                </span>
-                <span>{primaryDateMemory ? 'Edit in Composer' : 'Write in Composer'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => closeDateOverlay()}
-                className="text-secondary hover:text-primary text-xs uppercase tracking-wider font-medium"
-              >
-                Exit Fullscreen
+                <span className="material-symbols-outlined text-[17px]">edit</span>
+                <span>Edit</span>
               </button>
             </div>
             {/* End Editorial Title & Ruled Note Card */}
