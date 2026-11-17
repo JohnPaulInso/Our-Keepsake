@@ -186,23 +186,22 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
       )}
 
       {/* Top Sticky Header */}
-      {/* (2026-07-13) Make header frosted glass less transparent vs /95 blur */}
+      {/* (2026-07-13) Fix responsive header wrap and clipping; was fixed h-16 */}
       <header className="sticky top-0 w-full z-40 bg-surface-bright/98 backdrop-blur-md border-b border-outline-variant/30">
-        <div className="h-16 px-margin max-w-[760px] mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+        <div className="min-h-[3.75rem] py-2 px-margin max-w-[760px] mx-auto flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             {/* (2026-07-13) Set explicit 32px square dimensions on logo vs auto width */}
             <img
               src={CAPYBARA_SEAL_LOGO}
               alt="Capybara Wax Seal"
               className="h-8 w-8 object-contain shrink-0"
             />
-            <div>
-              <h1 className="font-headline-sm text-headline-sm text-primary font-serif leading-tight">
+            <div className="min-w-0 flex-1">
+              <h1 className="font-headline-sm text-sm sm:text-headline-sm text-primary font-serif leading-tight truncate">
                 {form.partner1Name} &amp; {form.partner2Name} • Keepsake Sanctuary
               </h1>
-              <span className="font-label-md text-[10px] uppercase tracking-widest text-secondary">
-                Since {formatStandardDate(form.relationshipStartDateISO)} • Settings &amp; Firestore
-                Backups
+              <span className="font-label-md text-[10px] uppercase tracking-wider text-secondary truncate block">
+                Since {formatStandardDate(form.relationshipStartDateISO)} • Settings &amp; Firestore Backups
               </span>
             </div>
           </div>
@@ -210,10 +209,11 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="px-3.5 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform"
+            className="shrink-0 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-primary text-on-primary font-label-md text-xs sm:text-label-md uppercase tracking-wider flex items-center gap-1 sm:gap-1.5 shadow-sm active:scale-95 transition-transform"
           >
             <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-            <span>Back to Journal</span>
+            <span className="hidden sm:inline">Back to </span>
+            <span>Journal</span>
           </button>
         </div>
       </header>
@@ -221,9 +221,10 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
       <div className="max-w-[760px] mx-auto px-margin pt-6 flex flex-col gap-6">
         {/* SECTION 1: COUPLE SANCTUARY SETTINGS & GOOGLE AUTH */}
         <section className="bg-surface-container-lowest rounded-2xl p-5 sm:p-6 shadow-md border border-outline-variant/35 flex flex-col gap-5">
-          <div className="flex items-center justify-between border-b border-outline-variant/25 pb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-xs">
+          {/* (2026-07-13) Fix responsive card header wrap; was single row squeeze */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline-variant/25 pb-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-xs shrink-0">
                 <span
                   className="material-symbols-outlined text-[19px]"
                   style={{ fontVariationSettings: "'FILL' 1" }}
@@ -231,8 +232,8 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
                   favorite
                 </span>
               </div>
-              <div>
-                <h2 className="font-headline-sm text-headline-sm text-primary font-serif">
+              <div className="min-w-0">
+                <h2 className="font-headline-sm text-headline-sm text-primary font-serif leading-tight">
                   Sanctuary Settings &amp; Cloud Sync
                 </h2>
                 <p className="font-label-md text-[10px] uppercase tracking-wider text-secondary">
@@ -244,7 +245,7 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
             <button
               type="button"
               onClick={() => setShowFbConfigDrawer((p) => !p)}
-              className="px-3 py-1.5 rounded-xl bg-surface-container-low text-primary font-label-md text-[10px] uppercase tracking-wider border border-outline-variant/40 flex items-center gap-1"
+              className="self-start sm:self-auto shrink-0 px-3 py-1.5 rounded-xl bg-surface-container-low text-primary font-label-md text-[10px] uppercase tracking-wider border border-outline-variant/40 flex items-center gap-1"
             >
               <span className="material-symbols-outlined text-[15px] text-secondary">key</span>
               <span>{showFbConfigDrawer ? 'Hide Firebase Keys' : 'Connect Firebase Keys'}</span>
@@ -253,7 +254,7 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
 
           {/* Local-First & Cloud Sync Bar */}
           <div className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/30 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[19px] text-secondary">
                   cloud_sync
@@ -492,18 +493,19 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
 
         {/* SECTION 2: DAILY BACKUPS SAVED ON FIRESTORE & LOCAL VAULT */}
         <section className="bg-surface-container-lowest rounded-2xl p-5 sm:p-6 shadow-md border border-outline-variant/35 flex flex-col gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant/25 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary text-[22px]">
+          {/* (2026-07-13) Fix responsive backup toolbar wrap; was overflow on mobile */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline-variant/25 pb-3">
+            <div className="flex items-start sm:items-center gap-2.5 min-w-0">
+              <span className="material-symbols-outlined text-secondary text-[22px] shrink-0 mt-0.5 sm:mt-0">
                 backup
               </span>
-              <div>
-                <h2 className="font-headline-sm text-headline-sm text-primary font-serif">
+              <div className="min-w-0">
+                <h2 className="font-headline-sm text-headline-sm text-primary font-serif leading-tight">
                   Daily Backups Saved on Firestore &amp; Vault ({dailyBackups.length})
                 </h2>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">
+                <p className="font-body-sm text-body-sm text-on-surface-variant break-words">
                   Automated daily snapshots and manual checkpoints synced with{' '}
-                  <span className="font-medium text-primary">
+                  <span className="font-medium text-primary break-all">
                     couples/jp_zea_vault/daily_backups
                   </span>
                 </p>
@@ -514,7 +516,7 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
               type="button"
               disabled={isBusy}
               onClick={handleCreateManualDailyBackup}
-              className="px-4 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform"
+              className="self-start sm:self-auto shrink-0 px-3.5 sm:px-4 py-2 rounded-xl bg-primary text-on-primary font-label-md text-xs sm:text-label-md uppercase tracking-wider flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform"
             >
               <span className="material-symbols-outlined text-[16px]">cloud_upload</span>
               <span>Create Daily Backup Now</span>
@@ -636,7 +638,7 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
 
           {/* Segmented Inspector Tabs: Daily Backups List vs Backed-Up Items */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
-            // (2026-07-13) Display live counts for memories/notes vs sample data lengths
+            {/* (2026-07-13) Display live counts for memories/notes vs sample data */}
             {[
               {
                 id: 'DAILY_BACKUPS',
