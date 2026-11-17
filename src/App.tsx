@@ -816,6 +816,8 @@ export const App: React.FC = () => {
                 onOpenSecretNotesTab={() => switchTab('letters')}
                 onOpenProfileModal={() => navigate('/backup')}
                 onOpenMonthlyNotepad={() => switchTab('notepad')}
+                // (2026-07-13) Pass handleSaveMemory to TimelineView; was omitted
+                onSaveMemory={handleSaveMemory}
               />
             )}
 

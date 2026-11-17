@@ -46,7 +46,8 @@ interface TimelineViewProps {
   onReorderMemories: (reordered: KeepsakeMemory[]) => void;
   onOpenSecretNotesTab: () => void;
   onOpenProfileModal: () => void;
-  // (2026-07-13) Add onOpenMonthlyNotepad callback prop; was missing prop
+  // (2026-07-13) Add onSaveMemory prop for in-page date editing; was none
+  onSaveMemory?: (memory: KeepsakeMemory, isDraft: boolean) => void;
   onOpenMonthlyNotepad?: () => void;
 }
 
@@ -313,8 +314,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   onReorderMemories,
   onOpenSecretNotesTab,
   onOpenProfileModal,
-  // (2026-07-13) Destructure onOpenMonthlyNotepad handler; was unpassed
+  // (2026-07-13) Destructure onOpenMonthlyNotepad and onSaveMemory; was unpassed
   onOpenMonthlyNotepad,
+  onSaveMemory,
 }) => {
   const [activeCategory, setActiveCategory] = useState<
     'ALL' | 'PHOTO' | 'VOICE_MEMO' | 'VIDEO' | 'ANNIVERSARY' | 'DRAFT'
@@ -350,6 +352,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   };
 
   const closeDateOverlay = (callback?: () => void) => {
+    setIsEditingDate(false);
     setIsOverlayClosing(true);
     setIsOverlayVisible(false);
     setTimeout(() => {
@@ -376,6 +379,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
   const handleNextOverlayDate = () => {
     if (selectedDay === null || dateSlideStage !== 'idle') return;
+    setIsEditingDate(false);
     setDateSlideStage('sliding-out-left');
     setTimeout(() => {
       const daysInCurrentMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
@@ -401,6 +405,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
   const handlePrevOverlayDate = () => {
     if (selectedDay === null || dateSlideStage !== 'idle') return;
+    setIsEditingDate(false);
     setDateSlideStage('sliding-out-right');
     setTimeout(() => {
       if (selectedDay > 1) {
@@ -461,6 +466,240 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       .map((m) => m.videoCapsule)
       .filter((v): v is VideoCapsule => !!v && !!v.url);
   }, [selectedDayMemories]);
+
+  // (2026-07-13) In-page edit state, handlers & media uploads; was modal composer
+  const [isEditingDate, setIsEditingDate] = useState<boolean>(false);
+  const [editTitle, setEditTitle] = useState<string>('');
+  const [editStoryBody, setEditStoryBody] = useState<string>('');
+  const [editQuoteHighlight, setEditQuoteHighlight] = useState<string>('');
+  const [editSelectedDots, setEditSelectedDots] = useState<DotIndicator[]>(['GOLD']);
+  const [editSelectedTags, setEditSelectedTags] = useState<string[]>([]);
+  const [customTagInput, setCustomTagInput] = useState<string>('');
+  const [editPhotos, setEditPhotos] = useState<PolaroidPhoto[]>([]);
+  const [editAudioMemo, setEditAudioMemo] = useState<AudioMemo | undefined>(undefined);
+  const [editVideoCapsule, setEditVideoCapsule] = useState<VideoCapsule | undefined>(undefined);
+  const [isRecordingMic, setIsRecordingMic] = useState<boolean>(false);
+  const [recordSec, setRecordSec] = useState<number>(0);
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const audioInputRef = useRef<HTMLInputElement | null>(null);
+  const videoInputRef = useRef<HTMLInputElement | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recordTimerRef = useRef<number | null>(null);
+
+  const handleEnterEditMode = () => {
+    if (primaryDateMemory) {
+      setEditTitle(primaryDateMemory.title || '');
+      setEditStoryBody(primaryDateMemory.storyBody || primaryDateMemory.snippet || '');
+      setEditQuoteHighlight(primaryDateMemory.quoteHighlight || '');
+      setEditSelectedDots(primaryDateMemory.dotIndicators || ['GOLD']);
+      setEditSelectedTags(primaryDateMemory.vibeTags || []);
+      setEditPhotos(primaryDateMemory.photos || []);
+      setEditAudioMemo(primaryDateMemory.audioMemo);
+      setEditVideoCapsule(primaryDateMemory.videoCapsule);
+    } else {
+      setEditTitle('');
+      setEditStoryBody('');
+      setEditQuoteHighlight('');
+      setEditSelectedDots(['GOLD']);
+      setEditSelectedTags([]);
+      setEditPhotos([]);
+      setEditAudioMemo(undefined);
+      setEditVideoCapsule(undefined);
+    }
+    setIsEditingDate(true);
+  };
+
+  const handleCancelInlineEdit = () => {
+    setIsEditingDate(false);
+    if (isRecordingMic) stopMicRecording();
+  };
+
+  const handleToggleDot = (dot: DotIndicator) => {
+    setEditSelectedDots((prev) =>
+      prev.includes(dot) ? prev.filter((d) => d !== dot) : [...prev, dot]
+    );
+  };
+
+  const handleToggleTag = (tag: string) => {
+    setEditSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const handleAddCustomTag = () => {
+    const trimmed = customTagInput.trim();
+    if (trimmed && !editSelectedTags.includes(trimmed)) {
+      setEditSelectedTags((prev) => [...prev, trimmed]);
+      setCustomTagInput('');
+    }
+  };
+
+  const handleUploadPhotos = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setEditPhotos((prev) => [
+            ...prev,
+            {
+              id: `ph-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+              url: reader.result as string,
+              caption: '',
+              tag: 'GENERAL',
+            },
+          ]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
+
+  const handleUploadAudio = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      const tempAudio = new Audio();
+      tempAudio.src = dataUrl;
+      tempAudio.onloadedmetadata = () => {
+        const dur = Math.round(tempAudio.duration) || 30;
+        setEditAudioMemo({
+          id: `aud-${Date.now()}`,
+          title: file.name.replace(/\.[^.]+$/, '') || `Voice Note for ${profile.partner2Name}`,
+          url: dataUrl,
+          durationSeconds: dur,
+          durationFormatted: formatDuration(dur),
+          waveformPeaks: [45, 60, 30, 75, 90, 40, 65, 80, 50, 70, 85, 40],
+        });
+      };
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleUploadVideo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      setEditVideoCapsule({
+        id: `vid-${Date.now()}`,
+        title: file.name.replace(/\.[^.]+$/, '') || 'Motion Capsule',
+        url: dataUrl,
+        thumbnailUrl: '',
+        durationFormatted: '01:00',
+      });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const startMicRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      mediaRecorderRef.current = mr;
+      audioChunksRef.current = [];
+      setRecordSec(0);
+      setIsRecordingMic(true);
+
+      mr.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      mr.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === 'string') {
+            const dur = recordSec || 15;
+            setEditAudioMemo({
+              id: `aud-${Date.now()}`,
+              title: `Whispered note for ${profile.partner2Name}`,
+              url: reader.result,
+              durationSeconds: dur,
+              durationFormatted: formatDuration(dur),
+              waveformPeaks: [50, 70, 40, 80, 95, 60, 85, 75, 45, 65, 80, 35],
+            });
+          }
+        };
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach((t) => t.stop());
+        setIsRecordingMic(false);
+        if (recordTimerRef.current) clearInterval(recordTimerRef.current);
+      };
+
+      mr.start();
+      recordTimerRef.current = window.setInterval(() => {
+        setRecordSec((s) => s + 1);
+      }, 1000);
+    } catch (err) {
+      console.error('Mic recording error', err);
+    }
+  };
+
+  const stopMicRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  const handleSaveInlineDate = async () => {
+    const mStr = String(calendarMonth + 1).padStart(2, '0');
+    const dStr = String(selectedDay).padStart(2, '0');
+    const targetIso = `${calendarYear}-${mStr}-${dStr}`;
+
+    const updatedMemory: KeepsakeMemory = {
+      id: primaryDateMemory?.id || `mem-${Date.now()}`,
+      keepsakeNumber: primaryDateMemory?.keepsakeNumber || memories.length + 1,
+      volumeNumber: primaryDateMemory?.volumeNumber || 1,
+      dateISO: targetIso,
+      timeFormatted: primaryDateMemory?.timeFormatted || 'All Day',
+      title: editTitle.trim() || `A Keepsake for ${selectedDayFormatted}`,
+      snippet: editStoryBody.trim().slice(0, 160) || '',
+      storyBody: editStoryBody.trim(),
+      quoteHighlight: editQuoteHighlight.trim(),
+      signOffAuthor: profile.partner1Name,
+      location: primaryDateMemory?.location || 'Bogo City, Cebu',
+      weatherTemp: primaryDateMemory?.weatherTemp || '',
+      weatherConditions: primaryDateMemory?.weatherConditions || '',
+      moodVibe: primaryDateMemory?.moodVibe || '',
+      vibeTags: editSelectedTags,
+      categories: ['EVENT'],
+      dotIndicators: editSelectedDots,
+      photos: editPhotos,
+      audioMemo: editAudioMemo,
+      videoCapsule: editVideoCapsule,
+      partnerNotes: primaryDateMemory?.partnerNotes || [],
+      isSealed: primaryDateMemory ? primaryDateMemory.isSealed : false,
+      isDraft: false,
+      sealLabel: primaryDateMemory?.sealLabel || 'Capybara Wax Seal',
+      sealIcon: primaryDateMemory?.sealIcon || 'verified',
+      updatedAt: Date.now(),
+      sortOrder: primaryDateMemory?.sortOrder || 0,
+    };
+
+    if (editPhotos.length > 0) updatedMemory.categories.push('PHOTO');
+    if (editAudioMemo && editAudioMemo.url) updatedMemory.categories.push('VOICE_MEMO');
+    if (editVideoCapsule && editVideoCapsule.url) updatedMemory.categories.push('VIDEO');
+
+    if (onSaveMemory) {
+      onSaveMemory(updatedMemory, false);
+    } else {
+      const exists = memories.some((m) => m.id === updatedMemory.id);
+      const nextList = exists
+        ? memories.map((m) => (m.id === updatedMemory.id ? updatedMemory : m))
+        : [updatedMemory, ...memories];
+      await DB.setMemories(nextList);
+    }
+    setIsEditingDate(false);
+  };
 
   useEffect(() => {
     return audioEngine.subscribe(() => {
@@ -1454,219 +1693,554 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               </svg>
             </div>
 
-            {/* Title of this moment */}
-            <div className="mb-5 pb-3 border-b border-surface-container-high">
-              <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
-                Title of this moment
-              </span>
-              <h3 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-primary font-semibold">
-                {primaryDateMemory?.title || "Sunday morning pastries and warm coffee..."}
-              </h3>
-            </div>
+            {/* (2026-07-13) Inline edit form & upload elements; was separate composer modal */}
+            {isEditingDate ? (
+              <div className="flex flex-col gap-5 w-full">
+                {/* Title of this moment */}
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
+                    Title of this moment
+                  </span>
+                  <input
+                    type="text"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    placeholder="E.g., Sunday morning pastries and warm coffee..."
+                    className="w-full bg-transparent font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-primary font-semibold border-b border-surface-container-high focus:border-primary focus:outline-none pb-2 placeholder:text-outline/50 transition-colors"
+                  />
+                </div>
 
-            {/* The Heartfelt Note with stationery lines */}
-            <div>
-              <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-2">
-                The Heartfelt Note
-              </span>
-              <div className="min-h-[160px] text-on-surface-variant font-['Cormorant_Garamond',serif] text-[18px] leading-[2.1rem] bg-[linear-gradient(transparent_31px,#e5ded8_32px)] bg-[size:100%_32px]">
-                <p className="whitespace-pre-wrap">
-                  {primaryDateMemory?.storyBody || primaryDateMemory?.snippet || "Write down how Zea smiled, what she said, the quiet moments you never want to forget..."}
-                </p>
-              </div>
-            </div>
+                {/* The Heartfelt Note */}
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-2">
+                    The Heartfelt Note
+                  </span>
+                  <textarea
+                    value={editStoryBody}
+                    onChange={(e) => setEditStoryBody(e.target.value)}
+                    placeholder="Write down how Zea smiled, what she said, the quiet moments you never want to forget..."
+                    rows={6}
+                    className="w-full bg-transparent font-['Cormorant_Garamond',serif] text-[18px] leading-[2.1rem] bg-[linear-gradient(transparent_31px,#e5ded8_32px)] bg-[size:100%_32px] text-on-surface focus:outline-none resize-none placeholder:text-outline/50 border-none p-0"
+                  />
+                </div>
 
-            {/* What Zea Said (Optional and placed at the bottom) */}
-            {primaryDateMemory?.quoteHighlight && (
-              <div className="mt-5 pt-3 border-t border-surface-container-high">
-                <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
-                  What {profile.partner2Name} Said (Highlighted Quote)
-                </span>
-                <p className="font-['Cormorant_Garamond',serif] italic text-secondary text-lg">
-                  “{primaryDateMemory.quoteHighlight}”
-                </p>
-              </div>
-            )}
+                {/* What Zea Said (Highlighted Quote) */}
+                <div className="pt-2 border-t border-surface-container-high">
+                  <span className="text-[10px] uppercase tracking-wider text-outline font-semibold flex items-center justify-between mb-1">
+                    <span>What {profile.partner2Name} Said (Highlighted Quote)</span>
+                    <span className="text-[9px] text-secondary font-normal lowercase tracking-normal">optional</span>
+                  </span>
+                  <input
+                    type="text"
+                    value={editQuoteHighlight}
+                    onChange={(e) => setEditQuoteHighlight(e.target.value)}
+                    placeholder={`E.g., What ${profile.partner2Name} said or whispered today (leave blank if none)`}
+                    className="w-full bg-transparent font-['Cormorant_Garamond',serif] italic text-base text-secondary border-b border-surface-container-high focus:border-primary focus:outline-none pb-1.5 placeholder:text-outline/50 transition-colors"
+                  />
+                </div>
 
-            {/* Polaroids Attached */}
-            {allDatePhotos.length > 0 && (
-              <div className="mt-6 flex flex-col gap-4 w-full">
-                <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block">
-                  Polaroid Keepsakes ({allDatePhotos.length})
-                </span>
-                {allDatePhotos.map((photo, idx) => (
-                  <div
-                    key={photo.id || idx}
-                    className="bg-[#faf8f5] p-3.5 pb-5 rounded-xl shadow-sm border border-outline-variant/35 text-center flex flex-col items-center"
-                  >
-                    <div className="w-full overflow-hidden rounded-lg bg-surface-container-high aspect-[4/3] mb-3">
-                      <img
-                        src={photo.url}
-                        alt={photo.caption || 'Polaroid'}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    {photo.caption && (
-                      <p className="font-['Cormorant_Garamond',serif] italic text-base text-primary/90 font-medium px-2">
-                        “{photo.caption}”
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Voice Notes Attached */}
-            {allDateAudio.length > 0 && (
-              <div className="mt-6 flex flex-col gap-3 w-full">
-                <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block">
-                  Voice Memories &amp; Audio Notes
-                </span>
-                {allDateAudio.map((memo, idx) => {
-                  const isCurrentTrack = audioState.currentTrackId === memo.id;
-                  const isPlaying = isCurrentTrack && audioState.isPlaying;
-                  return (
-                    <div
-                      key={memo.id || idx}
-                      className="bg-[#342721] text-[#fbf9f4] rounded-2xl p-4 shadow-sm border border-[#48372e]"
+                {/* Calendar Ribbon Dots */}
+                <div className="pt-2 border-t border-surface-container-high">
+                  <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-2">
+                    Calendar Ribbon Dots
+                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleDot('GOLD')}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                        editSelectedDots.includes('GOLD')
+                          ? 'bg-[#342721] text-[#fbf9f4] shadow-xs'
+                          : 'bg-surface-container-low text-secondary hover:bg-surface-container'
+                      }`}
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-1.5 text-[#cca440] text-[11px] font-bold uppercase tracking-wider">
-                          <span className="material-symbols-outlined text-[16px]">mic</span>
-                          <span>Voice Note</span>
-                        </div>
-                        <span className="text-[10px] text-[#cca440]/90 font-mono uppercase tracking-wider">
-                          WAV • Mastered
-                        </span>
-                      </div>
-                      <p className="text-sm italic font-['Cormorant_Garamond',serif] text-[#f0e8e2] mb-3">
-                        “{memo.title || 'Whispered note for Zea'}”
-                      </p>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            audioEngine.toggleTrack(
-                              memo.id,
-                              memo.durationSeconds || 42,
-                              memo.url,
-                              memo.synthNotes
-                            );
-                          }}
-                          className="w-10 h-10 rounded-full bg-[#cca440] text-[#342721] flex items-center justify-center shadow-md active:scale-95 flex-shrink-0 transition-transform"
-                        >
-                          <span className="material-symbols-outlined text-[22px]">
-                            {isPlaying ? 'pause' : 'play_arrow'}
-                          </span>
-                        </button>
-                        <div className="flex-1 flex flex-col gap-1.5 min-w-0">
-                          <div className="flex items-center justify-between text-[11px] font-mono text-[#dcd4cd]">
-                            <span>
-                              {isCurrentTrack ? formatDuration(audioState.currentTime) : '00:00'}
-                              {' / '}
-                              {memo.durationFormatted || '00:42'}
-                            </span>
-                            <span className="text-[10px] text-[#a4968d]">128 kbps</span>
-                          </div>
-                          <div className="h-1.5 bg-[#201814] rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-[#cca440] transition-all duration-150"
-                              style={{
-                                width: `${
-                                  isCurrentTrack
-                                    ? (audioState.currentTime / Math.max(1, audioState.duration)) * 100
-                                    : 0
-                                }%`,
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Videos Attached */}
-            {allDateVideos.length > 0 && (
-              <div className="mt-6 flex flex-col gap-3 w-full">
-                <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block">
-                  Video Capsules
-                </span>
-                {allDateVideos.map((vid, idx) => (
-                  <div
-                    key={vid.id || idx}
-                    className="rounded-2xl overflow-hidden shadow-sm border border-outline-variant/35 bg-surface-container-low"
-                  >
-                    <div className="px-4 py-2 flex items-center justify-between bg-surface-container-high/60 border-b border-outline-variant/20">
-                      <div className="flex items-center gap-1.5 text-primary text-xs font-semibold uppercase tracking-wider">
-                        <span className="material-symbols-outlined text-[16px]">videocam</span>
-                        <span>{vid.title || 'Video Memory'}</span>
-                      </div>
-                      <span className="text-[10px] text-secondary font-mono">
-                        {vid.durationFormatted || 'HD'}
-                      </span>
-                    </div>
-                    <video
-                      src={vid.url}
-                      controls
-                      className="w-full max-h-[300px] bg-black object-cover"
-                      poster={vid.thumbnailUrl}
-                    />
+                      <span className="w-2 h-2 rounded-full bg-[#cca440]" />
+                      <span>Events</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleDot('MOCHA')}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                        editSelectedDots.includes('MOCHA')
+                          ? 'bg-[#342721] text-[#fbf9f4] shadow-xs'
+                          : 'bg-surface-container-low text-secondary hover:bg-surface-container'
+                      }`}
+                    >
+                      <span className="w-2 h-2 rounded-full bg-[#705646]" />
+                      <span>Date</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleDot('ROSE')}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                        editSelectedDots.includes('ROSE')
+                          ? 'bg-[#342721] text-[#fbf9f4] shadow-xs'
+                          : 'bg-surface-container-low text-secondary hover:bg-surface-container'
+                      }`}
+                    >
+                      <span className="w-2 h-2 rounded-full bg-[#c76d75]" />
+                      <span>Milestone</span>
+                    </button>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
 
-            {/* Action buttons: Single Edit button without exit fullscreen button */}
-            <div className="mt-7 pt-4 border-t border-outline-variant/20 flex items-center justify-end w-full">
-              <button
-                type="button"
-                onClick={() => {
-                  closeDateOverlay(() => {
-                    if (primaryDateMemory) {
-                      onEditMemory(primaryDateMemory);
-                    } else {
-                      const mStr = String(calendarMonth + 1).padStart(2, '0');
-                      const dStr = String(selectedDay).padStart(2, '0');
-                      const targetIso = `${calendarYear}-${mStr}-${dStr}`;
-                      onEditMemory({
-                        id: `mem-${Date.now()}`,
-                        keepsakeNumber: memories.length + 1,
-                        volumeNumber: 1,
-                        dateISO: targetIso,
-                        timeFormatted: 'All Day',
-                        title: '',
-                        snippet: '',
-                        storyBody: '',
-                        quoteHighlight: '',
-                        signOffAuthor: profile.partner1Name,
-                        location: 'Bogo City, Cebu',
-                        weatherTemp: '',
-                        weatherConditions: '',
-                        moodVibe: '',
-                        vibeTags: [],
-                        categories: ['PHOTO'],
-                        dotIndicators: ['GOLD'],
-                        photos: [],
-                        partnerNotes: [],
-                        isSealed: false,
-                        isDraft: false,
-                        sealLabel: 'Capybara Wax Seal',
-                        sealIcon: 'verified',
-                        updatedAt: Date.now(),
-                        sortOrder: 0,
-                      });
-                    }
-                  });
-                }}
-                className="flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-primary text-on-primary font-['Plus_Jakarta_Sans',sans-serif] text-xs uppercase tracking-wider font-semibold shadow-sm hover:bg-primary/95 transition-all active:scale-95"
-              >
-                <span className="material-symbols-outlined text-[17px]">edit</span>
-                <span>Edit</span>
-              </button>
-            </div>
+                {/* Vibe & Memory Tags */}
+                <div className="pt-2 border-t border-surface-container-high">
+                  <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-2">
+                    Vibe &amp; Memory Tags
+                  </span>
+                  <div className="flex flex-wrap gap-1.5 mb-2.5">
+                    {[
+                      'First Time',
+                      'Cozy Rainy Day',
+                      'Deep Talks',
+                      'Anniversary',
+                      'Roadtrip',
+                      'Laughter',
+                      'Sweet Treats',
+                      'Stargazing',
+                    ].map((tag) => {
+                      const isSel = editSelectedTags.includes(tag);
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => handleToggleTag(tag)}
+                          className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                            isSel
+                              ? 'bg-secondary text-on-secondary shadow-2xs'
+                              : 'bg-surface-container-low text-secondary hover:bg-surface-container'
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      );
+                    })}
+                    {editSelectedTags
+                      .filter(
+                        (t) =>
+                          ![
+                            'First Time',
+                            'Cozy Rainy Day',
+                            'Deep Talks',
+                            'Anniversary',
+                            'Roadtrip',
+                            'Laughter',
+                            'Sweet Treats',
+                            'Stargazing',
+                          ].includes(t)
+                      )
+                      .map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => handleToggleTag(t)}
+                          className="px-3 py-1 rounded-full text-xs font-medium bg-secondary text-on-secondary shadow-2xs flex items-center gap-1"
+                        >
+                          <span>{t}</span>
+                          <span className="material-symbols-outlined text-[13px]">close</span>
+                        </button>
+                      ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={customTagInput}
+                      onChange={(e) => setCustomTagInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddCustomTag();
+                        }
+                      }}
+                      placeholder="Add custom tag..."
+                      className="flex-1 px-3 py-1.5 rounded-xl bg-surface-container-low text-xs text-primary border border-outline-variant/40 focus:outline-none focus:border-primary"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCustomTag}
+                      className="px-3 py-1.5 rounded-xl bg-surface-container-high text-primary font-semibold text-xs uppercase tracking-wider hover:bg-surface-variant transition-colors"
+                    >
+                      + Tag
+                    </button>
+                  </div>
+                </div>
+
+                {/* Upload Media Section */}
+                <div className="pt-2 border-t border-surface-container-high flex flex-col gap-4">
+                  <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block">
+                    Upload Media (Polaroids, Voice Notes &amp; Video)
+                  </span>
+
+                  {/* Hidden inputs */}
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleUploadPhotos}
+                    className="hidden"
+                  />
+                  <input
+                    ref={audioInputRef}
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleUploadAudio}
+                    className="hidden"
+                  />
+                  <input
+                    ref={videoInputRef}
+                    type="file"
+                    accept="video/*"
+                    onChange={handleUploadVideo}
+                    className="hidden"
+                  />
+
+                  {/* Action Upload Triggers */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => photoInputRef.current?.click()}
+                      className="flex flex-col items-center justify-center gap-1 p-3.5 rounded-xl border border-dashed border-outline-variant/60 hover:bg-surface-container-low text-secondary hover:text-primary transition-colors text-center"
+                    >
+                      <span className="material-symbols-outlined text-[24px]">photo_camera</span>
+                      <span className="text-[11px] font-semibold uppercase tracking-wider">Add Polaroid</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (isRecordingMic) {
+                          stopMicRecording();
+                        } else {
+                          audioInputRef.current?.click();
+                        }
+                      }}
+                      className="flex flex-col items-center justify-center gap-1 p-3.5 rounded-xl border border-dashed border-outline-variant/60 hover:bg-surface-container-low text-secondary hover:text-primary transition-colors text-center relative"
+                    >
+                      <span className="material-symbols-outlined text-[24px]">mic</span>
+                      <span className="text-[11px] font-semibold uppercase tracking-wider">Upload Audio / VM</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => videoInputRef.current?.click()}
+                      className="flex flex-col items-center justify-center gap-1 p-3.5 rounded-xl border border-dashed border-outline-variant/60 hover:bg-surface-container-low text-secondary hover:text-primary transition-colors text-center"
+                    >
+                      <span className="material-symbols-outlined text-[24px]">videocam</span>
+                      <span className="text-[11px] font-semibold uppercase tracking-wider">Add Video</span>
+                    </button>
+                  </div>
+
+                  {/* Record with Mic Live Button */}
+                  <div className="flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={isRecordingMic ? stopMicRecording : startMicRecording}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-colors ${
+                        isRecordingMic
+                          ? 'bg-error text-on-error animate-pulse'
+                          : 'bg-secondary-container text-on-secondary-container hover:bg-secondary-container/80'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[16px]">
+                        {isRecordingMic ? 'stop' : 'radio_button_checked'}
+                      </span>
+                      <span>{isRecordingMic ? `Recording (${recordSec}s) • Stop` : 'Record VM via Mic'}</span>
+                    </button>
+                  </div>
+
+                  {/* Attached Polaroids List */}
+                  {editPhotos.length > 0 && (
+                    <div className="flex flex-col gap-3 mt-1">
+                      <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
+                        Polaroid Photos ({editPhotos.length})
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {editPhotos.map((photo, pIdx) => (
+                          <div
+                            key={photo.id || pIdx}
+                            className="bg-[#faf8f5] p-2.5 pb-3 rounded-xl border border-outline-variant/35 flex flex-col gap-2 relative shadow-2xs"
+                          >
+                            <div className="w-full aspect-[4/3] rounded-lg overflow-hidden bg-surface-container-high">
+                              <img src={photo.url} alt="Polaroid preview" className="w-full h-full object-cover" />
+                            </div>
+                            <input
+                              type="text"
+                              value={photo.caption || ''}
+                              onChange={(e) => {
+                                const newCap = e.target.value;
+                                setEditPhotos((prev) =>
+                                  prev.map((item, idx) => (idx === pIdx ? { ...item, caption: newCap } : item))
+                                );
+                              }}
+                              placeholder="Write a sweet caption..."
+                              className="w-full text-xs italic font-['Cormorant_Garamond',serif] bg-transparent border-b border-surface-container-high focus:outline-none focus:border-primary pb-1"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditPhotos((prev) => prev.filter((_, idx) => idx !== pIdx));
+                              }}
+                              title="Delete photo"
+                              className="absolute top-4 right-4 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-error transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-[14px]">close</span>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Attached Audio Memo */}
+                  {editAudioMemo && (
+                    <div className="bg-[#342721] text-[#fbf9f4] rounded-2xl p-3.5 shadow-sm border border-[#48372e] flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="material-symbols-outlined text-[#cca440] text-[20px]">mic</span>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-xs font-bold text-[#cca440] truncate-single">
+                            {editAudioMemo.title}
+                          </span>
+                          <span className="text-[10px] text-[#dcd4cd]">
+                            {editAudioMemo.durationFormatted || '00:42'} • Audio Memo
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setEditAudioMemo(undefined)}
+                        className="w-7 h-7 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-error transition-colors flex-shrink-0"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">delete</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Attached Video */}
+                  {editVideoCapsule && (
+                    <div className="rounded-xl overflow-hidden border border-outline-variant/35 bg-surface-container-low p-3 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="material-symbols-outlined text-primary text-[20px]">videocam</span>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-xs font-bold text-primary truncate-single">
+                            {editVideoCapsule.title}
+                          </span>
+                          <span className="text-[10px] text-secondary">
+                            {editVideoCapsule.durationFormatted || 'HD'} • Video Capsule
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setEditVideoCapsule(undefined)}
+                        className="w-7 h-7 rounded-full bg-surface-container-high text-secondary flex items-center justify-center hover:bg-error hover:text-white transition-colors flex-shrink-0"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">delete</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Form Action Buttons: Save Keepsake and Cancel */}
+                <div className="flex items-center justify-end gap-2.5 mt-5 pt-4 border-t border-outline-variant/20 w-full">
+                  <button
+                    type="button"
+                    onClick={handleCancelInlineEdit}
+                    className="px-5 py-2.5 rounded-full border border-outline-variant/40 text-secondary hover:text-primary text-xs uppercase tracking-wider font-semibold hover:bg-surface-container transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveInlineDate}
+                    className="flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-primary text-on-primary text-xs uppercase tracking-wider font-semibold shadow-sm hover:bg-primary/95 transition-all active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-[17px]">check</span>
+                    <span>Save Keepsake</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Title of this moment */}
+                <div className="mb-5 pb-3 border-b border-surface-container-high">
+                  <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
+                    Title of this moment
+                  </span>
+                  <h3 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-primary font-semibold">
+                    {primaryDateMemory?.title || "Sunday morning pastries and warm coffee..."}
+                  </h3>
+                </div>
+
+                {/* The Heartfelt Note with stationery lines */}
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-2">
+                    The Heartfelt Note
+                  </span>
+                  <div className="min-h-[160px] text-on-surface-variant font-['Cormorant_Garamond',serif] text-[18px] leading-[2.1rem] bg-[linear-gradient(transparent_31px,#e5ded8_32px)] bg-[size:100%_32px]">
+                    <p className="whitespace-pre-wrap">
+                      {primaryDateMemory?.storyBody || primaryDateMemory?.snippet || "Write down how Zea smiled, what she said, the quiet moments you never want to forget..."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* What Zea Said (Optional and placed at the bottom) */}
+                {primaryDateMemory?.quoteHighlight && (
+                  <div className="mt-5 pt-3 border-t border-surface-container-high">
+                    <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
+                      What {profile.partner2Name} Said (Highlighted Quote)
+                    </span>
+                    <p className="font-['Cormorant_Garamond',serif] italic text-secondary text-lg">
+                      “{primaryDateMemory.quoteHighlight}”
+                    </p>
+                  </div>
+                )}
+
+                {/* Polaroids Attached */}
+                {allDatePhotos.length > 0 && (
+                  <div className="mt-6 flex flex-col gap-4 w-full">
+                    <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block">
+                      Polaroid Keepsakes ({allDatePhotos.length})
+                    </span>
+                    {allDatePhotos.map((photo, idx) => (
+                      <div
+                        key={photo.id || idx}
+                        className="bg-[#faf8f5] p-3.5 pb-5 rounded-xl shadow-sm border border-outline-variant/35 text-center flex flex-col items-center"
+                      >
+                        <div className="w-full overflow-hidden rounded-lg bg-surface-container-high aspect-[4/3] mb-3">
+                          <img
+                            src={photo.url}
+                            alt={photo.caption || 'Polaroid'}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        {photo.caption && (
+                          <p className="font-['Cormorant_Garamond',serif] italic text-base text-primary/90 font-medium px-2">
+                            “{photo.caption}”
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Voice Notes Attached */}
+                {allDateAudio.length > 0 && (
+                  <div className="mt-6 flex flex-col gap-3 w-full">
+                    <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block">
+                      Voice Memories &amp; Audio Notes
+                    </span>
+                    {allDateAudio.map((memo, idx) => {
+                      const isCurrentTrack = audioState.currentTrackId === memo.id;
+                      const isPlaying = isCurrentTrack && audioState.isPlaying;
+                      return (
+                        <div
+                          key={memo.id || idx}
+                          className="bg-[#342721] text-[#fbf9f4] rounded-2xl p-4 shadow-sm border border-[#48372e]"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-1.5 text-[#cca440] text-[11px] font-bold uppercase tracking-wider">
+                              <span className="material-symbols-outlined text-[16px]">mic</span>
+                              <span>Voice Note</span>
+                            </div>
+                            <span className="text-[10px] text-[#cca440]/90 font-mono uppercase tracking-wider">
+                              WAV • Mastered
+                            </span>
+                          </div>
+                          <p className="text-sm italic font-['Cormorant_Garamond',serif] text-[#f0e8e2] mb-3">
+                            “{memo.title || 'Whispered note for Zea'}”
+                          </p>
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                audioEngine.toggleTrack(
+                                  memo.id,
+                                  memo.durationSeconds || 42,
+                                  memo.url,
+                                  memo.synthNotes
+                                );
+                              }}
+                              className="w-10 h-10 rounded-full bg-[#cca440] text-[#342721] flex items-center justify-center shadow-md active:scale-95 flex-shrink-0 transition-transform"
+                            >
+                              <span className="material-symbols-outlined text-[22px]">
+                                {isPlaying ? 'pause' : 'play_arrow'}
+                              </span>
+                            </button>
+                            <div className="flex-1 flex flex-col gap-1.5 min-w-0">
+                              <div className="flex items-center justify-between text-[11px] font-mono text-[#dcd4cd]">
+                                <span>
+                                  {isCurrentTrack ? formatDuration(audioState.currentTime) : '00:00'}
+                                  {' / '}
+                                  {memo.durationFormatted || '00:42'}
+                                </span>
+                                <span className="text-[10px] text-[#a4968d]">128 kbps</span>
+                              </div>
+                              <div className="h-1.5 bg-[#201814] rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-[#cca440] transition-all duration-150"
+                                  style={{
+                                    width: `${
+                                      isCurrentTrack
+                                        ? (audioState.currentTime / Math.max(1, audioState.duration)) * 100
+                                        : 0
+                                    }%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Videos Attached */}
+                {allDateVideos.length > 0 && (
+                  <div className="mt-6 flex flex-col gap-3 w-full">
+                    <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block">
+                      Video Capsules
+                    </span>
+                    {allDateVideos.map((vid, idx) => (
+                      <div
+                        key={vid.id || idx}
+                        className="rounded-2xl overflow-hidden shadow-sm border border-outline-variant/35 bg-surface-container-low"
+                      >
+                        <div className="px-4 py-2 flex items-center justify-between bg-surface-container-high/60 border-b border-outline-variant/20">
+                          <div className="flex items-center gap-1.5 text-primary text-xs font-semibold uppercase tracking-wider">
+                            <span className="material-symbols-outlined text-[16px]">videocam</span>
+                            <span>{vid.title || 'Video Memory'}</span>
+                          </div>
+                          <span className="text-[10px] text-secondary font-mono">
+                            {vid.durationFormatted || 'HD'}
+                          </span>
+                        </div>
+                        <video
+                          src={vid.url}
+                          controls
+                          className="w-full max-h-[300px] bg-black object-cover"
+                          poster={vid.thumbnailUrl}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Action buttons: Single Edit button without exit fullscreen button */}
+                <div className="mt-7 pt-4 border-t border-outline-variant/20 flex items-center justify-end w-full">
+                  <button
+                    type="button"
+                    onClick={handleEnterEditMode}
+                    className="flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-primary text-on-primary font-['Plus_Jakarta_Sans',sans-serif] text-xs uppercase tracking-wider font-semibold shadow-sm hover:bg-primary/95 transition-all active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-[17px]">edit</span>
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </>
+            )}
             {/* End Editorial Title & Ruled Note Card */}
           </div>
           {/* End Date Content Card */}
