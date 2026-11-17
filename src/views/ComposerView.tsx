@@ -133,6 +133,46 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
   const [metaModalOpen, setMetaModalOpen] = useState(false);
   const [sealingAnim, setSealingAnim] = useState(false);
 
+  // (2026-07-13) Auto-adjust story textarea height; was fixed 5 rows
+  const storyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const adjustTextareaHeight = (el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.max(220, el.scrollHeight)}px`;
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight(storyTextareaRef.current);
+  }, [storyBody]);
+
+  // (2026-07-13) Sync form state when editing memory changes; was initial only
+  useEffect(() => {
+    if (editingMemory) {
+      setDateISO(editingMemory.dateISO || '2026-11-16');
+      setTimeFormatted(editingMemory.timeFormatted || 'All Day');
+      setLocation(editingMemory.location || 'Bogo City, Cebu');
+      setWeatherTemp(editingMemory.weatherTemp || '');
+      setWeatherConditions(editingMemory.weatherConditions || '');
+      setMoodVibe(editingMemory.moodVibe || '');
+      setTitle(editingMemory.title || '');
+      setLetterHeading(editingMemory.letterHeading || '');
+      setStoryBody(editingMemory.storyBody || editingMemory.snippet || '');
+      setQuoteHighlight(editingMemory.quoteHighlight || '');
+      setSelectedTags(editingMemory.vibeTags || ['First Time', 'Cozy Rainy Day']);
+      setSelectedDots(editingMemory.dotIndicators || ['GOLD', 'MOCHA']);
+      setPhotos(editingMemory.photos || []);
+      setVoiceTitle(editingMemory.audioMemo?.title || `Whispered note for ${profile.partner2Name}`);
+      setVoiceDurationSec(editingMemory.audioMemo?.durationSeconds || 42);
+      setVoiceDataUrl(editingMemory.audioMemo?.url);
+      setHasVideo(Boolean(editingMemory.videoCapsule));
+      setVideoTitle(editingMemory.videoCapsule?.title || `Candid moment with ${profile.partner2Name}`);
+      setVideoDuration(editingMemory.videoCapsule?.durationFormatted || '0:22');
+      setVideoUrl(editingMemory.videoCapsule?.url);
+      setTimeout(() => adjustTextareaHeight(storyTextareaRef.current), 50);
+    }
+  }, [editingMemory]);
+
   useEffect(() => {
     if (metaModalOpen || Boolean(pendingCropSrc)) {
       document.body.classList.add('overflow-hidden');
@@ -476,7 +516,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
             <div className="w-full h-px bg-surface-container-high" />
           </div>
 
-          {/* Ruled Stationery Notepad Area */}
+          {/* (2026-07-13) Set Google font & auto-expanding textarea; was ruled-notebook */}
           <div className="relative">
             <label
               className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-space-xs"
@@ -484,14 +524,17 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
             >
               The Heartfelt Note
             </label>
-            <div className="relative rounded-lg bg-surface-container-low/50 p-space-md">
+            <div className="relative rounded-xl bg-surface-container-low/40 p-4 border border-outline-variant/20">
               <textarea
+                ref={storyTextareaRef}
                 id="memory-narrative"
-                rows={5}
                 value={storyBody}
-                onChange={(e) => setStoryBody(e.target.value)}
+                onChange={(e) => {
+                  setStoryBody(e.target.value);
+                  adjustTextareaHeight(e.target);
+                }}
                 placeholder={`Write down how ${profile.partner2Name} smiled, what she said, the quiet moments you never want to forget...`}
-                className="w-full bg-transparent font-body-lg text-body-lg text-primary placeholder:text-outline-variant/80 focus:outline-none resize-none leading-[2rem] ruled-notebook"
+                className="w-full bg-transparent font-['Plus_Jakarta_Sans',sans-serif] text-[15px] sm:text-base text-primary placeholder:text-outline-variant/80 focus:outline-none resize-none leading-relaxed"
               />
             </div>
           </div>
@@ -604,31 +647,41 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
           </div>
         </div>
 
-        {/* Media Attachment Vault */}
-        <div className="flex flex-col gap-space-md">
+        {/* (2026-07-13) Clean up media cards UI; was cluttered containers */}
+        {/* Media attachment section */}
+        <div id="composer-media-attachments-vault" className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs font-serif">
+            <h3 className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-bold text-primary flex items-center gap-2">
               <span className="material-symbols-outlined text-[20px] text-secondary">
                 attachment
               </span>
-              Attach Keepsakes
+              <span>Attach Keepsakes</span>
             </h3>
-            <span className="font-label-md text-label-md text-outline">3 Vault Slots</span>
+            <span className="text-[11px] uppercase tracking-wider text-outline font-semibold">
+              Vault Media
+            </span>
           </div>
 
           {/* 1. Voice Note Recording Module */}
-          <div className="bg-surface-container-low rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm relative border border-outline-variant/25">
+          <div className="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-xs border border-outline-variant/30 flex flex-col gap-3.5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-space-xs">
-                <span className="material-symbols-outlined text-[18px] text-secondary">mic</span>
-                <span className="font-label-lg text-label-lg text-primary">
-                  Her Voice &amp; Whispers
-                </span>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-secondary-container/60 text-secondary flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[17px]">mic</span>
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-primary font-['Plus_Jakarta_Sans',sans-serif]">
+                    Her Voice &amp; Whispers
+                  </h4>
+                  <p className="text-[11px] text-outline">
+                    {voiceDataUrl ? 'Audio recording attached' : `Capture ${profile.partner2Name}'s voice or a note`}
+                  </p>
+                </div>
               </div>
-              <span className="font-body-sm text-body-sm text-outline">
+              <span className="text-xs font-mono text-outline font-medium">
                 {isRecording
                   ? `${formatDuration(recordElapsed)} / 02:00`
-                  : `${formatDuration(voiceDurationSec)} / 02:00`}
+                  : `${formatDuration(voiceDurationSec)}`}
               </span>
             </div>
 
@@ -637,66 +690,68 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
               value={voiceTitle}
               onChange={(e) => setVoiceTitle(e.target.value)}
               placeholder="Voice note title (e.g., Laughing at the icy waves)..."
-              className="w-full px-3 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-body-sm text-body-sm border border-outline-variant/30 focus:outline-none"
+              className="w-full px-3.5 py-2 rounded-xl bg-surface-container-low text-primary text-xs border border-outline-variant/20 focus:border-primary focus:outline-none transition-colors"
             />
 
-            <div className="flex items-center gap-space-md bg-surface-container-lowest p-space-sm rounded-lg shadow-sm">
+            <div className="flex items-center gap-3 bg-surface-container-low p-3 rounded-xl border border-outline-variant/20">
               <button
                 type="button"
                 onClick={handleToggleRecording}
-                className="w-12 h-12 rounded-full bg-error-container text-error flex items-center justify-center shrink-0 active:scale-90 transition-transform relative group"
+                className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-transform active:scale-95 shadow-xs ${
+                  isRecording ? 'bg-error text-white animate-pulse' : 'bg-primary text-on-primary hover:bg-primary/90'
+                }`}
+                title={isRecording ? 'Stop recording' : 'Record voice memo'}
               >
-                {isRecording && (
-                  <span className="w-5 h-5 rounded-full bg-error animate-ping absolute opacity-60" />
-                )}
-                <span
-                  className={`bg-error relative z-10 transition-all ${
-                    isRecording ? 'w-3.5 h-3.5 rounded-xs' : 'w-3.5 h-3.5 rounded-full'
-                  }`}
-                />
+                <span className="material-symbols-outlined text-[18px]">
+                  {isRecording ? 'stop' : 'mic'}
+                </span>
               </button>
-              <div className="flex-1 flex flex-col justify-center min-w-0">
-                <p className="font-body-sm text-body-sm text-on-surface truncate-single">
+              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <p className="text-xs text-on-surface truncate-single font-medium">
                   {isRecording
-                    ? 'Recording live microphone... Tap red button to finish'
-                    : `Tap red button to record ${profile.partner2Name}'s voice or a note`}
+                    ? 'Recording live microphone... Tap to finish'
+                    : voiceDataUrl
+                      ? 'Preview voice recording'
+                      : `Tap mic to record ${profile.partner2Name}'s voice`}
                 </p>
-                <div className="w-full h-6 flex items-center gap-1 mt-1 overflow-hidden opacity-85">
+                <div className="w-full h-4 flex items-center gap-1 mt-1 overflow-hidden opacity-75">
                   {[2, 3, 5, 4, 6, 3, 5, 2, 4, 5, 3, 2, 4, 6, 3, 2].map((h, i) => (
                     <span
                       key={i}
-                      style={{ height: `${h * 4}px` }}
-                      className={`w-1 rounded-full ${
+                      style={{ height: `${h * 2.5}px` }}
+                      className={`w-1 rounded-full transition-colors ${
                         isRecording && i % 2 === 0
                           ? 'bg-error animate-pulse'
-                          : i % 3 === 0
-                            ? 'bg-tertiary-container'
-                            : 'bg-secondary'
+                          : voiceDataUrl
+                            ? 'bg-secondary'
+                            : 'bg-outline-variant'
                       }`}
                     />
                   ))}
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() =>
-                  audioEngine.toggleTrack('composer-preview', voiceDurationSec, voiceDataUrl)
-                }
-                className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-primary hover:bg-secondary-container transition-colors shrink-0"
-              >
-                <span className="material-symbols-outlined text-[18px]">play_arrow</span>
-              </button>
+              {voiceDataUrl && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    audioEngine.toggleTrack('composer-preview', voiceDurationSec, voiceDataUrl)
+                  }
+                  className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-primary hover:bg-secondary-container transition-colors shrink-0"
+                  title="Play audio preview"
+                >
+                  <span className="material-symbols-outlined text-[18px]">play_arrow</span>
+                </button>
+              )}
             </div>
 
-            {/* (2026-07-13) Add manual audio upload for wav/mp3/m4a; was mic recording only */}
-            <div className="flex items-center gap-2 pt-1">
+            <div className="flex items-center gap-2 pt-0.5">
               <button
                 type="button"
                 onClick={() => audioFileInputRef.current?.click()}
-                className="flex-1 py-2 px-3 rounded-lg bg-surface-container-lowest hover:bg-surface-container text-primary font-label-md text-xs font-semibold flex items-center justify-center gap-1.5 border border-outline-variant/35 shadow-2xs active:scale-95 transition-all"
+                className="flex-1 py-2 px-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-primary text-xs font-semibold flex items-center justify-center gap-1.5 border border-outline-variant/25 active:scale-98 transition-all"
               >
                 <span className="material-symbols-outlined text-[16px] text-secondary">upload_file</span>
-                <span>{voiceDataUrl ? 'Replace Audio File' : 'Upload Audio (.wav, .mp3, .m4a)'}</span>
+                <span>{voiceDataUrl ? 'Replace Audio File' : 'Upload Audio (.mp3, .wav, .m4a)'}</span>
               </button>
               {voiceDataUrl && (
                 <button
@@ -706,7 +761,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                     onToast('Voice note removed', 'info');
                   }}
                   title="Remove sound recording"
-                  className="w-8 h-8 rounded-lg bg-surface-container-lowest text-error hover:bg-error-container/30 border border-outline-variant/30 flex items-center justify-center transition-colors shrink-0"
+                  className="w-8 h-8 rounded-xl bg-surface-container-low text-error hover:bg-error-container/40 border border-outline-variant/25 flex items-center justify-center transition-colors shrink-0"
                 >
                   <span className="material-symbols-outlined text-[15px]">delete</span>
                 </button>
@@ -722,46 +777,49 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
           </div>
 
           {/* 2. Photo Polaroids Scrapbook Section */}
-          <div className="bg-surface-container-low rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm border border-outline-variant/25">
+          <div className="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-xs border border-outline-variant/30 flex flex-col gap-3.5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-space-xs">
-                <span className="material-symbols-outlined text-[18px] text-secondary">
-                  photo_library
-                </span>
-                <span className="font-label-lg text-label-lg text-primary">
-                  Polaroids &amp; Photos
-                </span>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-secondary-container/60 text-secondary flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[17px]">photo_camera</span>
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-primary font-['Plus_Jakarta_Sans',sans-serif]">
+                    Polaroids &amp; Photos
+                  </h4>
+                  <p className="text-[11px] text-outline">
+                    {photos.length === 0 ? 'No photos attached' : `${photos.length} polaroid${photos.length > 1 ? 's' : ''} in scrapbook`}
+                  </p>
+                </div>
               </div>
-              <span className="font-label-md text-label-md text-secondary">
+              <span className="text-xs uppercase tracking-wider text-secondary font-semibold">
                 {photos.length} Attached
               </span>
             </div>
 
-            {/* (2026-07-13) Add big upload placeholder for polaroids; was small button */}
             <div
               onClick={() => photoInputRef.current?.click()}
-              className="border-2 border-dashed border-outline-variant/60 hover:border-primary/60 bg-surface-container-lowest/80 rounded-2xl p-6 sm:p-8 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-2 group hover:bg-surface-container-lowest shadow-xs"
+              className="border-2 border-dashed border-outline-variant/40 hover:border-primary/50 bg-surface-container-low/40 hover:bg-surface-container-low rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 group"
             >
-              <div className="w-14 h-14 rounded-2xl bg-secondary-container/60 text-secondary group-hover:scale-105 group-hover:text-primary transition-all flex items-center justify-center shadow-xs">
-                <span className="material-symbols-outlined text-[32px]">add_photo_alternate</span>
+              <div className="w-11 h-11 rounded-full bg-surface-container-high text-secondary group-hover:text-primary group-hover:scale-105 transition-all flex items-center justify-center mb-1">
+                <span className="material-symbols-outlined text-[24px]">add_photo_alternate</span>
               </div>
-              <span className="font-label-lg text-sm sm:text-base font-bold text-primary">
+              <span className="text-xs sm:text-sm font-semibold text-primary">
                 Upload Images to Turn into Polaroids
               </span>
-              <span className="font-body-sm text-xs text-on-surface-variant max-w-xs">
-                Tap to choose photos from your phone or desktop (1600px high-resolution cropper)
+              <span className="text-[11px] text-outline max-w-xs">
+                Tap to choose photos • 1600px high-resolution cropper
               </span>
             </div>
 
-            {/* 1 polaroid each in a vertical scrollable list */}
             {photos.length > 0 && (
-              <div className="flex flex-col gap-4 w-full mt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-1">
                 {photos.map((photo, index) => (
                   <div
                     key={photo.id}
-                    className="bg-[#ffffff] p-3.5 sm:p-4 rounded-xl shadow-md border border-[#e2dcd5] flex flex-col items-center gap-2.5 w-full max-w-sm mx-auto"
+                    className="bg-[#ffffff] p-3 rounded-xl shadow-xs border border-[#e2dcd5] flex flex-col items-center gap-2"
                   >
-                    <div className="w-full aspect-square rounded-lg overflow-hidden bg-surface-container relative shadow-inner">
+                    <div className="w-full aspect-[4/3] rounded-lg overflow-hidden bg-surface-container relative">
                       <img
                         className="w-full h-full object-cover"
                         alt={photo.caption || 'Polaroid Memory'}
@@ -772,9 +830,9 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                         onClick={() =>
                           setPhotos((prev) => prev.filter((item) => item.id !== photo.id))
                         }
-                        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-primary/80 text-on-primary flex items-center justify-center text-xs backdrop-blur-sm shadow-sm active:scale-95"
+                        className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary/80 hover:bg-primary text-on-primary flex items-center justify-center text-xs backdrop-blur-sm shadow-sm transition-transform active:scale-95"
                       >
-                        <span className="material-symbols-outlined text-[15px]">close</span>
+                        <span className="material-symbols-outlined text-[13px]">close</span>
                       </button>
                     </div>
                     <div className="w-full flex flex-col gap-1 px-1">
@@ -787,10 +845,10 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                             prev.map((p, i) => (i === index ? { ...p, caption: val } : p))
                           );
                         }}
-                        placeholder="Add handwritten caption for Zea..."
-                        className="w-full bg-transparent font-serif italic text-sm text-primary placeholder:text-outline/60 focus:outline-none border-b border-outline-variant/30 pb-0.5 text-center"
+                        placeholder={`Caption for ${profile.partner2Name}...`}
+                        className="w-full bg-transparent font-['Cormorant_Garamond',serif] italic text-sm text-primary placeholder:text-outline/60 focus:outline-none border-b border-outline-variant/30 pb-0.5 text-center"
                       />
-                      <div className="flex items-center justify-between text-[10px] text-secondary font-label-md uppercase tracking-wider">
+                      <div className="flex items-center justify-between text-[10px] text-secondary font-mono">
                         <span>Polaroid #{index + 1}</span>
                         <span>{photo.tag || 'MEMO'}</span>
                       </div>
@@ -810,34 +868,42 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
           </div>
 
           {/* 3. Video Capsule Card */}
-          <div className="bg-surface-container-low rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm border border-outline-variant/25">
+          <div className="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-xs border border-outline-variant/30 flex flex-col gap-3.5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-space-xs">
-                <span className="material-symbols-outlined text-[18px] text-secondary">
-                  videocam
-                </span>
-                <span className="font-label-lg text-label-lg text-primary">
-                  Motion Video Capsule
-                </span>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-secondary-container/60 text-secondary flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[17px]">movie</span>
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-primary font-['Plus_Jakarta_Sans',sans-serif]">
+                    Motion Video Capsule
+                  </h4>
+                  <p className="text-[11px] text-outline">
+                    {hasVideo ? 'Video clip attached' : 'Add short video reel or moment'}
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-1 bg-surface-container-high px-2 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim" />
-                <span className="font-label-md text-label-md text-primary font-medium">
-                  Firestore Ready
+                <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
+                <span className="text-[10px] uppercase font-semibold text-primary">
+                  HD 1080p
                 </span>
               </div>
             </div>
 
             {hasVideo ? (
-              <div className="bg-surface-container-lowest rounded-lg p-3 flex flex-col gap-2 border border-outline-variant/30">
+              <div className="bg-surface-container-low rounded-xl p-3 flex flex-col gap-2 border border-outline-variant/20">
                 <div className="flex items-center justify-between">
-                  <span className="font-label-md text-label-md text-secondary uppercase">
-                    Attached 1080p HD Reel ({videoDuration})
+                  <span className="text-xs font-semibold text-secondary uppercase tracking-wider">
+                    Attached Video ({videoDuration})
                   </span>
                   <button
                     type="button"
-                    onClick={() => setHasVideo(false)}
-                    className="text-error font-label-md text-label-md"
+                    onClick={() => {
+                      setHasVideo(false);
+                      setVideoUrl(undefined);
+                    }}
+                    className="text-error text-xs font-semibold hover:underline"
                   >
                     Remove
                   </button>
@@ -846,21 +912,22 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                   type="text"
                   value={videoTitle}
                   onChange={(e) => setVideoTitle(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded bg-surface-container-low text-primary font-body-sm text-body-sm"
+                  placeholder="Video caption or title..."
+                  className="w-full px-3 py-1.5 rounded-lg bg-surface-container-lowest text-primary text-xs border border-outline-variant/20 focus:outline-none"
                 />
               </div>
             ) : (
               <div
                 onClick={() => videoInputRef.current?.click()}
-                className="relative bg-surface-container-lowest rounded-lg p-space-md flex flex-col items-center justify-center text-center cursor-pointer shadow-sm group border border-outline-variant/25"
+                className="border border-outline-variant/30 hover:border-primary/50 bg-surface-container-low/40 hover:bg-surface-container-low rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 group"
               >
-                <div className="w-12 h-12 rounded-full bg-secondary-container/60 text-on-secondary-container flex items-center justify-center mb-space-xs group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[24px]">movie_filter</span>
+                <div className="w-10 h-10 rounded-full bg-surface-container-high text-secondary group-hover:text-primary group-hover:scale-105 transition-all flex items-center justify-center mb-0.5">
+                  <span className="material-symbols-outlined text-[20px]">movie_filter</span>
                 </div>
-                <p className="font-body-md text-body-md font-medium text-primary">
+                <p className="text-xs sm:text-sm font-semibold text-primary">
                   Upload 4K / HD Video Clip
                 </p>
-                <p className="font-body-sm text-body-sm text-outline mt-0.5">
+                <p className="text-[11px] text-outline">
                   Auto-optimized for streaming storage
                 </p>
               </div>
