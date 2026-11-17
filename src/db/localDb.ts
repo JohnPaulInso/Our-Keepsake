@@ -259,6 +259,19 @@ class LocalDatabase {
         savedProfile.heroQuote = "You're an answered prayer, baby.";
         await idbSet('coupleProfile', savedProfile);
       }
+      // (2026-07-13) Upgrade saved milestone to Nov 7, 2025; was Sep 14 first hangout
+      if (
+        savedProfile.showNextRendezvous === undefined ||
+        savedProfile.milestoneDateLabel === 'Sep 14, 2025' ||
+        !savedProfile.milestoneTitle ||
+        savedProfile.milestoneTitle.includes('First Chapter')
+      ) {
+        savedProfile.showNextRendezvous = false;
+        savedProfile.milestoneTitle = 'The Day I Courted Her';
+        savedProfile.milestoneDateLabel = 'Nov 7, 2025';
+        savedProfile.milestoneTag = 'Milestone';
+        await idbSet('coupleProfile', savedProfile);
+      }
       memCache.coupleProfile = savedProfile;
     } else {
       await idbSet('coupleProfile', DEFAULT_COUPLE_PROFILE);
