@@ -912,8 +912,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight font-serif mb-1">
           Together for {daysTogether} Days
         </h1>
+        {/* (2026-07-13) Fallback to answered prayer quote; was unhandled heroQuote */}
         <p className="font-body-md text-body-md text-on-surface-variant max-w-[320px] italic font-serif">
-          “{profile.heroQuote}”
+          “{profile.heroQuote && !profile.heroQuote.includes('no heart for me like yours') ? profile.heroQuote : "You're an answered prayer, baby."}”
         </p>
 
         {/* (2026-07-13) Boost Next Rendezvous card contrast & visibility; was faint */}

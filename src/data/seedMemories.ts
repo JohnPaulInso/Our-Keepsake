@@ -19,7 +19,8 @@ export const DEFAULT_COUPLE_PROFILE: CoupleProfile = {
   partner2Name: 'Zea',
   relationshipStartDateISO: '2025-09-14',
   chapterTitle: 'Chapter II • JP & Zea',
-  heroQuote: 'In all the world, there is no heart for me like yours, Zea.',
+  // (2026-07-13) Update heroQuote to prayer quote; was world heart quote
+  heroQuote: "You're an answered prayer, baby.",
   avatarUrl: COUPLE_AVATAR_URL,
   nextRendezvousTitle: 'Sunset Picnic at Presidio with Zea',
   nextRendezvousDayLabel: 'This Sat',

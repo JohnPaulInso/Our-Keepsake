@@ -236,6 +236,11 @@ class LocalDatabase {
         savedProfile.avatarUrl = COUPLE_AVATAR_URL;
         await idbSet('coupleProfile', savedProfile);
       }
+      // (2026-07-13) Upgrade saved heroQuote in profile; was old heart quote
+      if (!savedProfile.heroQuote || savedProfile.heroQuote.includes('no heart for me like yours')) {
+        savedProfile.heroQuote = "You're an answered prayer, baby.";
+        await idbSet('coupleProfile', savedProfile);
+      }
       memCache.coupleProfile = savedProfile;
     } else {
       await idbSet('coupleProfile', DEFAULT_COUPLE_PROFILE);
