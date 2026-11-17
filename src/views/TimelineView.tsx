@@ -1797,7 +1797,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 </div>
 
                 {/* The Heartfelt Note */}
-                {/* (2026-07-13) Auto-expanding Keep textarea with limit; was 6-line striped box */}
+                {/* (2026-07-13) Set Google font Plus Jakarta Sans on note; was Cormorant serif */}
                 <div id="heartfelt-note-input-container">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
@@ -1816,7 +1816,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                       adjustStoryTextareaHeight(e.target);
                     }}
                     placeholder={`Write down how ${profile.partner2Name} smiled, what she said, the quiet moments you never want to forget...`}
-                    className="w-full bg-transparent font-['Cormorant_Garamond',Georgia,serif] text-lg sm:text-[19px] leading-relaxed text-on-surface focus:outline-none border-none p-0 placeholder:text-outline/40 overflow-hidden resize-none min-h-[240px]"
+                    className="w-full bg-transparent font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[15px] sm:text-base leading-relaxed text-on-surface focus:outline-none border-none p-0 placeholder:text-outline/40 overflow-hidden resize-none min-h-[240px]"
                     style={{ minHeight: '240px' }}
                   />
                 </div>
@@ -2153,12 +2153,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 </div>
 
                 {/* The Heartfelt Note with stationery lines */}
-                {/* (2026-07-13) Clean Keep-style note layout; was fixed 160px striped lines */}
+                {/* (2026-07-13) Set Google font Plus Jakarta Sans on note; was Cormorant serif */}
                 <div id="heartfelt-note-view-container">
                   <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-2">
                     The Heartfelt Note
                   </span>
-                  <div className="min-h-[160px] text-on-surface font-['Cormorant_Garamond',Georgia,serif] text-lg sm:text-[19px] leading-relaxed">
+                  <div className="min-h-[160px] text-on-surface font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[15px] sm:text-base leading-relaxed">
                     <p className="whitespace-pre-wrap">
                       {primaryDateMemory?.storyBody ||
                         primaryDateMemory?.snippet ||
