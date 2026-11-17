@@ -1,0 +1,16 @@
+{
+  "total_tokens": {
+    "input": 0,
+    "output": 0
+  },
+  "total_cost_usd": 0.0,
+  "runs": [
+    {
+      "timestamp": "2026-11-17T16:34:31.509479+00:00",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "files_processed": 80
+    }
+  ]
+}
