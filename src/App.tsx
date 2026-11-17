@@ -405,16 +405,17 @@ export const App: React.FC = () => {
                   setEditingMemory(null);
                   switchTab('timeline');
                 }}
-                className="w-8 h-8 -ml-1 rounded-full flex items-center justify-center text-primary active:scale-95"
+                className="w-8 h-8 -ml-1 mr-1 rounded-full flex items-center justify-center text-primary active:scale-95"
               >
                 <span className="material-symbols-outlined text-[19px]">
                   arrow_back_ios_new
                 </span>
               </button>
             )}
+            {/* (2026-07-13) Fix header logo size and spacing vs squeezed broken img */}
             <img
               alt="Capybara Wax Seal Monogram"
-              className="h-8 w-auto object-contain"
+              className="h-8 w-8 object-contain shrink-0"
               src={CAPYBARA_SEAL_LOGO}
             />
             <div className="flex flex-col">

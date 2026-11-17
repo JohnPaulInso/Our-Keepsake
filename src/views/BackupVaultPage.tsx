@@ -190,10 +190,11 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
       <header className="sticky top-0 w-full z-40 bg-surface-bright/98 backdrop-blur-md border-b border-outline-variant/30">
         <div className="h-16 px-margin max-w-[760px] mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
+            {/* (2026-07-13) Set explicit 32px square dimensions on logo vs auto width */}
             <img
               src={CAPYBARA_SEAL_LOGO}
               alt="Capybara Wax Seal"
-              className="h-8 w-auto object-contain"
+              className="h-8 w-8 object-contain shrink-0"
             />
             <div>
               <h1 className="font-headline-sm text-headline-sm text-primary font-serif leading-tight">
