@@ -443,10 +443,23 @@ class LocalDatabase {
     return (all || []).filter((m) => m.dateISO === dateISO);
   }
 
+  // (2026-07-13) Deduplicate memories by dateISO on save; was raw array write
   async setMemories(memories: KeepsakeMemory[], fromRemote = false): Promise<void> {
-    memCache.memories = memories;
-    await idbSet('memories', memories);
-    saveLightweightMirror(memories);
+    const map = new Map<string, KeepsakeMemory>();
+    for (const m of memories) {
+      if (m && m.dateISO) {
+        const existing = map.get(m.dateISO);
+        if (!existing || (m.updatedAt || 0) >= (existing.updatedAt || 0)) {
+          map.set(m.dateISO, m);
+        }
+      }
+    }
+    const deduplicated = Array.from(map.values()).sort((a, b) =>
+      b.dateISO.localeCompare(a.dateISO)
+    );
+    memCache.memories = deduplicated;
+    await idbSet('memories', deduplicated);
+    saveLightweightMirror(deduplicated);
     this.notify();
     if (!fromRemote) {
       this.signalCrossTab();

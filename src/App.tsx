@@ -478,13 +478,13 @@ export const App: React.FC = () => {
       snippet: formattedStory.slice(0, 160) + (formattedStory.length > 160 ? '...' : ''),
       updatedAt: now,
     };
-    let nextList: KeepsakeMemory[];
-    if (existingIndex !== -1) {
-      nextList = [...memories];
-      nextList[existingIndex] = formattedMemory;
-    } else {
-      nextList = [formattedMemory, ...memories];
-    }
+    // (2026-07-13) Strictly deduplicate by dateISO on save; was partial index swap
+    const remaining = memories.filter(
+      (m) => m.id !== finalId && m.dateISO !== memory.dateISO
+    );
+    const nextList = [formattedMemory, ...remaining].sort((a, b) =>
+      b.dateISO.localeCompare(a.dateISO)
+    );
 
     setMemories(nextList);
     setSelectedMemoryId(finalId);
