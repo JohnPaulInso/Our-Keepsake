@@ -430,6 +430,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
   const isHorizontalGestureRef = useRef<boolean | null>(null);
+  // (2026-07-13) Add swipe state & refs for month swiping; was buttons only
+  const [calendarDragX, setCalendarDragX] = useState(0);
+  const [isCalendarSwiping, setIsCalendarSwiping] = useState(false);
+  const calSwipeStartXRef = useRef<number | null>(null);
+  const calSwipeStartYRef = useRef<number | null>(null);
+  const calSwipeHorizontalRef = useRef<boolean | null>(null);
+  const calSuppressClickRef = useRef(false);
 
   const openDateOverlay = (day: number) => {
     setSelectedDay(day);
@@ -929,6 +936,69 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     }
   };
 
+  // (2026-07-13) Handle touch/mouse horizontal swipe to switch months; was none
+  const handleCalendarPointerDown = (e: React.PointerEvent<HTMLElement>) => {
+    if (monthPickerOpen || yearPickerOpen) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    calSwipeStartXRef.current = e.clientX;
+    calSwipeStartYRef.current = e.clientY;
+    calSwipeHorizontalRef.current = null;
+    setIsCalendarSwiping(false);
+    setCalendarDragX(0);
+  };
+
+  const handleCalendarPointerMove = (e: React.PointerEvent<HTMLElement>) => {
+    if (calSwipeStartXRef.current === null || calSwipeStartYRef.current === null) return;
+    const dx = e.clientX - calSwipeStartXRef.current;
+    const dy = e.clientY - calSwipeStartYRef.current;
+
+    if (calSwipeHorizontalRef.current === null) {
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+      if (Math.abs(dx) > Math.abs(dy) * 1.1) {
+        calSwipeHorizontalRef.current = true;
+        setIsCalendarSwiping(true);
+      } else {
+        calSwipeHorizontalRef.current = false;
+        return;
+      }
+    }
+
+    if (calSwipeHorizontalRef.current) {
+      setCalendarDragX(Math.max(-90, Math.min(90, dx * 0.55)));
+    }
+  };
+
+  const handleCalendarPointerEnd = (e: React.PointerEvent<HTMLElement>) => {
+    if (calSwipeStartXRef.current === null) return;
+    const dx = e.clientX - calSwipeStartXRef.current;
+    const wasHorizontal = calSwipeHorizontalRef.current === true;
+
+    calSwipeStartXRef.current = null;
+    calSwipeStartYRef.current = null;
+    calSwipeHorizontalRef.current = null;
+    setIsCalendarSwiping(false);
+    setCalendarDragX(0);
+
+    if (wasHorizontal && Math.abs(dx) >= 48) {
+      calSuppressClickRef.current = true;
+      window.setTimeout(() => {
+        calSuppressClickRef.current = false;
+      }, 60);
+      if (dx < 0) {
+        handleNextMonth();
+      } else {
+        handlePrevMonth();
+      }
+    }
+  };
+
+  const handleCalendarClickCapture = (e: React.MouseEvent<HTMLElement>) => {
+    if (calSuppressClickRef.current) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -1180,10 +1250,16 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         </section>
       )}
 
-      {/* (2026-07-13) Improve calendar typography with Google Fonts vs oldstyle serif */}
+      {/* (2026-07-13) Enable left/right month swipe on calendar card; was buttons */}
       <section
         id="keepsake-monthly-calendar-card" // Monthly calendar card with Google Fonts
-        className="relative bg-surface-container-lowest rounded-2xl shadow-md p-space-md mb-space-lg overflow-hidden border border-outline-variant/35"
+        onPointerDown={handleCalendarPointerDown}
+        onPointerMove={handleCalendarPointerMove}
+        onPointerUp={handleCalendarPointerEnd}
+        onPointerCancel={handleCalendarPointerEnd}
+        onPointerLeave={handleCalendarPointerEnd}
+        onClickCapture={handleCalendarClickCapture}
+        className="relative bg-surface-container-lowest rounded-2xl shadow-md p-space-md mb-space-lg overflow-hidden border border-outline-variant/35 touch-pan-y select-none"
       >
         {/* (2026-07-13) Responsive single-row calendar header; was broken line break */}
         <div className="flex items-center justify-between pb-space-sm border-b border-outline-variant/40 mb-space-sm gap-1.5">
@@ -1334,8 +1410,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           <span>Sa</span>
         </div>
 
-        {/* Monthly Calendar Days Grid with crisp lining tabular Google Font numbers */}
-        <div className="grid grid-cols-7 gap-y-1.5 text-center calendar-num-font text-[13.5px]">
+        {/* (2026-07-13) Translate calendar grid on horizontal swipe; was static */}
+        <div
+          className={`grid grid-cols-7 gap-y-1.5 text-center calendar-num-font text-[13.5px] ${
+            isCalendarSwiping ? '' : 'transition-transform duration-200 ease-out'
+          }`}
+          style={{ transform: calendarDragX ? `translateX(${calendarDragX}px)` : undefined }}
+        >
           {calendarDays.map((cell, idx) => {
             if (!cell.inCurrentMonth) {
               return (
