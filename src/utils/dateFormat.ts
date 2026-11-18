@@ -44,6 +44,15 @@ export function calculateDaysUntil(targetDateISO: string): number {
   }
 }
 
+// (2026-07-13) Format current local date as YYYY-MM-DD; was hardcoded 2026-11-16
+export function getTodayISO(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 export function formatDuration(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);

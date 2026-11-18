@@ -527,7 +527,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       weatherTemp: '',
       weatherConditions: '',
       moodVibe: '',
-      vibeTags: ['First Time', 'Cozy Rainy Day'],
+      // (2026-07-13) Set default vibeTags to empty array; was hardcoded default tags
+      vibeTags: [],
       categories: ['PHOTO'],
       dotIndicators: ['GOLD', 'MOCHA'],
       photos: [],

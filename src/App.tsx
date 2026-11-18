@@ -25,8 +25,8 @@ import { ToastContainer, ToastItem } from './components/ToastContainer';
 import { CoupleStudioModal } from './components/CoupleStudioModal';
 // (2026-07-13) Import PinLockModal for startup passcode gate; was unimported
 import { PinLockModal } from './components/PinLockModal';
-// (2026-07-13) Import getChapterNumber for dynamic chapter seal; was fixed 15
-import { formatStandardDate, getChapterNumber } from './utils/dateFormat';
+// (2026-07-13) Import getTodayISO for today record defaults; was omitted
+import { formatStandardDate, getChapterNumber, getTodayISO } from './utils/dateFormat';
 
 export const App: React.FC = () => {
   const location = useLocation();
@@ -310,6 +310,19 @@ export const App: React.FC = () => {
   const handleStartEditMemory = (memory: KeepsakeMemory) => {
     setEditingMemory(memory);
     switchTab('new-date');
+  };
+
+  // (2026-07-13) Open today memory or edit if exists; was direct tab navigation
+  const handleRecordNewDateClick = () => {
+    const todayISO = getTodayISO();
+    const existingToday = memories.find((m) => m.dateISO === todayISO);
+    if (existingToday) {
+      addToast('Today already has a recorded keepsake. Opening it to edit.', 'info');
+      handleStartEditMemory(existingToday);
+      return;
+    }
+    setEditingMemory(null);
+    requestTabNavigation('new-date');
   };
 
   const handleSaveMemory = async (memory: KeepsakeMemory, isDraft: boolean) => {
@@ -667,7 +680,7 @@ export const App: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => requestTabNavigation('new-date')}
+            onClick={handleRecordNewDateClick}
             className={`w-full py-3 px-4 rounded-xl font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 ${
               activeTab === 'new-date'
                 ? 'bg-primary text-on-primary ring-2 ring-primary-container'
@@ -1022,11 +1035,12 @@ export const App: React.FC = () => {
               ))}
 
             {activeTab === 'new-date' && (
-              // (2026-07-13) Connect onDirtyChange and safe tab cancel; was immediate
+              // (2026-07-13) Pass existingMemories to disallow duplicate dates; was absent
               <ComposerView
                 key={editingMemory?.id || 'new-composer'}
                 profile={profile}
                 editingMemory={editingMemory}
+                existingMemories={memories}
                 totalMemoriesCount={memories.length}
                 onSaveMemory={handleSaveMemory}
                 onCancel={() => requestTabNavigation('timeline')}
@@ -1111,7 +1125,7 @@ export const App: React.FC = () => {
             <button
               type="button"
               aria-label="Record New Date Memory"
-              onClick={() => requestTabNavigation('new-date')}
+              onClick={handleRecordNewDateClick}
               className="w-12 h-12 rounded-full bg-gradient-to-tr from-secondary to-primary-container text-surface-bright flex items-center justify-center shadow-[0_6px_14px_-3px_rgba(74,59,50,0.28)] ring-2 ring-tertiary-fixed/80 active:scale-95 transition-transform"
             >
               <span className="material-symbols-outlined text-[26px]">add</span>

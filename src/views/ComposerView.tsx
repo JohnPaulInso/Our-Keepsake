@@ -9,8 +9,8 @@ import {
   MemoryCategory,
   PolaroidPhoto,
 } from '../types';
-// (2026-07-13) Import getChapterNumber for dynamic chapter seal; was fixed II
-import { formatDuration, formatStandardDate, getChapterNumber } from '../utils/dateFormat';
+// (2026-07-13) Add getTodayISO & existingMemories to prevent duplicate same-day
+import { formatDuration, formatStandardDate, getChapterNumber, getTodayISO } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 import { ImageCropperModal } from '../components/ImageCropperModal';
 
@@ -23,6 +23,7 @@ interface ComposerViewProps {
   onToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
   // (2026-07-13) Add onDirtyChange prop for unsaved changes guard; was absent
   onDirtyChange?: (isDirty: boolean) => void;
+  existingMemories?: KeepsakeMemory[];
 }
 
 const DEFAULT_VIBE_TAGS = [
@@ -59,8 +60,10 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
   onToast,
   // (2026-07-13) Destructure onDirtyChange; was unhandled
   onDirtyChange,
+  existingMemories,
 }) => {
-  const [dateISO, setDateISO] = useState(editingMemory?.dateISO || '2026-11-16');
+  // (2026-07-13) Default date to today & tags empty; was hardcoded date and tags
+  const [dateISO, setDateISO] = useState(editingMemory?.dateISO || getTodayISO());
   // (2026-07-13) Set default location to Bogo City, Cebu & all-day; was Soho
   const [timeFormatted, setTimeFormatted] = useState(
     editingMemory?.timeFormatted || 'All Day'
@@ -92,12 +95,22 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     return (words.charAt(0).toUpperCase() + words.slice(1)).replace(/[,;:]+$/, '') + '...';
   }, [storyBody]);
   const [selectedTags, setSelectedTags] = useState<string[]>(
-    editingMemory?.vibeTags || ['First Time', 'Cozy Rainy Day']
+    editingMemory?.vibeTags || []
   );
   const [customTagInput, setCustomTagInput] = useState('');
   const [selectedDots, setSelectedDots] = useState<DotIndicator[]>(
-    editingMemory?.dotIndicators || ['GOLD', 'MOCHA']
+    editingMemory?.dotIndicators || ['MOCHA']
   );
+
+  // (2026-07-13) Detect duplicate memory on same day; was unconstrained
+  const duplicateMemory = useMemo(() => {
+    if (!existingMemories) return null;
+    return existingMemories.find(
+      (m) => m.dateISO === dateISO && (!editingMemory || m.id !== editingMemory.id)
+    ) || null;
+  }, [existingMemories, dateISO, editingMemory]);
+
+  const isDuplicateDate = Boolean(duplicateMemory);
 
   // Voice Note State
   const [voiceTitle, setVoiceTitle] = useState(
@@ -191,7 +204,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
   // (2026-07-13) Sync form state when editing memory changes; was initial only
   useEffect(() => {
     if (editingMemory) {
-      setDateISO(editingMemory.dateISO || '2026-11-16');
+      setDateISO(editingMemory.dateISO || getTodayISO());
       setTimeFormatted(editingMemory.timeFormatted || 'All Day');
       setLocation(editingMemory.location || 'Bogo City, Cebu');
       setWeatherTemp(editingMemory.weatherTemp || '');
@@ -200,9 +213,9 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       setTitle(editingMemory.title || '');
       setLetterHeading(editingMemory.letterHeading || '');
       setStoryBody(editingMemory.storyBody || editingMemory.snippet || '');
-      setQuoteHighlight(editingMemory.quoteHighlight || '');
-      setSelectedTags(editingMemory.vibeTags || ['First Time', 'Cozy Rainy Day']);
-      setSelectedDots(editingMemory.dotIndicators || ['GOLD', 'MOCHA']);
+      quoteHighlight !== undefined && setQuoteHighlight(editingMemory.quoteHighlight || '');
+      setSelectedTags(editingMemory.vibeTags || []);
+      setSelectedDots(editingMemory.dotIndicators || ['MOCHA']);
       setPhotos(editingMemory.photos || []);
       setVoiceTitle(editingMemory.audioMemo?.title || `Whispered note for ${profile.partner2Name}`);
       setVoiceDurationSec(editingMemory.audioMemo?.durationSeconds || 42);
@@ -415,7 +428,12 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     };
   };
 
+  // (2026-07-13) Disallow same-day duplicate save; was unguarded submission
   const handleSealSubmit = () => {
+    if (isDuplicateDate) {
+      onToast(`A keepsake for ${formatStandardDate(dateISO)} already exists. Choose another date or edit the existing one.`, 'warning');
+      return;
+    }
     setSealingAnim(true);
     setTimeout(() => {
       setSealingAnim(false);
@@ -424,7 +442,12 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     }, 220);
   };
 
+  // (2026-07-13) Disallow same-day duplicate draft; was unguarded draft save
   const handleDraftSubmit = () => {
+    if (isDuplicateDate) {
+      onToast(`A keepsake for ${formatStandardDate(dateISO)} already exists. Choose another date or edit the existing one.`, 'warning');
+      return;
+    }
     const payload = buildMemoryPayload(true);
     onSaveMemory(payload, true);
   };
@@ -516,6 +539,18 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
             </span>
           </button>
         </div>
+
+        {/* (2026-07-13) Show duplicate date warning banner; was absent */}
+        {isDuplicateDate && (
+          <div className="flex items-center gap-space-sm p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-900 text-body-sm">
+            <span className="material-symbols-outlined text-[20px] text-amber-700 shrink-0">
+              warning
+            </span>
+            <span className="flex-1 min-w-0">
+              A keepsake already exists for <strong>{formatStandardDate(dateISO)}</strong>. Same-day duplicate records are disallowed. Please select another date or edit the existing keepsake.
+            </span>
+          </div>
+        )}
 
         {/* Editorial Title & Ruled Note Card */}
         <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm relative overflow-hidden flex flex-col border border-outline-variant/30">
@@ -1075,6 +1110,12 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                   onChange={(e) => setDateISO(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
                 />
+                {/* (2026-07-13) Inline date conflict alert in modal; was absent */}
+                {isDuplicateDate && (
+                  <p className="text-xs text-amber-700 mt-1 font-medium">
+                    ⚠️ A memory already exists for this date.
+                  </p>
+                )}
               </div>
               <div>
                 <label className="font-label-md text-label-md uppercase text-outline block mb-1">
