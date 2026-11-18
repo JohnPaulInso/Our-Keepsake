@@ -539,26 +539,26 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
             </div>
           </div>
 
-          {/* (2026-07-13) Move quote to bottom as optional; was required & placed above note */}
+          {/* (2026-07-13) Memorable quote & summary field; was what partner said */}
           <div className="mt-space-md pt-space-sm border-t border-outline-variant/20 relative">
             <div className="flex items-center justify-between mb-space-xs">
               <label
                 className="font-label-md text-label-md uppercase tracking-wider text-outline block"
                 htmlFor="memory-quote"
               >
-                What {profile.partner2Name} Said (Highlighted Quote)
+                Memorable Quote &amp; Summary (Highlighted)
               </label>
               <span className="text-[11px] font-medium text-outline uppercase tracking-wider">
                 Optional
               </span>
             </div>
-            {/* (2026-07-13) Update quote placeholder to natural optional prompt vs dummy */}
+            {/* (2026-07-13) Update placeholder to memorable quote summary vs whispered */}
             <input
               id="memory-quote"
               type="text"
               value={quoteHighlight}
               onChange={(e) => setQuoteHighlight(e.target.value)}
-              placeholder={`E.g., What ${profile.partner2Name} said or whispered today (leave blank if none)...`}
+              placeholder="E.g., A memorable quote, phrase, or heartfelt summary of this day (leave blank if none)..."
               className="w-full bg-transparent font-italic-quote text-body-md italic text-secondary placeholder:text-outline-variant/80 focus:outline-none pb-space-xs font-serif"
             />
             <div className="w-full h-px bg-surface-container-high" />

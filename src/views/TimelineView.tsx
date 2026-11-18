@@ -1853,11 +1853,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   </div>
                 </div>
 
-                {/* What Zea Said (Optional and placed at the bottom) */}
+                {/* (2026-07-13) Memorable quote & summary display; was what partner said */}
                 {primaryDateMemory?.quoteHighlight && (
                   <div className="mt-5 pt-3 border-t border-surface-container-high">
                     <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
-                      What {profile.partner2Name} Said (Highlighted Quote)
+                      Memorable Quote &amp; Summary
                     </span>
                     <p className="font-['Cormorant_Garamond',serif] italic text-secondary text-lg">
                       “{primaryDateMemory.quoteHighlight}”
