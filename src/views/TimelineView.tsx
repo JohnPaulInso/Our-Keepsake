@@ -1620,7 +1620,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         </div>
 
         {/* 7-Column Day-of-Week Headers in Plus Jakarta Sans */}
-        <div className="grid grid-cols-7 text-center calendar-num-font text-[11px] font-semibold uppercase tracking-[0.12em] text-secondary py-1.5 mb-1">
+        <div className="grid grid-cols-7 text-center calendar-num-font text-[11px] font-semibold uppercase tracking-[0.12em] text-secondary py-2 mb-2">
           <span>Su</span>
           <span>Mo</span>
           <span>Tu</span>
@@ -1630,9 +1630,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           <span>Sa</span>
         </div>
 
-        {/* (2026-07-13) Translate calendar grid on horizontal swipe; was static */}
+        {/* (2026-07-13) Increase calendar grid height and day cell size; was h-10 */}
         <div
-          className={`grid grid-cols-7 gap-y-1.5 text-center calendar-num-font text-[13.5px] ${
+          className={`grid grid-cols-7 gap-y-2.5 sm:gap-y-3.5 text-center calendar-num-font text-[14px] ${
             isCalendarSwiping ? '' : 'transition-transform duration-200 ease-out'
           }`}
           style={{ transform: calendarDragX ? `translateX(${calendarDragX}px)` : undefined }}
@@ -1642,7 +1642,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               return (
                 <div
                   key={idx}
-                  className="flex flex-col items-center justify-center h-10 text-outline opacity-35 select-none font-normal"
+                  className="flex flex-col items-center justify-center h-12 sm:h-14 text-outline opacity-35 select-none font-normal"
                 >
                   <span>{cell.day}</span>
                 </div>
@@ -1656,7 +1656,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 type="button"
                 // (2026-07-13) Open date overlay on calendar click; was setSelectedDay
                 onClick={() => openDateOverlay(cell.day)}
-                className={`flex flex-col items-center justify-center h-10 mx-auto w-10 rounded-xl transition-all relative ${
+                className={`flex flex-col items-center justify-center h-12 sm:h-14 mx-auto w-10 sm:w-11 rounded-xl transition-all relative ${
                   isSelected
                     ? 'bg-primary text-on-primary font-bold shadow-sm active:scale-95'
                     : hasDots
@@ -1664,9 +1664,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                       : 'hover:bg-surface-container text-primary font-medium'
                 }`}
               >
-                <span className="leading-none">{cell.day}</span>
+                <span className="leading-none text-[14px] sm:text-[15px]">{cell.day}</span>
                 {hasDots && (
-                  <div className="flex items-center gap-0.5 mt-1">
+                  <div className="flex items-center gap-1 mt-1.5">
                     {cell.dots.includes('GOLD') && (
                       <span
                         className="w-1.5 h-1.5 rounded-full"
