@@ -399,8 +399,9 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
           </p>
 
           {memory.quoteHighlight && (
-            <div className="px-4 py-3 bg-surface-container-low/65 rounded-xl my-4 border border-outline-variant/25">
-              <p className="font-['Cormorant_Garamond',Georgia,serif] text-[15px] sm:text-base text-secondary text-center italic leading-relaxed">
+            <div className="px-4 py-3.5 bg-surface-container-low/65 rounded-xl my-4 border border-outline-variant/25">
+              {/* (2026-07-13) Increase quote font size; was text-[15px] sm:text-base */}
+              <p className="font-['Cormorant_Garamond',Georgia,serif] text-lg sm:text-xl font-medium text-secondary text-center italic leading-relaxed">
                 “{memory.quoteHighlight}”
               </p>
             </div>
@@ -439,10 +440,11 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                 <path d="M80,17 Q82,14 84,15" fill="none" stroke="currentColor" strokeWidth="1.5" />
               </svg>
             </div>
-            <span className="relative z-10 font-['Playfair_Display',Georgia,serif] text-base text-secondary italic">
+            {/* (2026-07-13) Increase sign-off font sizes; was text-base & 10px */}
+            <span className="relative z-10 font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl text-secondary italic">
               Yours always,
             </span>
-            <span className="relative z-10 font-['Plus_Jakarta_Sans',sans-serif] text-[10px] font-semibold uppercase tracking-[0.14em] text-outline mt-0.5">
+            <span className="relative z-10 font-['Plus_Jakarta_Sans',sans-serif] text-xs font-semibold uppercase tracking-[0.14em] text-outline mt-0.5">
               {memory.signOffAuthor || `${profile.partner1Name} • St. 14`}
             </span>
           </div>
