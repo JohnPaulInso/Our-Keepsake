@@ -2003,6 +2003,37 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     sortOrder: 65,
     updatedAt: 1771322400000,
   },
+  // (2026-07-13) Seed Feb 16, 2026 dockside makeout keepsake; was up to Feb 17
+  {
+    id: 'mem-2026-02-16-imported',
+    keepsakeNumber: 48,
+    volumeNumber: 1,
+    dateISO: '2026-02-16',
+    timeFormatted: '2:00 PM',
+    title: 'Black Dress, Medellin Dockside & 1-Hour Secret Makeout',
+    letterHeading: 'Black Dress, Medellin Dockside & 1-Hour Secret Makeout',
+    snippet:
+      'Fetched at DB in your stunning black dress, heading off to Medellin dockside, deep breathes, intense touching, and an hour-long secret makeout session.',
+    storyBody:
+      'Fetched u at db, you looked so beautiful in that black dress and i was crushing so hard then para di masakpan na gikuha mo alas 2 ta nanglarga, we stayed at medellin dockside and hugged each other with deep breathes and intense touching.. and long holds of kisses, we had to stop whenever the music ends para di mabati nagchula, had 1 hour of touching each other and makeout sessions while gelly and say² was at the back, we didnt care, we kissed and touched and breathed hard and fingered harder hangtud nalang nangakatag akong buhok ug nabungkag imong bingka',
+    quoteHighlight:
+      'You looked so beautiful in that black dress... 1 hour of touching each other and makeout sessions at Medellin dockside',
+    signOffAuthor: 'JP • St. 1',
+    location: 'DB & Medellin Dockside',
+    weatherTemp: '30°C',
+    weatherConditions: 'Warm Sea Breeze',
+    moodVibe: 'Intense Closeness & Thrilling Secret Kisses',
+    vibeTags: ['First Time', 'Deep Talks'],
+    categories: ['EVENT'],
+    dotIndicators: ['MOCHA', 'GOLD', 'ROSE'],
+    photos: [],
+    partnerNotes: [],
+    isSealed: true,
+    sealLabel: 'Sealed in Chapter 1 • JP & Zea',
+    sealIcon: 'favorite',
+    sortOrder: 66,
+    updatedAt: 1771236000000,
+  },
 ];
 
 export const INITIAL_SECRET_YEAR_NOTES: SecretYearNote[] = [];
