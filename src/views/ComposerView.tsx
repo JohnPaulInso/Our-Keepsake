@@ -498,8 +498,9 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
         <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight font-serif">
           {editingMemory ? 'Refine Our Keepsake Chapter' : "Preserve Today's Chapter"}
         </h2>
+        {/* (2026-07-13) Update romantic subtitle quote; was Every little moment */}
         <p className="font-italic-quote text-italic-quote text-secondary mt-space-xs max-w-xs leading-relaxed font-serif italic">
-          Every little moment with {profile.partner2Name} is worth remembering forever.
+          You&apos;re the closest to heaven, that I&apos;ll ever be, baby
         </p>
       </div>
 

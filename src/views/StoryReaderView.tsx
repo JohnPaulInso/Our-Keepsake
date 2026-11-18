@@ -326,8 +326,9 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
         <h2 className="font-['Playfair_Display',Georgia,serif] tracking-tight text-2xl md:text-3xl text-center text-primary font-semibold">
           <span>{capitalizeFirstLetters(memory.letterHeading || memory.title)}</span>
         </h2>
+        {/* (2026-07-13) Update romantic subtitle quote; was Every little moment */}
         <p className="mt-1 max-w-xs leading-relaxed font-['Cormorant_Garamond',serif] italic text-base text-secondary">
-          Every little moment with {profile.partner2Name} is worth remembering forever.
+          You&apos;re the closest to heaven, that I&apos;ll ever be, baby
         </p>
       </div>
 
