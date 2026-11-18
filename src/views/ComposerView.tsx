@@ -9,7 +9,8 @@ import {
   MemoryCategory,
   PolaroidPhoto,
 } from '../types';
-import { formatDuration, formatStandardDate } from '../utils/dateFormat';
+// (2026-07-13) Import getChapterNumber for dynamic chapter seal; was fixed II
+import { formatDuration, formatStandardDate, getChapterNumber } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 import { ImageCropperModal } from '../components/ImageCropperModal';
 
@@ -313,10 +314,13 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       categories.push('ANNIVERSARY');
     }
 
+    // (2026-07-13) Dynamic chapter number from courting date; was fixed 15 / II
+    const calculatedChapter = getChapterNumber(dateISO, profile.courtingDateISO || '2025-11-07');
+
     return {
       id: editingMemory?.id || `mem-${Date.now()}`,
       keepsakeNumber: editingMemory?.keepsakeNumber || 85 + totalMemoriesCount,
-      volumeNumber: editingMemory?.volumeNumber || 15,
+      volumeNumber: editingMemory?.volumeNumber || calculatedChapter,
       dateISO,
       timeFormatted: timeFormatted.trim() || 'All Day',
       title: cleanTitle,
@@ -324,7 +328,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       snippet: cleanBody.slice(0, 175) + (cleanBody.length > 175 ? '...' : ''),
       storyBody: cleanBody,
       quoteHighlight: quoteHighlight.trim(),
-      signOffAuthor: `${profile.partner1Name} • St. ${editingMemory?.volumeNumber || 15}`,
+      signOffAuthor: `${profile.partner1Name} • St. ${editingMemory?.volumeNumber || calculatedChapter}`,
       location: location.trim() || 'Bogo City, Cebu',
       weatherTemp: '',
       weatherConditions: '',
@@ -360,7 +364,10 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       partnerNotes: editingMemory?.partnerNotes || [],
       isSealed: !isDraft,
       isDraft,
-      sealLabel: isDraft ? 'Saved Draft on Desk' : `Sealed in ${profile.chapterTitle}`,
+      // (2026-07-13) Set sealLabel with dynamic chapter number; was Chapter II
+      sealLabel: isDraft
+        ? 'Saved Draft on Desk'
+        : `Sealed in Chapter ${calculatedChapter} • ${profile.partner1Name} & ${profile.partner2Name}`,
       sealIcon: isDraft ? 'edit_note' : 'spa',
       updatedAt: Date.now(),
       sortOrder: editingMemory?.sortOrder ?? 0,

@@ -27,7 +27,8 @@ import {
   SecretYearNote,
   VideoCapsule,
 } from '../types';
-import { calculateDaysTogether, formatDuration, formatStandardDate } from '../utils/dateFormat';
+// (2026-07-13) Import getChapterNumber for dynamic chapter calculation; was fixed II
+import { calculateDaysTogether, formatDuration, formatStandardDate, getChapterNumber } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 import { CustomDropdown } from '../components/CustomDropdown';
 // (2026-07-13) Import DB in TimelineView for date queries; was unimported
@@ -287,8 +288,13 @@ const SortableMemoryCard: React.FC<SortableMemoryCardProps> = ({
               {memory.sealIcon || 'spa'}
             </span>
           </div>
+          {/* (2026-07-13) Format dynamic chapter label from courting date; was fixed II */}
           <span className="font-label-md text-label-md text-on-surface-variant font-serif truncate-single">
-            {memory.sealLabel || 'Sealed in Chapter II'}
+            {memory.isDraft
+              ? 'Saved Draft on Desk'
+              : (memory.sealLabel
+                  ? memory.sealLabel.replace(/Chapter\s+(?:II|11|\d+)/i, `Chapter ${getChapterNumber(memory.dateISO)}`)
+                  : `Sealed in Chapter ${getChapterNumber(memory.dateISO)}`)}
           </span>
         </div>
         <div className="flex items-center gap-3 shrink-0">
@@ -528,7 +534,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       partnerNotes: [],
       isSealed: false,
       isDraft: false,
-      sealLabel: 'Capybara Wax Seal',
+      // (2026-07-13) Set sealLabel with dynamic chapter number; was Capybara Wax Seal
+      sealLabel: `Sealed in Chapter ${getChapterNumber(targetIso, profile.courtingDateISO || '2025-11-07')}`,
       sealIcon: 'verified',
       updatedAt: Date.now(),
       sortOrder: 0,
@@ -793,8 +800,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           >
             favorite
           </span>
+          {/* (2026-07-13) Dynamic current chapter title; was fixed Chapter II */}
           <span className="font-label-md text-label-md uppercase tracking-widest text-on-secondary-container">
-            {profile.chapterTitle || 'Chapter II • Our Keepsake'}
+            {profile.chapterTitle
+              ? profile.chapterTitle.replace(/Chapter\s+(?:II|11|\d+)/i, `Chapter ${getChapterNumber(undefined, profile.courtingDateISO || '2025-11-07')}`)
+              : `Chapter ${getChapterNumber(undefined, profile.courtingDateISO || '2025-11-07')} • ${profile.partner1Name} & ${profile.partner2Name}`}
           </span>
         </div>
         {/* (2026-07-13) Display courting stage banner vs official anniversary */}

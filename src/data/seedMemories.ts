@@ -23,7 +23,8 @@ export const DEFAULT_COUPLE_PROFILE: CoupleProfile = {
   meetingDateISO: '2025-09-14',
   courtingDateISO: '2025-11-07',
   anniversaryDateISO: '',
-  chapterTitle: 'Chapter II • JP & Zea',
+  // (2026-07-13) Set chapterTitle to Chapter 2 arabic numeral; was Chapter II
+  chapterTitle: 'Chapter 2 • JP & Zea',
   // (2026-07-13) Update heroQuote to prayer quote; was world heart quote
   heroQuote: "You're an answered prayer, baby.",
   avatarUrl: COUPLE_AVATAR_URL,

@@ -49,3 +49,30 @@ export function formatDuration(seconds: number): string {
   const secs = Math.floor(seconds % 60);
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
+
+// (2026-07-13) Calculate chapter based on courting anniversary; was fixed II
+export function getChapterNumber(dateISO?: string, courtingDateISO: string = '2025-11-07'): number {
+  try {
+    const [startYear, startMonth, startDay] = courtingDateISO.split('-').map(Number);
+    let targetYear: number, targetMonth: number, targetDay: number;
+    if (dateISO && /^\d{4}-\d{2}-\d{2}$/.test(dateISO)) {
+      [targetYear, targetMonth, targetDay] = dateISO.split('-').map(Number);
+    } else {
+      const now = new Date();
+      targetYear = now.getFullYear();
+      targetMonth = now.getMonth() + 1;
+      targetDay = now.getDate();
+    }
+
+    let years = targetYear - startYear;
+    if (
+      targetMonth < startMonth ||
+      (targetMonth === startMonth && targetDay < startDay)
+    ) {
+      years--;
+    }
+    return Math.max(1, years + 1);
+  } catch {
+    return 2;
+  }
+}

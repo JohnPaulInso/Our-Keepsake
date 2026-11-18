@@ -25,8 +25,8 @@ import { ToastContainer, ToastItem } from './components/ToastContainer';
 import { CoupleStudioModal } from './components/CoupleStudioModal';
 // (2026-07-13) Import PinLockModal for startup passcode gate; was unimported
 import { PinLockModal } from './components/PinLockModal';
-// (2026-07-13) Import formatStandardDate for responsive desktop sidebar vs none
-import { formatStandardDate } from './utils/dateFormat';
+// (2026-07-13) Import getChapterNumber for dynamic chapter seal; was fixed 15
+import { formatStandardDate, getChapterNumber } from './utils/dateFormat';
 
 export const App: React.FC = () => {
   const location = useLocation();
@@ -351,10 +351,12 @@ export const App: React.FC = () => {
           hasChanged = true;
         }
       } else {
+        // (2026-07-13) Set dynamic chapter number from courting date; was fixed 15
+        const calculatedChapter = getChapterNumber(dateISO, profile.courtingDateISO || '2025-11-07');
         const newMemory: KeepsakeMemory = {
           id: `mem-${dateISO}-${Date.now()}`,
           keepsakeNumber: memories.length + 1,
-          volumeNumber: 15,
+          volumeNumber: calculatedChapter,
           dateISO,
           timeFormatted: 'All Day',
           title: story.split('\n')[0].slice(0, 36) || `Keepsake for ${dateISO}`,
@@ -372,7 +374,7 @@ export const App: React.FC = () => {
           photos: [],
           partnerNotes: [],
           isSealed: true,
-          sealLabel: 'Sealed Keepsake',
+          sealLabel: `Sealed in Chapter ${calculatedChapter} • ${profile.partner1Name} & ${profile.partner2Name}`,
           sealIcon: 'favorite',
           sortOrder: 1,
           updatedAt: Date.now(),

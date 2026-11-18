@@ -283,6 +283,10 @@ class LocalDatabase {
       savedProfile.courtingDateISO = '2025-11-07';
       savedProfile.anniversaryDateISO = '';
       savedProfile.relationshipStartDateISO = '2025-11-07';
+      // (2026-07-13) Migrate legacy Chapter II to dynamic Chapter 2; was Chapter II
+      if (!savedProfile.chapterTitle || savedProfile.chapterTitle.includes('Chapter II') || savedProfile.chapterTitle.includes('Chapter 11')) {
+        savedProfile.chapterTitle = 'Chapter 2 • JP & Zea';
+      }
       await idbSet('coupleProfile', savedProfile);
       memCache.coupleProfile = savedProfile;
     } else {
