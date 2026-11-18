@@ -352,10 +352,8 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
       {/* Main Editorial Letter Parchment Card */}
       <article className="relative bg-surface-container-lowest rounded-xl shadow-md p-space-md sm:p-space-lg mb-space-lg overflow-hidden border border-outline-variant/25">
         <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-tertiary-fixed-dim/20 to-transparent pointer-events-none" />
+        {/* (2026-07-13) Remove letter heading label; was A Letter Written For Zea */}
         <header className="mb-space-md">
-          <p className="font-label-md text-label-md uppercase tracking-widest text-secondary mb-1">
-            A Letter Written For {profile.partner2Name}
-          </p>
           {/* (2026-07-13) Add big memory icon before story heading; was plain title */}
           <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight leading-snug font-serif flex items-center gap-2.5">
             <span
