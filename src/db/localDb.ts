@@ -228,6 +228,23 @@ class LocalDatabase {
       });
       memCache.secretYearNotes = savedNotes && Array.isArray(savedNotes) ? savedNotes : [];
       memCache.digitalLoveLetters = savedLetters && Array.isArray(savedLetters) ? savedLetters : [];
+
+      // (2026-07-13) Auto-seed imported August 2026 memories if missing; was absent
+      let memoriesUpdated = false;
+      for (const item of INITIAL_MEMORIES) {
+        const existingIdx = memCache.memories.findIndex((m) => m.dateISO === item.dateISO);
+        if (existingIdx === -1) {
+          memCache.memories.push(item);
+          memoriesUpdated = true;
+        } else if (!memCache.memories[existingIdx].storyBody || memCache.memories[existingIdx].storyBody.length < 20) {
+          memCache.memories[existingIdx] = { ...item, id: memCache.memories[existingIdx].id };
+          memoriesUpdated = true;
+        }
+      }
+      if (memoriesUpdated) {
+        memCache.memories.sort((a, b) => b.dateISO.localeCompare(a.dateISO));
+        await idbSet('memories', memCache.memories);
+      }
     }
 
     // (2026-07-13) Upgrade saved avatar to COUPLE_AVATAR_URL; was root string
