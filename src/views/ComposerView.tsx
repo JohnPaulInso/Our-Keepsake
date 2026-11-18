@@ -57,37 +57,46 @@ const DEFAULT_POLAROIDS: PolaroidPhoto[] = [
 
 // (2026-07-13) Optimize image compression to ~50KB; was 1600px at 0.88 quality
 function compressImageFile(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
+      const rawData = e.target?.result as string;
+      if (!rawData) {
+        resolve('');
+        return;
+      }
       const img = new Image();
       img.onload = () => {
-        const MAX_DIM = 1200;
-        let { width, height } = img;
-        if (width > MAX_DIM || height > MAX_DIM) {
-          if (width > height) {
-            height = Math.round((height * MAX_DIM) / width);
-            width = MAX_DIM;
-          } else {
-            width = Math.round((width * MAX_DIM) / height);
-            height = MAX_DIM;
+        try {
+          const MAX_DIM = 1200;
+          let { width, height } = img;
+          if (width > MAX_DIM || height > MAX_DIM) {
+            if (width > height) {
+              height = Math.round((height * MAX_DIM) / width);
+              width = MAX_DIM;
+            } else {
+              width = Math.round((width * MAX_DIM) / height);
+              height = MAX_DIM;
+            }
           }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(rawData);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.74));
+        } catch {
+          resolve(rawData);
         }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve(e.target?.result as string);
-          return;
-        }
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.74));
       };
-      img.onerror = () => resolve(e.target?.result as string);
-      img.src = e.target?.result as string;
+      img.onerror = () => resolve(rawData);
+      img.src = rawData;
     };
-    reader.onerror = reject;
+    reader.onerror = () => resolve('');
     reader.readAsDataURL(file);
   });
 }
@@ -202,9 +211,9 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
   const [recordElapsed, setRecordElapsed] = useState(0);
   const recordTimerRef = useRef<number | null>(null);
 
-  // (2026-07-13) Start new memories with empty polaroids vs prefilled sample photos
+  // (2026-07-13) Safeguard photos array default; was editingMemory.photos direct
   const [photos, setPhotos] = useState<PolaroidPhoto[]>(
-    editingMemory ? editingMemory.photos : []
+    editingMemory?.photos || []
   );
   const [pendingCropSrc, setPendingCropSrc] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
@@ -417,27 +426,35 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     onToast(`Voice note captured (${formatDuration(res.durationSeconds)})!`, 'success');
   };
 
-  // (2026-07-13) Batch up to 5 photos from gallery; was single crop modal
+  // (2026-07-13) Copy files before reset & compress; was reset before copy
   const handleSelectPhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawFiles = e.target.files;
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
+    const files = Array.from(fileList).slice(0, 5);
     e.target.value = '';
-    if (!rawFiles || rawFiles.length === 0) return;
 
-    const files = Array.from(rawFiles).slice(0, 5);
     const newPolaroids: PolaroidPhoto[] = [];
     const now = Date.now();
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const compressedUrl = await compressImageFile(file);
-      newPolaroids.push({
-        id: `ph-${now}-${i}`,
-        url: compressedUrl,
-        caption: file.name.replace(/\.[^.]+$/, '') || `Photo ${i + 1}`,
-        tag: 'POLAROID',
-      });
+      try {
+        const compressedUrl = await compressImageFile(file);
+        if (compressedUrl) {
+          newPolaroids.push({
+            id: `ph-${now}-${i}`,
+            url: compressedUrl,
+            caption: file.name.replace(/\.[^.]+$/, '') || `Photo ${i + 1}`,
+            tag: 'POLAROID',
+          });
+        }
+      } catch (err) {
+        console.error('Failed to process image:', err);
+      }
     }
-    setPhotos((prev) => [...prev, ...newPolaroids]);
-    onToast(`Attached ${newPolaroids.length} photo${newPolaroids.length > 1 ? 's' : ''}!`, 'success');
+    if (newPolaroids.length > 0) {
+      setPhotos((prev) => [...prev, ...newPolaroids]);
+      onToast(`Attached ${newPolaroids.length} photo${newPolaroids.length > 1 ? 's' : ''}!`, 'success');
+    }
   };
 
   const handleSelectVideoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1059,10 +1076,12 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
               </div>
             )}
 
+            {/* (2026-07-13) Set explicit image formats & id; was plain image/* */}
             <input
+              id="composer-photo-input"
               ref={photoInputRef}
               type="file"
-              accept="image/*"
+              accept="image/png,image/jpeg,image/jpg,image/webp,image/*"
               multiple
               onChange={handleSelectPhotoFile}
               className="hidden"
