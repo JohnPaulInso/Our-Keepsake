@@ -1104,8 +1104,11 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
 
               <div className="bg-[#fdfbf7] rounded-2xl p-6 sm:p-8 border border-[#dfcbb7]/60 shadow-xs">
                 {activeReadingLetter.salutation && (
+                  // (2026-07-13) Show My baby, Bambam,; was activeReadingLetter.salutation
                   <p className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-primary font-semibold italic mb-4">
-                    {activeReadingLetter.salutation}
+                    {activeReadingLetter.salutation.startsWith('My dearest')
+                      ? 'My baby, Bambam,'
+                      : activeReadingLetter.salutation}
                   </p>
                 )}
                 <div className="font-['Cormorant_Garamond',Georgia,serif] text-lg sm:text-xl text-[#3b2d24] whitespace-pre-line leading-[2.1rem] select-text">

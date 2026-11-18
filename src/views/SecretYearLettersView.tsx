@@ -74,7 +74,8 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
   const [letterDateISO, setLetterDateISO] = useState('2026-11-16');
   const [letterPaperStatus, setLetterPaperStatus] =
     useState<DigitalLoveLetter['paperStatus']>('TRANSCRIBED_TO_PAPER');
-  const [letterSalutation, setLetterSalutation] = useState(`My dearest ${profile.partner2Name},`);
+  // (2026-07-13) Rename salutation to My baby, Bambam,; was My dearest ${name}
+  const [letterSalutation, setLetterSalutation] = useState('My baby, Bambam,');
   const [letterBody, setLetterBody] = useState('');
   const [letterSignOff, setLetterSignOff] = useState(`All my love, always,\n${profile.partner1Name}`);
   const [letterPaperNotes, setLetterPaperNotes] = useState(
@@ -123,7 +124,8 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
     setLetterOccasion('Drafted Before Writing on Paper');
     setLetterDateISO(new Date().toISOString().slice(0, 10));
     setLetterPaperStatus('TRANSCRIBED_TO_PAPER');
-    setLetterSalutation(`My dearest ${profile.partner2Name},`);
+    // (2026-07-13) Set default salutation to My baby, Bambam,; was My dearest
+    setLetterSalutation('My baby, Bambam,');
     setLetterBody('');
     setLetterSignOff(`Forever yours,\n${profile.partner1Name}`);
     // (2026-07-13) Clear default paper note; was boilerplate text
@@ -137,7 +139,9 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
     setLetterOccasion(letter.occasion);
     setLetterDateISO(letter.dateISO);
     setLetterPaperStatus(letter.paperStatus);
-    setLetterSalutation(letter.salutation);
+    setLetterSalutation(
+      letter.salutation?.startsWith('My dearest') ? 'My baby, Bambam,' : letter.salutation
+    );
     setLetterBody(letter.body);
     setLetterSignOff(letter.signOff);
     setLetterPaperNotes(letter.paperNotes || '');
@@ -154,7 +158,8 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
       occasion: letterOccasion.trim() || 'Handwritten Stationery Draft',
       dateISO: letterDateISO,
       paperStatus: letterPaperStatus,
-      salutation: letterSalutation.trim() || `My dearest ${profile.partner2Name},`,
+      // (2026-07-13) Fallback to My baby, Bambam,; was My dearest
+      salutation: letterSalutation.trim() || 'My baby, Bambam,',
       body:
         letterBody.trim() ||
         `I wrote this digital copy first before writing every word onto physical paper for you, ${profile.partner2Name}.`,
@@ -479,8 +484,10 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                           <button
                             type="button"
                             onClick={() => {
+                              // (2026-07-13) Format salutation to My baby, Bambam,; was letter.salutation
+                              const s = letter.salutation?.startsWith('My dearest') ? 'My baby, Bambam,' : letter.salutation;
                               navigator.clipboard?.writeText(
-                                `${letter.salutation}\n\n${letter.body}\n\n${letter.signOff}`
+                                `${s}\n\n${letter.body}\n\n${letter.signOff}`
                               );
                               onToast('Digital love letter copied to clipboard!', 'info');
                             }}
@@ -674,8 +681,9 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
               {/* Full stationery sheet */}
               <div className="bg-[#fdfbf7] rounded-2xl p-6 sm:p-10 border border-[#dfcbb7]/70 shadow-sm relative">
                 {readingLetter.salutation && (
+                  // (2026-07-13) Show My baby, Bambam,; was readingLetter.salutation
                   <p className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-primary font-semibold italic mb-5">
-                    {readingLetter.salutation}
+                    {readingLetter.salutation.startsWith('My dearest') ? 'My baby, Bambam,' : readingLetter.salutation}
                   </p>
                 )}
                 <div className="font-['Cormorant_Garamond',Georgia,serif] text-lg sm:text-2xl text-[#3b2d24] whitespace-pre-line leading-[2.2rem] select-text">
@@ -702,8 +710,9 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
               <button
                 type="button"
                 onClick={() => {
+                  const s = readingLetter.salutation?.startsWith('My dearest') ? 'My baby, Bambam,' : readingLetter.salutation;
                   navigator.clipboard?.writeText(
-                    `${readingLetter.salutation}\n\n${readingLetter.body}\n\n${readingLetter.signOff}`
+                    `${s}\n\n${readingLetter.body}\n\n${readingLetter.signOff}`
                   );
                   onToast('Digital love letter copied to clipboard!', 'info');
                 }}
