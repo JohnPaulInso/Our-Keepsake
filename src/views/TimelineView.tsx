@@ -344,6 +344,49 @@ const CALENDAR_MONTH_NAMES = [
 ];
 const CALENDAR_YEARS = [2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030];
 
+interface StoredCalendarState {
+  year: number;
+  month: number;
+  selectedDay: number | null;
+  lastActiveAt: number;
+}
+
+const CALENDAR_INACTIVITY_LIMIT_MS = 5 * 60 * 1000;
+
+// (2026-07-13) Restore opened month on reload, reset after 5m idle; was fixed now
+function getInitialCalendarState(): { year: number; month: number; selectedDay: number | null } {
+  const now = new Date();
+  const defaultState = {
+    year: now.getFullYear(),
+    month: now.getMonth(),
+    selectedDay: now.getDate(),
+  };
+  try {
+    const raw = localStorage.getItem('ok_calendar_view_state');
+    if (!raw) return defaultState;
+    const parsed = JSON.parse(raw) as Partial<StoredCalendarState>;
+    const lastActive = typeof parsed.lastActiveAt === 'number' ? parsed.lastActiveAt : 0;
+    if (Date.now() - lastActive > CALENDAR_INACTIVITY_LIMIT_MS) {
+      return defaultState;
+    }
+    if (
+      typeof parsed.year === 'number' &&
+      typeof parsed.month === 'number' &&
+      parsed.month >= 0 &&
+      parsed.month <= 11
+    ) {
+      return {
+        year: parsed.year,
+        month: parsed.month,
+        selectedDay: typeof parsed.selectedDay === 'number' ? parsed.selectedDay : null,
+      };
+    }
+  } catch {
+    // Ignore error
+  }
+  return defaultState;
+}
+
 export const TimelineView: React.FC<TimelineViewProps> = ({
   profile,
   memories,
@@ -368,10 +411,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   // (2026-07-13) Add month and year popover picker states; was non-interactive text
   const [monthPickerOpen, setMonthPickerOpen] = useState(false);
   const [yearPickerOpen, setYearPickerOpen] = useState(false);
-  // (2026-07-13) Default calendar to current month and date; was fixed Oct 2026
-  const [calendarYear, setCalendarYear] = useState<number>(() => new Date().getFullYear());
-  const [calendarMonth, setCalendarMonth] = useState<number>(() => new Date().getMonth());
-  const [selectedDay, setSelectedDay] = useState<number | null>(() => new Date().getDate());
+  // (2026-07-13) Restore opened month on reload & 5m idle reset; was new Date()
+  const [calendarYear, setCalendarYear] = useState<number>(() => getInitialCalendarState().year);
+  const [calendarMonth, setCalendarMonth] = useState<number>(() => getInitialCalendarState().month);
+  const [selectedDay, setSelectedDay] = useState<number | null>(() => getInitialCalendarState().selectedDay);
   // (2026-07-13) Paginated scrolling for older memories; was unpaginated list
   const [visibleMemoriesCount, setVisibleMemoriesCount] = useState<number>(10);
   // (2026-07-13) Slide animation and vertical scroll support; was instant fade
@@ -427,6 +470,97 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       document.body.style.overflow = prevOverflow;
     };
   }, [isFullscreenDateOpen]);
+
+  // (2026-07-13) Persist opened calendar state to storage; was unpersisted
+  useEffect(() => {
+    try {
+      const state: StoredCalendarState = {
+        year: calendarYear,
+        month: calendarMonth,
+        selectedDay,
+        lastActiveAt: Date.now(),
+      };
+      localStorage.setItem('ok_calendar_view_state', JSON.stringify(state));
+    } catch {
+      // Ignore
+    }
+  }, [calendarYear, calendarMonth, selectedDay]);
+
+  // (2026-07-13) Refresh calendar to current date after 5m idle; was unrefreshed
+  useEffect(() => {
+    let timer: number | null = null;
+
+    const resetToToday = () => {
+      const now = new Date();
+      setCalendarYear(now.getFullYear());
+      setCalendarMonth(now.getMonth());
+      setSelectedDay(now.getDate());
+      try {
+        const state: StoredCalendarState = {
+          year: now.getFullYear(),
+          month: now.getMonth(),
+          selectedDay: now.getDate(),
+          lastActiveAt: Date.now(),
+        };
+        localStorage.setItem('ok_calendar_view_state', JSON.stringify(state));
+      } catch {
+        // Ignore
+      }
+    };
+
+    const scheduleTimer = () => {
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(resetToToday, CALENDAR_INACTIVITY_LIMIT_MS);
+    };
+
+    const handleUserActivity = () => {
+      try {
+        const raw = localStorage.getItem('ok_calendar_view_state');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          parsed.lastActiveAt = Date.now();
+          localStorage.setItem('ok_calendar_view_state', JSON.stringify(parsed));
+        }
+      } catch {
+        // Ignore
+      }
+      scheduleTimer();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        try {
+          const raw = localStorage.getItem('ok_calendar_view_state');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            const timeSince = Date.now() - (parsed.lastActiveAt || 0);
+            if (timeSince > CALENDAR_INACTIVITY_LIMIT_MS) {
+              resetToToday();
+              return;
+            }
+          }
+        } catch {
+          // Ignore
+        }
+        scheduleTimer();
+      }
+    };
+
+    scheduleTimer();
+    const activityEvents = ['mousedown', 'keydown', 'touchstart', 'scroll', 'pointerdown'];
+    activityEvents.forEach((evt) =>
+      window.addEventListener(evt, handleUserActivity, { passive: true })
+    );
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      activityEvents.forEach((evt) =>
+        window.removeEventListener(evt, handleUserActivity)
+      );
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   const handleNextOverlayDate = () => {
     if (selectedDay === null || dateSlideStage !== 'idle') return;
@@ -1325,9 +1459,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             <button
               type="button"
               onClick={() => {
-                // (2026-07-13) Reset view to current month on clear; was fixed Oct 2026
-                setCalendarYear(new Date().getFullYear());
-                setCalendarMonth(new Date().getMonth());
+                // (2026-07-13) Clear day filter without resetting month; was resetting month
                 setSelectedDay(null);
               }}
               className="flex items-center gap-1 text-secondary font-label-md text-label-md tracking-wider uppercase hover:text-primary transition-colors"

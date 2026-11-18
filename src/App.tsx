@@ -90,6 +90,31 @@ export const App: React.FC = () => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
+  // (2026-07-13) Bump calendar lastActiveAt during app interactions; was idle drift
+  useEffect(() => {
+    let lastRecorded = 0;
+    const bumpActiveTime = () => {
+      const now = Date.now();
+      if (now - lastRecorded < 2500) return;
+      lastRecorded = now;
+      try {
+        const raw = localStorage.getItem('ok_calendar_view_state');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          parsed.lastActiveAt = now;
+          localStorage.setItem('ok_calendar_view_state', JSON.stringify(parsed));
+        }
+      } catch {
+        // Ignore
+      }
+    };
+    const events = ['mousedown', 'keydown', 'touchstart', 'scroll', 'pointerdown'];
+    events.forEach((ev) => window.addEventListener(ev, bumpActiveTime, { passive: true }));
+    return () => {
+      events.forEach((ev) => window.removeEventListener(ev, bumpActiveTime));
+    };
+  }, []);
+
   // (2026-07-13) Helper for robust avatar resolution; was raw string check
   const getAvatarSrc = (url?: string): string => {
     if (!url || url.includes('googleusercontent.com') || url.startsWith('/meandzea') || url === './meandzea.png') {
