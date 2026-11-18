@@ -2397,6 +2397,37 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     sortOrder: 78,
     updatedAt: 1769248800000,
   },
+  // (2026-07-13) Seed Jan 21, 2026 first 'bye labyu' keepsake; was up to Jan 24
+  {
+    id: 'mem-2026-01-21-imported',
+    keepsakeNumber: 61,
+    volumeNumber: 1,
+    dateISO: '2026-01-21',
+    timeFormatted: '3:00 PM',
+    title: 'First "Bye Labyu", Reclined Cuddles & Cafe Search',
+    letterHeading: 'First "Bye Labyu", Reclined Cuddles & Cafe Search',
+    snippet:
+      'DB school gate fetch, hunting for an official date cafe, Kawit church hugs against the cold, deep reclined cuddles at Medellin dockside, and hearing you say "bye labyu" for the first time.',
+    storyBody:
+      'Db date fetched her sa school gate, gitanaw pajd mis mga tao pagbagat nako niya kuha sa iya bag ug pasulods sakyanan, random kaayo nangita mig cafe, para "official date", abi nimo watakibaw asa padong ato, ana dayun ko "you think i came unprepared?" dayun agi mig  2 ka cafe shops bati man, adto mis makapark mig tarong, nya  sudlonon kaayo random na cafe shop 2nd floor murag tagiya duha bahala na ang cctv, abot kawit chika ka abouts kapakboi ni benjie, nya adto tas kawit church atbang pajud ha kay gitugnaw nag ginaksanay,\n\n nya adto dayun dockside medellin para dika tugnawon,\nwe parked in a dark area, reclined the chair para kahigda ta, and we cuddled.... hard.. me on top... as my entire body weight pressed against yours... i wanted to be that much close to you...  the deep slow... heavy breaths... the spam kissing... our hearts... beat together... the scent of each other mixes as our bodies intertwined... and the heat... it felt through each other... BANG naulian ang katugnaw.. luhag pajd kaayo musayawg apil sa kanta ni mrld, kato part na "san daliii"... wahahhaha.. i still never got that first lip to lip kiss tho... pirme jd ka mudili.. but its okay, you already know i love you... so we went home.. pag uli random science facts kaayong blue led light ug ang dynamite cos ah ah im in the stars tonight bts biot... had a fun day and hunong dayuns traffic light para di masakpan... muto whilst she opened the door going out, you said the words... "bye labyu"... for the first time... i heard it from you.. grabe kashocked nako sge nag smile pag uli and babyee',
+    quoteHighlight:
+      'Whilst opening the door going out, you said the words... "Bye labyu"... For the first time I heard it from you.',
+    signOffAuthor: 'JP • St. 1',
+    location: 'DB, Kawit Cafe & Medellin Dockside',
+    weatherTemp: '27°C',
+    weatherConditions: 'Chilly Evening to Warm Hearts',
+    moodVibe: 'Electrifying First Labyu & Soul Cuddles',
+    vibeTags: ['First Time', 'Deep Talks', 'Roadtrip', 'Laughter'],
+    categories: ['EVENT', 'ANNIVERSARY'],
+    dotIndicators: ['MOCHA', 'GOLD', 'ROSE', 'BURGUNDY'],
+    photos: [],
+    partnerNotes: [],
+    isSealed: true,
+    sealLabel: 'Sealed in Chapter 1 • JP & Zea',
+    sealIcon: 'favorite',
+    sortOrder: 79,
+    updatedAt: 1768989600000,
+  },
 ];
 
 export const INITIAL_SECRET_YEAR_NOTES: SecretYearNote[] = [];
