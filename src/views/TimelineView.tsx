@@ -2338,6 +2338,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 profile={profile}
                 memory={primaryDateMemory}
                 allMemories={memories}
+                // (2026-07-13) Pass digitalLoveLetters to StoryReader; was omitted
+                digitalLoveLetters={digitalLoveLetters}
                 onSelectMemory={(id) => {
                   const target = memories.find((m) => m.id === id);
                   if (target && /^\d{4}-\d{2}-\d{2}$/.test(target.dateISO)) {

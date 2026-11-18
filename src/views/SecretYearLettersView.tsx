@@ -623,48 +623,51 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
         </div>
       )}
 
-      {/* Full-Screen Stationery Reader Modal for Digital Love Letter */}
+      {/* (2026-07-13) Simplified clean Love Letter modal; was 8 cluttered inputs */}
       {readingLetter && (
         <div
-          className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 select-text"
           onClick={() => setReadingLetter(null)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg max-h-[90dvh] overflow-y-auto bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-outline-variant/50 modal-animate-in flex flex-col gap-4 relative"
+            className="w-full max-w-2xl max-h-[90dvh] overflow-y-auto bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-outline-variant/50 modal-animate-in flex flex-col gap-4 relative"
           >
             <div className="flex items-center justify-between border-b border-outline-variant/30 pb-3">
               <div>
                 <span className="font-label-md text-label-md uppercase tracking-widest text-secondary block">
-                  Digital Manuscript #{readingLetter.letterNumber} •{' '}
-                  {formatStandardDate(readingLetter.dateISO)}
+                  Love Letter #{readingLetter.letterNumber} • {formatStandardDate(readingLetter.dateISO)}
                 </span>
-                <span className="font-label-md text-[10px] text-outline uppercase">
-                  {PAPER_STATUS_LABELS[readingLetter.paperStatus]}
-                </span>
+                {readingLetter.occasion && (
+                  <span className="text-[11px] text-outline uppercase font-medium">
+                    {readingLetter.occasion}
+                  </span>
+                )}
               </div>
               <button
                 type="button"
                 onClick={() => setReadingLetter(null)}
-                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary"
+                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
 
-            <h3 className="font-headline-lg-mobile text-headline-lg-mobile text-primary font-serif">
+            <h3 className="font-['Playfair_Display',Georgia,serif] text-2xl sm:text-3xl text-primary font-bold">
               {readingLetter.title}
             </h3>
 
-            <div className="bg-surface-container-low/60 rounded-xl p-5 border border-outline-variant/30 ruled-notebook">
-              <p className="font-headline-sm text-body-lg text-primary italic font-serif mb-3">
-                {readingLetter.salutation}
-              </p>
-              <p className="font-body-lg text-body-lg text-primary whitespace-pre-line font-serif leading-[2rem]">
+            <div className="bg-[#fdfbf7] rounded-2xl p-6 sm:p-8 border border-[#dfcbb7]/60 shadow-xs">
+              {readingLetter.salutation && (
+                <p className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-primary font-semibold italic mb-4">
+                  {readingLetter.salutation}
+                </p>
+              )}
+              <div className="font-['Cormorant_Garamond',Georgia,serif] text-lg sm:text-xl text-[#3b2d24] whitespace-pre-line leading-[2.1rem] select-text">
                 {readingLetter.body}
-              </p>
-              <div className="mt-6 flex flex-col items-end text-right">
-                <p className="font-headline-sm text-headline-sm text-secondary italic font-serif whitespace-pre-line">
+              </div>
+              <div className="mt-8 flex flex-col items-end text-right">
+                <p className="font-['Playfair_Display',Georgia,serif] text-lg text-primary font-medium italic whitespace-pre-line">
                   {readingLetter.signOff}
                 </p>
               </div>
@@ -688,152 +691,104 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
           <form
             onSubmit={handleSaveLetterSubmit}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg max-h-[90dvh] overflow-y-auto bg-surface-container-lowest rounded-2xl p-5 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col gap-3.5"
+            className="w-full max-w-xl max-h-[92dvh] overflow-y-auto bg-surface-container-lowest rounded-2xl p-5 sm:p-7 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col gap-4"
           >
-            <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2.5">
-              <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
-                {editingLetter
-                  ? 'Edit Digital Love Letter Copy'
-                  : `Add Digital Copy of Love Letter for ${profile.partner2Name}`}
-              </h3>
+            <div className="flex items-center justify-between border-b border-outline-variant/30 pb-3">
+              <div>
+                <h3 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl font-bold text-primary">
+                  {editingLetter ? 'Edit Love Letter' : `Write Love Letter for ${profile.partner2Name}`}
+                </h3>
+                <span className="text-xs text-secondary italic">A digital keepsake copy of your heartfelt words</span>
+              </div>
               <button
                 type="button"
                 onClick={() => setLetterComposerOpen(false)}
-                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary"
+                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2.5">
-              <div>
-                <label className="font-label-md text-label-md uppercase text-outline block mb-1">
-                  Occasion / Envelope Label
-                </label>
-                <input
-                  type="text"
-                  value={letterOccasion}
-                  onChange={(e) => setLetterOccasion(e.target.value)}
-                  placeholder="E.g., Monthsary Paper Letter"
-                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
-                />
-              </div>
-              <div>
-                <label className="font-label-md text-label-md uppercase text-outline block mb-1">
-                  Date Written
-                </label>
-                <input
-                  type="date"
-                  value={letterDateISO}
-                  onChange={(e) => setLetterDateISO(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
-                />
-              </div>
-            </div>
-
-            <CustomDropdown
-              label="Physical Paper Status"
-              options={[
-                {
-                  value: 'TRANSCRIBED_TO_PAPER',
-                  label: 'Drafted Digitally -> Written on Paper Afterward',
-                  icon: 'ink_pen',
-                },
-                {
-                  value: 'WAX_SEALED_GIVEN',
-                  label: 'Handwritten, Wax-Sealed & Given to Her',
-                  icon: 'mail',
-                },
-                {
-                  value: 'DIGITAL_ORIGINAL',
-                  label: 'Digital Original Manuscript',
-                  icon: 'history_edu',
-                },
-              ]}
-              value={letterPaperStatus}
-              onChange={(val) =>
-                setLetterPaperStatus(val as DigitalLoveLetter['paperStatus'])
-              }
-            />
-
-            <div>
-              <label className="font-label-md text-label-md uppercase text-outline block mb-1">
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
                 Letter Title
               </label>
               <input
                 type="text"
                 value={letterTitle}
                 onChange={(e) => setLetterTitle(e.target.value)}
-                placeholder="E.g., Before I Wrote It on Cream Linen Paper..."
-                className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                placeholder="E.g., Penelope or To My Favorite Person..."
+                required
+                className="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low text-primary font-serif text-base border border-outline-variant/40 focus:border-primary/60 outline-none transition-colors"
               />
             </div>
 
-            <div>
-              <label className="font-label-md text-label-md uppercase text-outline block mb-1">
-                Opening Salutation
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={letterDateISO}
+                  onChange={(e) => setLetterDateISO(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-surface-container-low text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
+                  Occasion / Tag
+                </label>
+                <input
+                  type="text"
+                  value={letterOccasion}
+                  onChange={(e) => setLetterOccasion(e.target.value)}
+                  placeholder="E.g., Apology & Love"
+                  className="w-full px-3 py-2 rounded-xl bg-surface-container-low text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
+                Your Letter
+              </label>
+              <textarea
+                rows={11}
+                value={letterBody}
+                onChange={(e) => setLetterBody(e.target.value)}
+                placeholder={`Write or paste your letter for ${profile.partner2Name} here...`}
+                required
+                className="w-full p-4 rounded-xl bg-[#fdfbf7] text-[#3b2d24] font-['Cormorant_Garamond',Georgia,serif] text-base sm:text-lg leading-relaxed border border-outline-variant/40 focus:border-primary/60 outline-none resize-y"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
+                Sign-off
               </label>
               <input
                 type="text"
-                value={letterSalutation}
-                onChange={(e) => setLetterSalutation(e.target.value)}
-                placeholder={`My dearest ${profile.partner2Name},`}
-                className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                value={letterSignOff}
+                onChange={(e) => setLetterSignOff(e.target.value)}
+                placeholder="E.g., -JP or Forever yours, JP"
+                className="w-full px-3.5 py-2 rounded-xl bg-surface-container-low text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none"
               />
             </div>
 
-            <div>
-              <label className="font-label-md text-label-md uppercase text-outline block mb-1">
-                Full Digital Love Letter Text (Paste or Write Here)
-              </label>
-              <textarea
-                rows={6}
-                value={letterBody}
-                onChange={(e) => setLetterBody(e.target.value)}
-                placeholder={`Paste or type the exact words you drafted before writing it on paper for ${profile.partner2Name}...`}
-                className="w-full p-3 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40 leading-relaxed"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <div>
-                <label className="font-label-md text-label-md uppercase text-outline block mb-1">
-                  Sign-Off
-                </label>
-                <input
-                  type="text"
-                  value={letterSignOff}
-                  onChange={(e) => setLetterSignOff(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
-                />
-              </div>
-              <div>
-                <label className="font-label-md text-label-md uppercase text-outline block mb-1">
-                  Stationery / Ink Note
-                </label>
-                <input
-                  type="text"
-                  value={letterPaperNotes}
-                  onChange={(e) => setLetterPaperNotes(e.target.value)}
-                  placeholder="E.g., Written with black fountain pen..."
-                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-outline-variant/20">
               <button
                 type="button"
                 onClick={() => setLetterComposerOpen(false)}
-                className="px-4 py-2 rounded-xl bg-surface-container-low text-secondary font-label-md text-label-md uppercase"
+                className="px-4 py-2 rounded-xl bg-surface-container-low text-secondary text-xs uppercase font-semibold hover:bg-surface-container transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase shadow-md"
+                className="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-xs uppercase tracking-wider font-semibold shadow-md hover:bg-primary/95 transition-all active:scale-95"
               >
-                Save Digital Love Letter
+                Save Love Letter
               </button>
             </div>
           </form>

@@ -249,6 +249,22 @@ class LocalDatabase {
         memCache.memories.sort((a, b) => b.dateISO.localeCompare(a.dateISO));
         await idbSet('memories', memCache.memories);
       }
+
+      // (2026-07-13) Auto-seed initial digital love letters; was empty list
+      let lettersUpdated = false;
+      for (const letter of INITIAL_DIGITAL_LOVE_LETTERS) {
+        const existingIdx = memCache.digitalLoveLetters.findIndex((l) => l.id === letter.id);
+        if (existingIdx === -1) {
+          memCache.digitalLoveLetters.push(letter);
+          lettersUpdated = true;
+        } else if (memCache.digitalLoveLetters[existingIdx].id.endsWith('-penelope')) {
+          memCache.digitalLoveLetters[existingIdx] = letter;
+          lettersUpdated = true;
+        }
+      }
+      if (lettersUpdated) {
+        await idbSet('digitalLoveLetters', memCache.digitalLoveLetters);
+      }
     }
 
     // (2026-07-13) Upgrade saved avatar to COUPLE_AVATAR_URL; was root string

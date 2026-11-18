@@ -1153,6 +1153,8 @@ export const App: React.FC = () => {
                   profile={profile}
                   memory={activeMemory}
                   allMemories={memories}
+                  // (2026-07-13) Pass digitalLoveLetters to StoryReader; was omitted
+                  digitalLoveLetters={digitalLoveLetters}
                   onSelectMemory={(id) => {
                     setSelectedMemoryId(id);
                     DB.setSelectedMemoryId(id);

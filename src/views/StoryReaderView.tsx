@@ -1,7 +1,8 @@
 // (2026-07-13) Import createPortal for overlay-safe modals; was inline divs
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { CoupleProfile, DotIndicator, KeepsakeMemory, PolaroidPhoto } from '../types';
+// (2026-07-13) Add DigitalLoveLetter support to StoryReader; was missing
+import { CoupleProfile, DigitalLoveLetter, DotIndicator, KeepsakeMemory, PolaroidPhoto } from '../types';
 // (2026-07-13) Import capitalizeFirstLetters to ensure proper case; was missing
 import { formatDuration, formatStandardDate, capitalizeFirstLetters } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
@@ -36,6 +37,7 @@ interface StoryReaderViewProps {
   onToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
   // (2026-07-13) Allow embedding directly inside date overlay; was standalone only
   embeddedInOverlay?: boolean;
+  digitalLoveLetters?: DigitalLoveLetter[];
 }
 
 export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
@@ -50,7 +52,9 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
   onUpdateMemoryDots,
   onToast,
   embeddedInOverlay = false,
+  digitalLoveLetters,
 }) => {
+  const [activeReadingLetter, setActiveReadingLetter] = useState<DigitalLoveLetter | null>(null);
   const [audioState, setAudioState] = useState(audioEngine.getState());
   const [noteDrawerOpen, setNoteDrawerOpen] = useState(false);
   const [noteAuthor, setNoteAuthor] = useState(profile.partner1Name);
@@ -478,6 +482,43 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
           </div>
         </div>
       </article>
+
+      {/* (2026-07-13) Display attached Love Letter card for this date; was omitted */}
+      {(() => {
+        const attachedLetter = digitalLoveLetters?.find((l) => l.dateISO === memory.dateISO) || null;
+        if (!attachedLetter) return null;
+        return (
+          <div
+            onClick={() => setActiveReadingLetter(attachedLetter)}
+            className="w-full bg-[#fbf5ee] rounded-2xl p-5 sm:p-6 mb-space-lg shadow-sm border border-[#dfcbb7] cursor-pointer hover:border-primary/50 hover:shadow-md transition-all active:scale-[0.99] flex flex-col gap-3 relative overflow-hidden group"
+          >
+            <div className="absolute -right-4 -bottom-4 opacity-[0.07] text-primary pointer-events-none group-hover:opacity-[0.12] transition-opacity">
+              <span className="material-symbols-outlined text-[90px]">mail</span>
+            </div>
+            <div className="flex items-center justify-between z-10">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-secondary">
+                <span className="material-symbols-outlined text-[18px]">mark_email_read</span>
+                <span>Love Letter For {profile.partner2Name}</span>
+              </div>
+              <span className="text-xs text-primary font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                Read Letter <span className="text-[14px]">&rarr;</span>
+              </span>
+            </div>
+            <h4 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl font-bold text-primary z-10">
+              {attachedLetter.title}
+            </h4>
+            <p className="font-['Cormorant_Garamond',serif] italic text-base sm:text-lg text-on-surface-variant line-clamp-3 leading-relaxed whitespace-pre-line z-10">
+              &ldquo;{attachedLetter.body.slice(0, 220).trim()}...&rdquo;
+            </p>
+            <div className="flex items-center justify-between pt-2.5 border-t border-[#dfcbb7]/50 text-xs text-secondary z-10">
+              <span>{formatStandardDate(attachedLetter.dateISO)}</span>
+              <span className="font-serif italic font-medium text-primary">
+                {attachedLetter.signOff ? attachedLetter.signOff.split('\n')[0] : `- ${profile.partner1Name}`}
+              </span>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* (2026-07-13) Hide Edit Elements & +media buttons; show empty card only when empty */}
       <div className="flex items-center justify-between mb-space-sm px-1 flex-wrap gap-2">
@@ -1018,6 +1059,61 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                 >
                   Remove
                 </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {/* (2026-07-13) Modal reader for attached love letter; was missing */}
+      {activeReadingLetter &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[140] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 select-text"
+            onClick={() => setActiveReadingLetter(null)}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-2xl max-h-[90dvh] overflow-y-auto bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-outline-variant/50 modal-animate-in flex flex-col gap-4 relative"
+            >
+              <div className="flex items-center justify-between border-b border-outline-variant/30 pb-3">
+                <div>
+                  <span className="font-label-md text-label-md uppercase tracking-widest text-secondary block">
+                    Love Letter • {formatStandardDate(activeReadingLetter.dateISO)}
+                  </span>
+                  {activeReadingLetter.occasion && (
+                    <span className="text-[11px] text-outline uppercase font-medium">
+                      {activeReadingLetter.occasion}
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveReadingLetter(null)}
+                  className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[18px]">close</span>
+                </button>
+              </div>
+
+              <h3 className="font-['Playfair_Display',Georgia,serif] text-2xl sm:text-3xl text-primary font-bold">
+                {activeReadingLetter.title}
+              </h3>
+
+              <div className="bg-[#fdfbf7] rounded-2xl p-6 sm:p-8 border border-[#dfcbb7]/60 shadow-xs">
+                {activeReadingLetter.salutation && (
+                  <p className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-primary font-semibold italic mb-4">
+                    {activeReadingLetter.salutation}
+                  </p>
+                )}
+                <div className="font-['Cormorant_Garamond',Georgia,serif] text-lg sm:text-xl text-[#3b2d24] whitespace-pre-line leading-[2.1rem] select-text">
+                  {activeReadingLetter.body}
+                </div>
+                <div className="mt-8 flex flex-col items-end text-right">
+                  <p className="font-['Playfair_Display',Georgia,serif] text-lg text-primary font-medium italic whitespace-pre-line">
+                    {activeReadingLetter.signOff}
+                  </p>
+                </div>
               </div>
             </div>
           </div>,

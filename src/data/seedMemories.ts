@@ -633,4 +633,59 @@ export const INITIAL_TIME_CAPSULE: TimeCapsuleItem = {
   updatedAt: 1729200000000,
 };
 
-export const INITIAL_DIGITAL_LOVE_LETTERS: DigitalLoveLetter[] = [];
+// (2026-07-13) Seed Penelope love letter; was empty list
+export const INITIAL_DIGITAL_LOVE_LETTERS: DigitalLoveLetter[] = [
+  {
+    id: 'letter-2026-05-09-penelope',
+    letterNumber: 1,
+    title: 'Penelope',
+    occasion: 'Apology & Love for My Penelope',
+    dateISO: '2026-05-09',
+    paperStatus: 'DIGITAL_ORIGINAL',
+    salutation: 'peneeeeeloooopeeee,',
+    body: `My beautiful baby, Zea, Bam, Baby, Im sorry,
+sorry for being such an asshole getting jealous over a play, I had my demons during that time too and I was just carrying my pain towards you for months. I know I was wrong jud and I disappointed you. Im sorry if I was too controlling towards you. Im sorry if I really am a bad person after all.
+
+Maybe the problem was me, I care too much and despite trusting you, I just couldn't trust the uncertainty of not being near you. We live in this cruel world bb and Ive been carrying a lot of pain recently. 
+
+Sorry for choosing silence cuz I might say very hurtful words instead, I was just very hurt na WALA KO KAKITA SA MOST AWAITED nga gipangandaman natog maayo. I'm sooo proud raman pud na all our efforts were all worth it.. Nasuya lng jd guro ko na favorite nanakong Epic, wapajd ko kitas personal. Nasuya lang jd guro ko na wako kakita nimo mao nasakitan kog maayo
+
+Im sorry.... I was really disappointed that I couldnt go, I couldnt stop shaking of the uncertainty of what could happen when you might get pressured cuz I let my fear speak louder than my heart.... For not being present when you deserved praise for your efforts... When I wasnt as gentle and patient as I am...  I'm sorry...
+
+If you hate me now, its okay, I deserve it, I mustve cared too much that was suffocating you... I'm sorry. I just never want you to doubt me bb... Salamat jd kaayo sa pagsabot and I'm working on myself everyday jd... cuz I never want to mess this up...
+
+I never really thought about it in your perspective cuz I was protecting myself from the hurt basin mag add rakog fuel to the fire.. nanyakoy bati masturya during stress kay nangurog gyud ko... I just want to remind you that...
+
+You know sa gilawmons akong kasingkasing na I'm really proud of you.. I'm super duper proud of you... sangko sa langit akong ka proud!! kato palang performance bb sa rehearsal, grabe. thank you for even giving me a chance to witness that moment, even though wala patoy props, it was already a blessing for me bisag wako kakita sa live najd... I hope makasabot rsd ka na defense mi ato.. Pero you might not have heard this enough, pero grabe jd, grabe kayko kaproud nimo, tanan achievements hinagoan jd nimo, labi najd ning first theater lead role nimo.. Sorry if nagpa as-if kog wala ra, perol grabe jd kayko ka proud uy, sobra jd, bad timing lng jd to akoa cuz life gets hard sometimes...
+
+Despite sa atong mga luha, I promise that I'll never be leaving, I just felt betrayed at that moment pero na misinterpret rasd nako to.
+
+I dont want us to hate this musical, and diko ganahan maremind ka sa pain for not being present during that time... I love this musical and want us to keep singing this hangtud maniguwang ta.... Im still learning how to be your safe space with boundaries even when Im struggling with my own storms..
+
+Also, Thank You for letting me be part of it..
+Im so happy jd na I even got to help making the props, the small recordings ato gisuwayan, and the small errands na mga cute dates nato... 
+
+this was one of the best experiences in my life jud and grabe kayko kalipay because... its with you, bb, zea, babam.. bahalag piyok² nata during garecording, bahala nag natae² nanas glue atong mga kamot naghimo sa helmets, magseg lalis asa ang gunting paras carton, himo props while getting introduced to this amazing musical nag tanaw ta sa tablet... it was the whole experience jd that mattered THE MOST for me..
+
+This was the whole reason for it gyud, and I hate myself and my school na gitiming jd ang schedule.... I was in so much pain na wala jd ko kakita sa most awaited moment.. pero maygale naa ramay video... pero I really wish nakakita jd tako.. wala nasd koy mabuhat uy.. But you know in yourself na, this means a lot to us jd, I got closer not only to you, but to your friends  sd ug si Bro Marco Bargayo hahaha..
+
+I dont know if you can still forgive me for not being there physically and mentally... But it meant the whole world to us jud and I Am really so fucking proud of your efforts aning projeca bisag ikaw pa ang pinakalayo... Makahilak mn sd kos kaguol ani uy, pero always remember na grabe jd kog todo support jd, di lng kay sa imo safety, pati najd sa atong small memories.... our shared laughs.... our lunchtime dates (hehe).... mga inside jokes.... our shared cries... mga laags.... our cravings.... and the best part Ill never forget.. is... the.. mogu² aw joke..
+
+The best part about it.. is...  I got to experience it all WITH YOU, baby... WITH YOU!! wanako kasabot jd ngano ingnana nako ka attached mao sigurong dalirakayko masakitan kay ikaw naman jd akong ganahan pakaslan uy.. mao rajd na akong masulti.. is THANK YOU and YOU ALWAYS MAKE ME PROUD, BABY.. You deserve all of the Good things that happened in your life
+
+Despite the monsters and storms we face through life... I will always find a way back home to you bb, my Penelope.
+
+CONGRATS, MY PENELOPE!!
+I'LL ALWAYS BE SO PROUD OF YOU!!!
+
+and the last thing I wanna say is
+
+Would You Fall In Love With Me Again?
+
+I Love You.`,
+    signOff: '-JP',
+    paperNotes: 'Written for Penelope, May 9, 2026.',
+    isFavorite: true,
+    updatedAt: 1778300000000,
+  },
+];
