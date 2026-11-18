@@ -1101,7 +1101,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       {metaModalOpen &&
         createPortal(
           <div
-            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            // (2026-07-13) Raise meta modal z-index above stacked composer; was z-100
+            className="fixed inset-0 z-[160] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
             onClick={() => setMetaModalOpen(false)}
           >
             <div

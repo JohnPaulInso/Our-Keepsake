@@ -362,8 +362,12 @@ export const App: React.FC = () => {
     requestTabNavigation('new-date');
   };
 
-  // (2026-07-13) Save memory updating in-place with capitalized text; was raw
-  const handleSaveMemory = async (memory: KeepsakeMemory, isDraft: boolean) => {
+  // (2026-07-13) Support stayInOverlay when saving from stacked edit modal; was nav
+  const handleSaveMemory = async (
+    memory: KeepsakeMemory,
+    isDraft: boolean,
+    stayInOverlay = false
+  ) => {
     const formattedTitle = capitalizeFirstLetters(memory.title);
     const formattedStory = capitalizeFirstLetters(memory.storyBody);
     const formattedMemory: KeepsakeMemory = {
@@ -376,8 +380,10 @@ export const App: React.FC = () => {
       (m) => m.id === memory.id || m.dateISO === memory.dateISO
     );
     let nextList: KeepsakeMemory[];
+    let finalId = formattedMemory.id;
     if (existingIndex !== -1) {
       const targetId = memories[existingIndex].id;
+      finalId = targetId;
       const updatedMemory = { ...formattedMemory, id: targetId };
       nextList = memories
         .filter((m) => m.id !== targetId && m.dateISO !== memory.dateISO)
@@ -388,8 +394,8 @@ export const App: React.FC = () => {
 
     // (2026-07-13) Synchronously update memories state; was async listener lag
     setMemories(nextList);
-    setSelectedMemoryId(memory.id);
-    DB.setSelectedMemoryId(memory.id);
+    setSelectedMemoryId(finalId);
+    DB.setSelectedMemoryId(finalId);
     await DB.setMemories(nextList);
     syncManager.schedulePush();
     // (2026-07-13) Clear unsaved changes flag on successful save; was untouched
@@ -398,13 +404,14 @@ export const App: React.FC = () => {
     setEditingMemory(null);
 
     if (isDraft) {
-      addToast(`Draft "${memory.title}" saved to your desk.`, 'info');
-      switchTab('timeline');
+      addToast(`Draft "${formattedMemory.title}" saved to your desk.`, 'info');
+      if (!stayInOverlay) switchTab('timeline');
     } else {
-      // (2026-07-13) Reopen fullscreen date overlay on save; was switchTab('story')
       addToast(`"${formattedMemory.title}" saved to your Memory Box!`, 'success');
-      setPendingOverlayDateISO(formattedMemory.dateISO);
-      switchTab('timeline');
+      if (!stayInOverlay) {
+        setPendingOverlayDateISO(formattedMemory.dateISO);
+        switchTab('timeline');
+      }
     }
   };
 

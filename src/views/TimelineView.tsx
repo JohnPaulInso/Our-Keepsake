@@ -31,9 +31,10 @@ import {
 import { calculateDaysTogether, formatDuration, formatStandardDate, getChapterNumber, capitalizeFirstLetters } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 import { CustomDropdown } from '../components/CustomDropdown';
-// (2026-07-13) Import StoryReaderView for unified date overlay; was separate UI
+// (2026-07-13) Import StoryReaderView & ComposerView for stacked edit modal
 import { DB } from '../db/localDb';
 import { StoryReaderView } from './StoryReaderView';
+import { ComposerView } from './ComposerView';
 
 // (2026-07-13) Add digitalLoveLetters to TimelineViewProps vs secretNotes only
 interface TimelineViewProps {
@@ -48,8 +49,8 @@ interface TimelineViewProps {
   onReorderMemories: (reordered: KeepsakeMemory[]) => void;
   onOpenSecretNotesTab: () => void;
   onOpenProfileModal: () => void;
-  // (2026-07-13) Add onSaveMemory prop for in-page date editing; was none
-  onSaveMemory?: (memory: KeepsakeMemory, isDraft: boolean) => void;
+  // (2026-07-13) Support stayInOverlay flag on onSaveMemory; was 2 args
+  onSaveMemory?: (memory: KeepsakeMemory, isDraft: boolean, stayInOverlay?: boolean) => void;
   // (2026-07-13) Pass active calendar year & month to notepad; was no args
   onOpenMonthlyNotepad?: (year?: number, month?: number) => void;
   // (2026-07-13) Add delete, partner note, toast & auto-open overlay props; was none
@@ -451,8 +452,60 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const calSwipeStartYRef = useRef<number | null>(null);
   const calSwipeHorizontalRef = useRef<boolean | null>(null);
   const calSuppressClickRef = useRef(false);
-  // (2026-07-13) Confirm modal state for delete button in overlay header; was none
+  // (2026-07-13) Confirm modal & stacked composer modal states; was closing overlay
   const [overlayDeleteConfirmOpen, setOverlayDeleteConfirmOpen] = useState(false);
+  const [overlayEditMemory, setOverlayEditMemory] = useState<KeepsakeMemory | null>(null);
+  const [overlayComposerDirty, setOverlayComposerDirty] = useState(false);
+  const [overlayUnsavedConfirmOpen, setOverlayUnsavedConfirmOpen] = useState(false);
+
+  const openStackedComposerForMemory = (mem: KeepsakeMemory) => {
+    setOverlayComposerDirty(false);
+    setOverlayUnsavedConfirmOpen(false);
+    setOverlayEditMemory(mem);
+  };
+
+  const openStackedComposerForCurrentDate = () => {
+    const mStr = String(calendarMonth + 1).padStart(2, '0');
+    const dStr = String(selectedDay || 1).padStart(2, '0');
+    const targetIso = `${calendarYear}-${mStr}-${dStr}`;
+    const memoryForDate = memories.find((m) => m.dateISO === targetIso) || null;
+    const memoryToEdit: KeepsakeMemory = memoryForDate || {
+      id: `mem-${Date.now()}`,
+      keepsakeNumber: memories.length + 1,
+      volumeNumber: getChapterNumber(targetIso, profile.courtingDateISO || '2025-11-07'),
+      dateISO: targetIso,
+      timeFormatted: 'All Day',
+      title: '',
+      snippet: '',
+      storyBody: '',
+      quoteHighlight: '',
+      signOffAuthor: profile.partner1Name,
+      location: 'Bogo City, Cebu',
+      weatherTemp: '',
+      weatherConditions: '',
+      moodVibe: '',
+      vibeTags: [],
+      categories: ['EVENT'],
+      dotIndicators: ['MOCHA'],
+      photos: [],
+      partnerNotes: [],
+      isSealed: false,
+      sealLabel: 'Draft Keepsake',
+      sealIcon: 'favorite',
+      sortOrder: 0,
+      updatedAt: Date.now(),
+    };
+    openStackedComposerForMemory(memoryToEdit);
+  };
+
+  const requestCloseStackedComposer = () => {
+    if (overlayComposerDirty) {
+      setOverlayUnsavedConfirmOpen(true);
+    } else {
+      setOverlayEditMemory(null);
+      setOverlayComposerDirty(false);
+    }
+  };
 
   const openDateOverlay = (day: number) => {
     setSelectedDay(day);
@@ -497,11 +550,21 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     }, 280);
   };
 
-  // (2026-07-13) Lock scroll and bind Escape for date overlay; was unmanaged
+  // (2026-07-13) Handle Escape per top-most modal layer; was always closing overlay
   useEffect(() => {
     if (!isFullscreenDateOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeDateOverlay();
+      if (e.key === 'Escape') {
+        if (overlayUnsavedConfirmOpen) {
+          setOverlayUnsavedConfirmOpen(false);
+        } else if (overlayEditMemory) {
+          requestCloseStackedComposer();
+        } else if (overlayDeleteConfirmOpen) {
+          setOverlayDeleteConfirmOpen(false);
+        } else {
+          closeDateOverlay();
+        }
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     const prevOverflow = document.body.style.overflow;
@@ -510,7 +573,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = prevOverflow;
     };
-  }, [isFullscreenDateOpen]);
+  }, [isFullscreenDateOpen, overlayEditMemory, overlayComposerDirty, overlayUnsavedConfirmOpen, overlayDeleteConfirmOpen]);
 
   // (2026-07-13) Persist opened calendar state to storage; was unpersisted
   useEffect(() => {
@@ -1994,7 +2057,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   </button>
                   <button
                     type="button"
-                    onClick={() => closeDateOverlay(() => onEditMemory(primaryDateMemory))}
+                    // (2026-07-13) Open edit composer modal on top without closing overlay; was closeDateOverlay
+                    onClick={() => openStackedComposerForMemory(primaryDateMemory)}
                     className="px-3.5 py-2 rounded-full bg-surface-container-low text-primary hover:bg-surface-container font-label-md text-xs uppercase tracking-wider flex items-center gap-1.5 border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
                   >
                     <span className="material-symbols-outlined text-[16px]">edit</span>
@@ -2111,7 +2175,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   }
                 }}
                 onBackToTimeline={() => closeDateOverlay()}
-                onEditMemory={(m) => closeDateOverlay(() => onEditMemory(m))}
+                // (2026-07-13) Open stacked edit modal on top of overlay; was closing overlay
+                onEditMemory={(m) => openStackedComposerForMemory(m)}
                 onDeleteMemory={(id) => {
                   closeDateOverlay();
                   onDeleteMemory?.(id);
@@ -2221,7 +2286,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 <div className="mt-7 pt-4 border-t border-outline-variant/20 flex items-center justify-end w-full">
                   <button
                     type="button"
-                    onClick={() => handleOpenComposerForDate()}
+                    // (2026-07-13) Open stacked composer modal on top of empty date; was closing overlay
+                    onClick={() => openStackedComposerForCurrentDate()}
                     className="flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-primary text-on-primary font-['Plus_Jakarta_Sans',sans-serif] text-xs uppercase tracking-wider font-semibold shadow-sm hover:bg-primary/95 transition-all active:scale-95"
                   >
                     <span className="material-symbols-outlined text-[17px]">add_circle</span>
@@ -2278,6 +2344,121 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   className="flex-1 py-2.5 rounded-xl bg-error text-on-error font-label-md text-label-md uppercase shadow-md"
                 >
                   Remove
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+      {/* (2026-07-13) Render stacked Composer modal on top of open date overlay; was closing overlay */}
+      {overlayEditMemory &&
+        createPortal(
+          <div
+            style={{
+              touchAction: 'pan-y',
+              WebkitOverflowScrolling: 'touch',
+              paddingBottom: 'max(24px, env(safe-area-inset-bottom, 36px))',
+            }}
+            className="fixed inset-0 z-[120] bg-background text-on-surface overflow-y-auto overscroll-y-contain pt-0 pb-8 select-text no-print modal-animate-in"
+          >
+            <div className="fixed inset-0 pointer-events-none opacity-[0.035] bg-[radial-gradient(#4a3b32_1px,transparent_1px)] [background-size:20px_20px] -z-10" />
+
+            {/* Sticky Frosted Header for Stacked Edit Modal */}
+            <div
+              style={{
+                paddingTop: 'max(12px, env(safe-area-inset-top, 12px))',
+              }}
+              className="w-full sticky top-0 z-30 frosted-glass-bar border-b border-outline-variant/20 pb-3 px-4 md:px-8 shadow-[0_2px_12px_rgba(74,59,50,0.04)]"
+            >
+              <div className="w-full max-w-[760px] mx-auto flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={requestCloseStackedComposer}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high/90 text-primary border border-outline-variant/30 text-[13px] font-medium shadow-sm hover:bg-surface-variant transition-colors active:scale-95 shrink-0"
+                >
+                  <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+                  <span>Back to Date</span>
+                </button>
+                <span className="font-label-md text-xs uppercase tracking-widest text-secondary font-semibold truncate">
+                  {overlayEditMemory.title || overlayEditMemory.storyBody ? 'Edit Keepsake' : 'Write Keepsake'}
+                </span>
+                <button
+                  type="button"
+                  onClick={requestCloseStackedComposer}
+                  title="Close editor"
+                  className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 shrink-0"
+                >
+                  <span className="material-symbols-outlined text-[18px]">close</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <ComposerView
+                key={`stacked-${overlayEditMemory.id}-${overlayEditMemory.dateISO}`}
+                profile={profile}
+                editingMemory={overlayEditMemory}
+                existingMemories={memories}
+                totalMemoriesCount={memories.length}
+                onSaveMemory={(savedMemory, isDraft) => {
+                  onSaveMemory?.(savedMemory, isDraft, true);
+                  if (/^\d{4}-\d{2}-\d{2}$/.test(savedMemory.dateISO)) {
+                    const [y, mm, dd] = savedMemory.dateISO.split('-').map(Number);
+                    setCalendarYear(y);
+                    setCalendarMonth(mm - 1);
+                    setSelectedDay(dd);
+                  }
+                  setOverlayComposerDirty(false);
+                  setOverlayUnsavedConfirmOpen(false);
+                  setOverlayEditMemory(null);
+                }}
+                onCancel={requestCloseStackedComposer}
+                onToast={(msg, type) => onToast?.(msg, type)}
+                onDirtyChange={setOverlayComposerDirty}
+              />
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {/* Unsaved Changes Confirmation for Stacked Edit Modal */}
+      {overlayUnsavedConfirmOpen &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[160] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setOverlayUnsavedConfirmOpen(false)}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm bg-surface-container-lowest rounded-2xl p-6 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col gap-4 text-center"
+            >
+              <div className="w-12 h-12 mx-auto rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center">
+                <span className="material-symbols-outlined text-[24px]">edit_note</span>
+              </div>
+              <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                Unsaved Changes
+              </h3>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">
+                You have unsaved edits in this keepsake. Closing now will discard your changes.
+              </p>
+              <div className="flex gap-2 mt-1">
+                <button
+                  type="button"
+                  onClick={() => setOverlayUnsavedConfirmOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-surface-container-low text-secondary font-label-md text-label-md uppercase font-semibold"
+                >
+                  Keep Editing
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOverlayUnsavedConfirmOpen(false);
+                    setOverlayComposerDirty(false);
+                    setOverlayEditMemory(null);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-error text-on-error font-label-md text-label-md uppercase font-semibold shadow-md"
+                >
+                  Discard
                 </button>
               </div>
             </div>

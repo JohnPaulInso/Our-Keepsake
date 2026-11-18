@@ -85,7 +85,8 @@ export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   return (
     <div
       id="polaroid-cropper-overlay" // High-res polaroid cropper modal
-      className="fixed inset-0 z-[100] bg-black/65 backdrop-blur-sm flex items-center justify-center p-4"
+      // (2026-07-13) Raise cropper z-index above stacked composer modal; was z-100
+      className="fixed inset-0 z-[160] bg-black/65 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={onCancel}
     >
       <div
