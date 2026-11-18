@@ -373,9 +373,9 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
             auto_awesome
           </span>
         </div>
-        {/* (2026-07-13) Remove icon left of story header title; was auto_awesome */}
+        {/* (2026-07-13) Prefer updated title over letterHeading; was letterHeading || title */}
         <h2 className="font-['Playfair_Display',Georgia,serif] tracking-tight text-2xl md:text-3xl text-center text-primary font-semibold">
-          <span>{capitalizeFirstLetters(memory.letterHeading || memory.title)}</span>
+          <span>{capitalizeFirstLetters(memory.title || memory.letterHeading || '')}</span>
         </h2>
         {/* (2026-07-13) Update romantic subtitle quote; was Every little moment */}
         <p className="mt-1 max-w-xs leading-relaxed font-['Cormorant_Garamond',serif] italic text-base text-secondary">
@@ -425,7 +425,7 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
         {/* (2026-07-13) Remove icon left of card title & size 2-line drop cap; was 30px */}
         <header className="mb-4">
           <h1 className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-semibold text-primary tracking-tight leading-snug">
-            {capitalizeFirstLetters(memory.letterHeading || memory.title)}
+            {capitalizeFirstLetters(memory.title || memory.letterHeading || '')}
           </h1>
           <div className="w-10 h-0.5 bg-secondary-container mt-2.5 rounded-full" />
         </header>

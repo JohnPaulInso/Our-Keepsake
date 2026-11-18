@@ -484,7 +484,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       dateISO,
       timeFormatted: timeFormatted.trim() || 'All Day',
       title: cleanTitle,
-      letterHeading: letterHeading.trim() || cleanTitle,
+      // (2026-07-13) Sync letterHeading with cleanTitle; was keeping stale heading
+      letterHeading: cleanTitle,
       snippet: cleanBody.slice(0, 175) + (cleanBody.length > 175 ? '...' : ''),
       storyBody: cleanBody,
       quoteHighlight: quoteHighlight.trim(),
