@@ -1236,27 +1236,40 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         </div>
       </section>
 
-      {/* (2026-07-13) Quick peep card of selected date; was instant overlay opening */}
+      {/* (2026-07-13) Improve date peep card design; was cramped repetitive card */}
       {selectedDay !== null && (
         <div
-          id="selected-day-peep-card" // Quick peep card for selected date
-          className="mb-space-lg bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm border border-outline-variant/40 flex flex-col gap-3 relative overflow-hidden"
+          id="selected-day-peep-card"
+          className="mb-space-lg bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-xs border border-outline-variant/35 flex flex-col gap-3 relative overflow-hidden"
         >
-          <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2.5">
-            <div className="flex items-center gap-2 text-secondary font-label-md text-[11px] uppercase tracking-wider font-semibold">
-              <span className="material-symbols-outlined text-[16px]">location_on</span>
-              <span>Our Keepsake Journal</span>
+          {/* Top meta bar */}
+          <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-outline-variant/20">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container text-secondary text-xs font-semibold font-['Plus_Jakarta_Sans',sans-serif]">
+              <span className="material-symbols-outlined text-[15px] text-tertiary-container">
+                calendar_today
+              </span>
+              <span>{selectedDayFormatted}</span>
             </div>
-            <span className="font-label-md text-[11px] text-secondary font-medium">
-              {selectedDayFormatted}
-            </span>
+            <button
+              type="button"
+              onClick={() => setSelectedDay(null)}
+              className="flex items-center gap-1 text-[11px] uppercase tracking-wider font-semibold text-secondary hover:text-primary transition-colors px-2 py-1 rounded-full hover:bg-surface-container"
+              title="Clear date filter to view all memories"
+            >
+              <span className="material-symbols-outlined text-[14px]">close</span>
+              <span>Clear Filter</span>
+            </button>
           </div>
 
+          {/* Moment title and note */}
           <div>
-            <h3 className="font-['Playfair_Display',Georgia,serif] text-xl text-primary font-bold leading-snug">
-              {primaryDateMemory ? primaryDateMemory.title : `A Keepsake for ${selectedDayFormatted}`}
+            <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-0.5">
+              {primaryDateMemory ? 'Recorded Moment' : 'Unwritten Page'}
+            </span>
+            <h3 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-primary font-bold leading-tight">
+              {primaryDateMemory ? primaryDateMemory.title : 'A Quiet Day in Our Story'}
             </h3>
-            <p className="font-body-md text-body-md text-on-surface-variant font-serif italic mt-1 line-clamp-3">
+            <p className="font-['Cormorant_Garamond',serif] italic text-sm sm:text-base text-on-surface-variant leading-relaxed mt-1 line-clamp-3">
               “{primaryDateMemory?.snippet || primaryDateMemory?.storyBody || `No memories recorded for this specific date yet. Every moment with ${profile.partner2Name} is a keepsake waiting to be written.`}”
             </p>
           </div>
@@ -1266,61 +1279,51 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             (primaryDateMemory.photos?.length > 0 ||
               primaryDateMemory.audioMemo ||
               primaryDateMemory.videoCapsule) && (
-              <div className="flex items-center gap-2 pt-1 flex-wrap">
+              <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
                 {primaryDateMemory.photos?.length > 0 && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-surface-container-low text-secondary text-[11px] font-label-md uppercase tracking-wider flex items-center gap-1 border border-outline-variant/30">
-                    <span className="material-symbols-outlined text-[14px]">photo_camera</span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-surface-container text-secondary text-[11px] font-medium flex items-center gap-1 border border-outline-variant/20">
+                    <span className="material-symbols-outlined text-[13px]">photo_camera</span>
                     <span>
-                      {primaryDateMemory.photos.length} Photo
-                      {primaryDateMemory.photos.length > 1 ? 's' : ''}
+                      {primaryDateMemory.photos.length} Photo{primaryDateMemory.photos.length > 1 ? 's' : ''}
                     </span>
                   </span>
                 )}
                 {primaryDateMemory.audioMemo && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-surface-container-low text-secondary text-[11px] font-label-md uppercase tracking-wider flex items-center gap-1 border border-outline-variant/30">
-                    <span className="material-symbols-outlined text-[14px]">mic</span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-surface-container text-secondary text-[11px] font-medium flex items-center gap-1 border border-outline-variant/20">
+                    <span className="material-symbols-outlined text-[13px]">mic</span>
                     <span>Voice Memo</span>
                   </span>
                 )}
                 {primaryDateMemory.videoCapsule && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-surface-container-low text-secondary text-[11px] font-label-md uppercase tracking-wider flex items-center gap-1 border border-outline-variant/30">
-                    <span className="material-symbols-outlined text-[14px]">movie</span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-surface-container text-secondary text-[11px] font-medium flex items-center gap-1 border border-outline-variant/20">
+                    <span className="material-symbols-outlined text-[13px]">movie</span>
                     <span>Video</span>
                   </span>
                 )}
               </div>
             )}
 
-          <div className="flex items-center justify-between pt-2 border-t border-outline-variant/30 gap-2 flex-wrap">
-            <div className="flex items-center gap-2">
-              {/* (2026-07-13) Open ComposerView from peep card; was inline edit mode */}
-              <button
-                type="button"
-                onClick={handleOpenComposerForDate}
-                className="px-3.5 py-1.5 rounded-xl bg-primary text-on-primary font-label-md text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-xs active:scale-95 transition-transform"
-              >
-                <span className="material-symbols-outlined text-[15px]">
-                  {primaryDateMemory ? 'edit_note' : 'add_circle'}
-                </span>
-                <span>{primaryDateMemory ? 'Edit in Keepsake Box' : 'Add Keepsake for This Date'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => openDateOverlay(selectedDay)}
-                className="px-3 py-1.5 rounded-xl bg-surface-container-high text-primary font-label-md text-xs uppercase tracking-wider flex items-center gap-1 hover:bg-surface-variant transition-colors"
-              >
-                <span className="material-symbols-outlined text-[15px]">fullscreen</span>
-                <span>View Fullscreen</span>
-              </button>
-            </div>
+          {/* Action buttons */}
+          <div className="flex items-center gap-2 pt-2 border-t border-outline-variant/20">
+            <button
+              type="button"
+              onClick={handleOpenComposerForDate}
+              className="flex-1 py-2 px-4 rounded-xl bg-primary text-on-primary font-['Plus_Jakarta_Sans',sans-serif] text-xs uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 shadow-xs hover:bg-primary/95 transition-all active:scale-98"
+            >
+              <span className="material-symbols-outlined text-[16px]">
+                {primaryDateMemory ? 'edit_note' : 'add_circle'}
+              </span>
+              <span>{primaryDateMemory ? 'Edit in Keepsake Box' : 'Write Keepsake'}</span>
+            </button>
 
             <button
               type="button"
-              onClick={() => setSelectedDay(null)}
-              className="font-label-md text-xs uppercase tracking-wider text-secondary hover:text-primary transition-colors underline"
+              onClick={() => openDateOverlay(selectedDay)}
+              className="py-2 px-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-primary font-['Plus_Jakarta_Sans',sans-serif] text-xs uppercase tracking-wider font-semibold flex items-center justify-center gap-1 border border-outline-variant/25 transition-all active:scale-98"
+              title="Open full date presentation view"
             >
-              Show Entire Dates
+              <span className="material-symbols-outlined text-[16px]">fullscreen</span>
+              <span className="hidden sm:inline">Fullscreen</span>
             </button>
           </div>
         </div>

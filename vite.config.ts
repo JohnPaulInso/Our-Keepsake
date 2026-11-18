@@ -1,8 +1,9 @@
-// (2026-07-13) Configure Vite server on port 7777 vs unconfigured state
+// (2026-07-13) Set relative base path for GitHub Pages; was unconfigured
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  base: './',
   plugins: [react()],
   server: {
     port: 7777,
