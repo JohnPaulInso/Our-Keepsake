@@ -2,6 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <!-- (2026-07-13) Trailing slash router guard & favicon links; was missing -->
+    <script>
+      (function () {
+        var p = window.location.pathname;
+        if (p && !p.endsWith('/') && !p.includes('.')) {
+          window.location.replace(window.location.origin + p + '/' + window.location.search + window.location.hash);
+        }
+      })();
+    </script>
+    <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="./favicon.ico" />
     <!-- (2026-07-13) Set mobile viewport lock per SKILL.md vs default viewport -->
     <meta
       name="viewport"
