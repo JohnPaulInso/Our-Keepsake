@@ -269,12 +269,13 @@ class LocalDatabase {
 
     // (2026-07-13) Upgrade saved avatar to COUPLE_AVATAR_URL; was root string
     if (savedProfile && savedProfile.partner1Name) {
+      // (2026-07-13) Normalize avatar to COUPLE_AVATAR_URL; was localhost/raw path
       if (
         !savedProfile.avatarUrl ||
         savedProfile.avatarUrl.includes('googleusercontent.com') ||
-        savedProfile.avatarUrl.startsWith('/meandzea') ||
-        savedProfile.avatarUrl === '/meandzea.png' ||
-        savedProfile.avatarUrl === './meandzea.png'
+        savedProfile.avatarUrl.includes('meandzea') ||
+        savedProfile.avatarUrl.includes('localhost') ||
+        savedProfile.avatarUrl.startsWith('/assets/')
       ) {
         savedProfile.avatarUrl = COUPLE_AVATAR_URL;
         await idbSet('coupleProfile', savedProfile);
@@ -634,6 +635,16 @@ class LocalDatabase {
 
   async restoreSnapshot(snapshot: BackupSnapshot): Promise<void> {
     if (snapshot.coupleProfile) {
+      // (2026-07-13) Normalize snapshot avatar URL; was raw localhost / assets path
+      if (
+        !snapshot.coupleProfile.avatarUrl ||
+        snapshot.coupleProfile.avatarUrl.includes('googleusercontent.com') ||
+        snapshot.coupleProfile.avatarUrl.includes('meandzea') ||
+        snapshot.coupleProfile.avatarUrl.includes('localhost') ||
+        snapshot.coupleProfile.avatarUrl.startsWith('/assets/')
+      ) {
+        snapshot.coupleProfile.avatarUrl = COUPLE_AVATAR_URL;
+      }
       memCache.coupleProfile = snapshot.coupleProfile;
       await idbSet('coupleProfile', snapshot.coupleProfile);
     }

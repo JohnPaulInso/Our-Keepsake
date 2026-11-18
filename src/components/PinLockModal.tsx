@@ -94,7 +94,11 @@ export const PinLockModal: React.FC<PinLockModalProps> = ({ onUnlock }) => {
               className="w-full h-full object-cover"
               onError={(e) => {
                 const img = e.currentTarget;
-                img.src = COUPLE_AVATAR_URL;
+                if (img.src !== COUPLE_AVATAR_URL) {
+                  img.src = COUPLE_AVATAR_URL;
+                } else {
+                  img.onerror = null;
+                }
               }}
             />
           </div>

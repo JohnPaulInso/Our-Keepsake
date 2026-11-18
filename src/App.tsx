@@ -133,9 +133,15 @@ export const App: React.FC = () => {
     };
   }, []);
 
-  // (2026-07-13) Helper for robust avatar resolution; was raw string check
+  // (2026-07-13) Normalize avatar URL with localhost checks; was raw string check
   const getAvatarSrc = (url?: string): string => {
-    if (!url || url.includes('googleusercontent.com') || url.startsWith('/meandzea') || url === './meandzea.png') {
+    if (
+      !url ||
+      url.includes('googleusercontent.com') ||
+      url.includes('meandzea') ||
+      url.includes('localhost') ||
+      url.startsWith('/assets/')
+    ) {
       return COUPLE_AVATAR_URL;
     }
     return url;
@@ -971,8 +977,11 @@ export const App: React.FC = () => {
               className="w-10 h-10 rounded-full object-cover ring-2 ring-tertiary-fixed-dim shrink-0"
               src={getAvatarSrc(profile.avatarUrl)}
               onError={(e) => {
-                if (e.currentTarget.src !== COUPLE_AVATAR_URL) {
-                  e.currentTarget.src = COUPLE_AVATAR_URL;
+                const target = e.currentTarget;
+                if (target.src !== COUPLE_AVATAR_URL) {
+                  target.src = COUPLE_AVATAR_URL;
+                } else {
+                  target.onerror = null;
                 }
               }}
             />
@@ -1160,8 +1169,11 @@ export const App: React.FC = () => {
                 className="w-8 h-8 rounded-full object-cover"
                 src={getAvatarSrc(profile.avatarUrl)}
                 onError={(e) => {
-                  if (e.currentTarget.src !== COUPLE_AVATAR_URL) {
-                    e.currentTarget.src = COUPLE_AVATAR_URL;
+                  const target = e.currentTarget;
+                  if (target.src !== COUPLE_AVATAR_URL) {
+                    target.src = COUPLE_AVATAR_URL;
+                  } else {
+                    target.onerror = null;
                   }
                 }}
               />

@@ -268,7 +268,8 @@ class FirebaseSyncManager {
   }
 
   // (2026-07-13) Pull and restore live cloud memories on launch; was strict baseline
-  async pullSnapshot(force = false): Promise<void> {
+  // (2026-07-13) Bind pullSnapshot as arrow method; was unbound class method
+  pullSnapshot = async (force = false): Promise<void> => {
     if (!this.db || this.status === 'quota') return;
     try {
       this.status = 'syncing';
@@ -331,8 +332,8 @@ class FirebaseSyncManager {
     }, 900);
   }
 
-  // (2026-07-13) Resolve split media URLs from IndexedDB & Firestore subcollection
-  private async resolveMediaUrls(data: BackupSnapshot): Promise<void> {
+  // (2026-07-13) Bind resolveMediaUrls as arrow method; was unbound class method
+  resolveMediaUrls = async (data: BackupSnapshot): Promise<void> => {
     if (!Array.isArray(data.memories)) return;
     for (const mem of data.memories) {
       if (!Array.isArray(mem.photos)) continue;
