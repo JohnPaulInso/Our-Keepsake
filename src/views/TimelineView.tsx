@@ -2141,78 +2141,138 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             </div>
           </div>
 
-          {/* Editorial Title & Ruled Note Card matching screenshot */}
-          {/* (2026-07-13) Gray out empty date card surface & placeholders; was dark */}
-          <div
-            className={`w-full max-w-xl rounded-2xl p-6 sm:p-7 shadow-md relative overflow-hidden flex flex-col border mb-8 font-['Plus_Jakarta_Sans',sans-serif] ${
+          {/* (2026-07-13) Render unified Story letter parchment card for saved dates; was plain form card */}
+          <article
+            className={`w-full max-w-xl rounded-xl p-space-md sm:p-space-lg shadow-md relative overflow-hidden flex flex-col border mb-8 ${
               primaryDateMemory
-                ? 'bg-surface-container-lowest border-outline-variant/30'
-                : 'bg-surface-container-low/70 border-outline-variant/25'
+                ? 'bg-surface-container-lowest border-outline-variant/25'
+                : 'bg-surface-container-low/70 border-outline-variant/25 font-[\'Plus_Jakarta_Sans\',sans-serif]'
             }`}
           >
-            {/* Watermark in corner */}
-            <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-[0.05] pointer-events-none text-primary">
-              <svg fill="currentColor" viewBox="0 0 100 100">
-                <path d="M20 70c0-18 12-32 30-32 15 0 26 8 30 20 2 4 4 8 8 8h4c4 0 6 3 6 7s-3 7-6 7h-12c-5 0-8 3-10 6H20z" />
-                <circle cx="32" cy="48" r="4" />
-                <circle cx="56" cy="24" r="8" />
-              </svg>
-            </div>
+            {primaryDateMemory ? (
+              (() => {
+                const overlayFormattedBody = capitalizeFirstLetters(
+                  primaryDateMemory.storyBody || primaryDateMemory.snippet || 'A cherished day together.'
+                );
+                const overlayParas = overlayFormattedBody.split(/\n\n+/).filter(Boolean);
+                const overlayFirstPara = overlayParas[0] || '';
+                const overlayDropCap = overlayFirstPara.charAt(0).toUpperCase() || 'I';
+                const overlayFirstRest = overlayFirstPara.slice(1);
+                const overlayRestParas = overlayParas.slice(1);
+                return (
+                  <>
+                    <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-tertiary-fixed-dim/20 to-transparent pointer-events-none" />
+                    <header className="mb-space-md relative z-10">
+                      <h3 className="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight leading-snug font-serif flex items-center gap-2.5">
+                        <span
+                          className="material-symbols-outlined text-[28px] text-secondary shrink-0"
+                          style={{ fontVariationSettings: "'FILL' 1" }}
+                          aria-hidden="true"
+                        >
+                          auto_awesome
+                        </span>
+                        <span>
+                          {capitalizeFirstLetters(primaryDateMemory.letterHeading || primaryDateMemory.title)}
+                        </span>
+                      </h3>
+                      <div className="w-12 h-0.5 bg-secondary-container mt-3 rounded-full" />
+                    </header>
 
-            {/* (2026-07-13) Show editorial date card; was divergent inline edit mode */}
-                {/* Title of this moment */}
+                    <div id="heartfelt-note-view-container" className="relative z-10 text-on-surface-variant">
+                      <p className="font-body-lg text-body-lg text-primary leading-relaxed text-justify mb-space-md whitespace-pre-line">
+                        <span className="float-left font-display-lg-mobile text-display-lg-mobile leading-none font-normal text-secondary pr-1.5 pt-1 font-serif">
+                          {overlayDropCap}
+                        </span>
+                        {overlayFirstRest}
+                      </p>
+
+                      {primaryDateMemory.quoteHighlight && (
+                        <div className="p-space-sm bg-surface-container-low/70 rounded-xl my-space-md border border-outline-variant/25">
+                          <p className="font-italic-quote text-italic-quote text-secondary text-center italic px-2 font-serif">
+                            “{primaryDateMemory.quoteHighlight}”
+                          </p>
+                        </div>
+                      )}
+
+                      {overlayRestParas.map((para, i) => (
+                        <p
+                          key={i}
+                          className="font-body-md text-body-md text-on-surface-variant leading-relaxed mb-space-sm whitespace-pre-line"
+                        >
+                          {para}
+                        </p>
+                      ))}
+
+                      <div className="mt-space-md pt-space-sm flex flex-col items-end">
+                        <span className="font-headline-sm text-headline-sm text-secondary italic font-serif">
+                          Yours always,
+                        </span>
+                        <span className="font-label-md text-label-md uppercase tracking-wider text-outline mt-0.5">
+                          {primaryDateMemory.signOffAuthor || `${profile.partner1Name} • St. ${primaryDateMemory.volumeNumber || 1}`}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Sleeping Capybara Lithograph Watermark */}
+                    <div className="absolute bottom-1 right-2 w-32 h-20 opacity-[0.07] pointer-events-none select-none flex items-center justify-center">
+                      <svg className="w-full h-full fill-primary" viewBox="0 0 120 75">
+                        <path d="M15,45 C20,38 32,32 50,33 C68,34 82,25 92,25 C102,25 106,30 110,38 C113,44 112,52 108,58 C102,65 92,68 78,68 C55,68 35,66 22,64 C14,62 10,54 15,45 Z" />
+                        <ellipse cx="98" cy="24" rx="4" ry="7" transform="rotate(-15 98 24)" />
+                        <path
+                          d="M102,34 C104,34 106,36 104,38"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeWidth="2"
+                        />
+                        <path
+                          d="M88,32 Q93,35 97,32"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeWidth="2"
+                        />
+                        <circle className="fill-tertiary-fixed-dim" cx="80" cy="22" r="5" />
+                        <path d="M80,17 Q82,14 84,15" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                      </svg>
+                    </div>
+                  </>
+                );
+              })()
+            ) : (
+              <>
+                {/* Watermark in corner for empty state */}
+                <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-[0.05] pointer-events-none text-primary">
+                  <svg fill="currentColor" viewBox="0 0 100 100">
+                    <path d="M20 70c0-18 12-32 30-32 15 0 26 8 30 20 2 4 4 8 8 8h4c4 0 6 3 6 7s-3 7-6 7h-12c-5 0-8 3-10 6H20z" />
+                    <circle cx="32" cy="48" r="4" />
+                    <circle cx="56" cy="24" r="8" />
+                  </svg>
+                </div>
+
                 <div className="mb-5 pb-3 border-b border-surface-container-high">
                   <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
                     Title of this moment
                   </span>
-                  <h3
-                    className={`font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl ${
-                      primaryDateMemory?.title
-                        ? 'text-primary font-semibold'
-                        : 'text-outline/55 font-normal italic'
-                    }`}
-                  >
-                    {primaryDateMemory?.title
-                      ? capitalizeFirstLetters(primaryDateMemory.title)
-                      : 'Sunday morning pastries and warm coffee...'}
+                  <h3 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-outline/55 font-normal italic">
+                    Sunday morning pastries and warm coffee...
                   </h3>
                 </div>
 
-                {/* The Heartfelt Note with stationery lines */}
-                {/* (2026-07-13) Set Google font Plus Jakarta Sans on note; was Cormorant serif */}
                 <div id="heartfelt-note-view-container">
                   <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-2">
                     The Heartfelt Note
                   </span>
-                  <div
-                    className={`min-h-[160px] font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[15px] sm:text-base leading-relaxed ${
-                      primaryDateMemory?.storyBody || primaryDateMemory?.snippet
-                        ? 'text-on-surface'
-                        : 'text-outline/55 italic'
-                    }`}
-                  >
-                    {/* (2026-07-13) Auto-capitalize heartfelt note lines; was raw text */}
+                  <div className="min-h-[160px] font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[15px] sm:text-base leading-relaxed text-outline/55 italic">
                     <p className="whitespace-pre-wrap">
                       {capitalizeFirstLetters(
-                        primaryDateMemory?.storyBody ||
-                        primaryDateMemory?.snippet ||
                         `Write down how ${profile.partner2Name} smiled, what she said, the quiet moments you never want to forget...`
                       )}
                     </p>
                   </div>
                 </div>
-
-                {/* (2026-07-13) Memorable quote & summary display; was what partner said */}
-                {primaryDateMemory?.quoteHighlight && (
-                  <div className="mt-5 pt-3 border-t border-surface-container-high">
-                    <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
-                      Memorable Quote &amp; Summary
-                    </span>
-                    <p className="font-['Cormorant_Garamond',serif] italic text-secondary text-lg">
-                      “{primaryDateMemory.quoteHighlight}”
-                    </p>
-                  </div>
-                )}
+              </>
+            )}
 
                 {/* Polaroids Attached */}
                 {allDatePhotos.length > 0 && (
@@ -2359,7 +2419,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   </button>
                 </div>
             {/* End Editorial Title & Ruled Note Card */}
-          </div>
+          </article>
           {/* End Date Content Card */}
         </div>
         {/* End Centered Column Wrapper */}

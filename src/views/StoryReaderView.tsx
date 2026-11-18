@@ -5,19 +5,20 @@ import { CoupleProfile, KeepsakeMemory, PolaroidPhoto } from '../types';
 import { formatDuration, formatStandardDate, capitalizeFirstLetters } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 
-// (2026-07-13) Format date with 3-letter weekday like THU; was standard date
-function formatWeekdayDate(dateInput: string | undefined): string {
-  if (!dateInput) return 'JAN 1, 2026';
+// (2026-07-13) Format long weekday date matching date overlay header; was short
+function formatLongWeekdayDate(dateInput: string | undefined): string {
+  if (!dateInput) return 'Sunday, Jan 1, 2026';
   try {
     const [y, m, d] = dateInput.split('-').map(Number);
     const dt = new Date(y, m - 1, d);
-    const weekday = dt.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
-    const month = dt.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-    const day = dt.getDate();
-    const year = dt.getFullYear();
-    return `${weekday}, ${month} ${day}, ${year}`;
+    return dt.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   } catch {
-    return (dateInput || 'JAN 1, 2026').toUpperCase();
+    return dateInput || 'Sunday, Jan 1, 2026';
   }
 }
 
@@ -183,7 +184,13 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
     onToast('Lockscreen Keepsake Wallpaper downloaded!', 'success');
   };
 
-  // (2026-07-13) Add swipe in/out gesture & slide animations; was static div
+  const longFormattedDate = formatLongWeekdayDate(memory.dateISO);
+  const displayTimeLabel =
+    memory.timeFormatted && memory.timeFormatted.toLowerCase() !== 'all day'
+      ? memory.timeFormatted
+      : 'Whole Day Note';
+
+  // (2026-07-13) Support left/right swipe to switch dates & 5th pic header; was old
   return (
     <div
       onTouchStart={(e) => {
@@ -195,158 +202,188 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
       onTouchMove={(e) => {
         if (touchStartX !== null && e.touches.length === 1) {
           const deltaX = e.touches[0].clientX - touchStartX;
-          if (deltaX > 0) {
-            setDragOffsetX(deltaX);
-          }
+          setDragOffsetX(Math.max(-110, Math.min(110, deltaX * 0.65)));
         }
       }}
       onTouchEnd={() => {
         setIsDragging(false);
-        if (dragOffsetX > 80) {
-          handleCloseWithAnimation();
-        } else {
-          setDragOffsetX(0);
+        if (dragOffsetX < -55 && nextMemory) {
+          onSelectMemory(nextMemory.id);
+        } else if (dragOffsetX > 55 && prevMemory) {
+          onSelectMemory(prevMemory.id);
         }
+        setDragOffsetX(0);
         setTouchStartX(null);
       }}
       style={{
         transform: isDismissing
           ? 'translateX(100%)'
-          : dragOffsetX > 0
+          : dragOffsetX !== 0
           ? `translateX(${dragOffsetX}px)`
           : undefined,
         transition: isDragging
           ? 'none'
           : 'transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease',
-        opacity: dragOffsetX > 0 ? Math.max(0.35, 1 - dragOffsetX / 400) : undefined,
       }}
       className={`flex flex-col w-full px-margin pb-space-xl max-w-[760px] mx-auto will-change-transform ${
         isDismissing ? 'envelope-slide-out' : 'envelope-slide-in'
       }`}
     >
-      {/* Top Navigation & Context Bar */}
-      <div className="flex items-center justify-between py-space-sm mb-space-sm no-print">
+      {/* (2026-07-13) Unified top bar matching date overlay header; was old Vol slip */}
+      <div className="w-full flex items-center justify-between mb-3 pt-1 pb-2 no-print gap-2">
         <button
           type="button"
           onClick={handleCloseWithAnimation}
           aria-label="Return to timeline"
-          className="flex items-center gap-space-xs text-secondary hover:text-primary transition-colors py-1 px-2.5 rounded-full bg-surface-container-low/80 active:scale-95"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high/90 text-primary border border-outline-variant/30 text-[13px] font-medium shadow-sm hover:bg-surface-variant transition-colors active:scale-95 shrink-0"
         >
           <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-          <span className="font-label-md text-label-md uppercase tracking-wider">Timeline</span>
+          <span>Back to Timeline</span>
         </button>
 
-        <div className="flex items-center gap-1.5">
-          {prevMemory && (
-            <button
-              type="button"
-              onClick={() => onSelectMemory(prevMemory.id)}
-              title={`Previous: ${prevMemory.title}`}
-              className="w-7 h-7 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary"
-            >
-              <span className="material-symbols-outlined text-[16px]">chevron_left</span>
-            </button>
-          )}
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high/60 shadow-sm">
-            <span
-              className="material-symbols-outlined text-[14px] text-tertiary-fixed-dim"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              favorite
-            </span>
-            <span className="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">
-              Keepsake #{String(memory.keepsakeNumber || 84).padStart(3, '0')}
-            </span>
-          </div>
-          {nextMemory && (
-            <button
-              type="button"
-              onClick={() => onSelectMemory(nextMemory.id)}
-              title={`Next: ${nextMemory.title}`}
-              className="w-7 h-7 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary"
-            >
-              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-            </button>
-          )}
+        <div className="flex items-center gap-1.5 min-w-0">
+          <button
+            type="button"
+            disabled={!prevMemory}
+            onClick={() => prevMemory && onSelectMemory(prevMemory.id)}
+            title={prevMemory ? `Previous: ${prevMemory.title}` : 'No previous date'}
+            className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 disabled:opacity-35 shrink-0"
+          >
+            <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+          </button>
+          <span className="text-[11px] uppercase font-bold tracking-widest text-secondary bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant/30 truncate">
+            {longFormattedDate}
+          </span>
+          <button
+            type="button"
+            disabled={!nextMemory}
+            onClick={() => nextMemory && onSelectMemory(nextMemory.id)}
+            title={nextMemory ? `Next: ${nextMemory.title}` : 'No next date'}
+            className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 disabled:opacity-35 shrink-0"
+          >
+            <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleCloseWithAnimation}
+            title="Close story"
+            className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 ml-0.5 shrink-0"
+          >
+            <span className="material-symbols-outlined text-[18px]">close</span>
+          </button>
         </div>
       </div>
 
-      {/* Editorial Stationery Header Slip */}
-      <div className="relative bg-surface-container-lowest rounded-xl p-space-md shadow-sm mb-space-md overflow-hidden border border-outline-variant/25">
-        <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-16 h-4 bg-secondary-fixed/50 backdrop-blur-sm rounded-sm rotate-1 shadow-xs pointer-events-none" />
-        <div className="flex flex-col gap-space-xs pt-1">
-          {/* (2026-07-13) Enlarge edit/delete, icon-only link, remove All Day; was cramped */}
-          <div className="flex items-center justify-between text-secondary gap-2 flex-wrap">
-            <div className="flex items-center gap-2 flex-wrap min-w-0">
-              <span className="font-label-md text-label-md uppercase tracking-wider text-secondary font-semibold">
-                Vol. {memory.volumeNumber || 1}
-              </span>
-              <span className="text-outline-variant/60">•</span>
-              <span
-                id="editorial-date-weekday-badge" // Weekday and date banner badge
-                className="px-2.5 py-0.5 rounded-md bg-secondary-container/40 text-primary font-bold text-xs uppercase tracking-wider border border-outline-variant/40 flex items-center gap-1.5 shadow-2xs"
-              >
-                <span className="material-symbols-outlined text-[13px] text-secondary">calendar_today</span>
-                <span>{formatWeekdayDate(memory.dateISO)}</span>
-              </span>
-            </div>
-            {memory.timeFormatted &&
-              memory.timeFormatted.toLowerCase() !== 'all day' && (
-                <span className="font-label-md text-label-md text-on-surface-variant/80 font-medium shrink-0">
-                  {memory.timeFormatted}
-                </span>
-              )}
+      {/* Swipe hint */}
+      <div className="flex items-center justify-center gap-1.5 text-[11px] text-secondary/80 font-medium mb-4 select-none no-print">
+        <span className="material-symbols-outlined text-[14px]">swipe</span>
+        <span>Swipe left or right to switch dates</span>
+      </div>
+
+      {/* Centered Romantic Header with Capybara Emblem */}
+      <div className="flex flex-col items-center text-center mb-6">
+        <div className="relative mb-3 flex items-center justify-center">
+          <div className="w-16 h-16 rounded-full bg-secondary-container/50 flex items-center justify-center text-primary shadow-inner">
+            <svg className="w-9 h-9" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 48 48">
+              <path d="M14 34c0-7 4-13 12-13 5 0 9 3 11 8 .5 1.5 1.5 3 3 3h1c1.5 0 2.5 1 2.5 2.5s-1 2.5-2.5 2.5h-5c-2 0-3 1-4 2" />
+              <path d="M14 26c-2 0-4-1.5-4-4 0-3 2-6 5-6h5c3 0 5 2 5 5v5" />
+              <circle cx="17" cy="20" fill="currentColor" r="1.2" />
+              <circle cx="39" cy="18" fill="#cca440" r="1.5" />
+            </svg>
           </div>
-          <div className="flex items-center justify-between gap-2 mt-1">
-            <div className="flex items-center gap-1.5 text-primary min-w-0">
-              <span className="material-symbols-outlined text-[16px] text-secondary shrink-0">
-                near_me
+          <span className="absolute -top-1 -right-2 text-tertiary-fixed-dim material-symbols-outlined text-[18px]">
+            auto_awesome
+          </span>
+        </div>
+        <h2 className="font-['Playfair_Display',Georgia,serif] tracking-tight text-2xl md:text-3xl flex items-center justify-center gap-2.5 text-primary font-semibold">
+          <span
+            className="material-symbols-outlined text-[28px] md:text-[32px] text-secondary shrink-0"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+            aria-hidden="true"
+          >
+            auto_awesome
+          </span>
+          <span>{capitalizeFirstLetters(memory.letterHeading || memory.title)}</span>
+        </h2>
+        <p className="mt-1 max-w-xs leading-relaxed font-['Cormorant_Garamond',serif] italic text-base text-secondary">
+          Every little moment with {profile.partner2Name} is worth remembering forever.
+        </p>
+      </div>
+
+      {/* Context Pills: Date & Location */}
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 font-['Plus_Jakarta_Sans',sans-serif]">
+        <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low text-primary rounded-full shadow-sm border border-outline-variant/30">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="material-symbols-outlined text-[20px] text-secondary">
+              calendar_today
+            </span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
+                Date
               </span>
-              <span className="font-body-sm text-body-sm font-medium tracking-tight truncate-single">
-                {memory.location || 'San Francisco, CA'}
+              <span className="text-sm font-medium text-primary truncate-single">
+                {longFormattedDate} • {displayTimeLabel}
               </span>
-            </div>
-            <div
-              id="editorial-reader-actions-toolbar" // Reader actions toolbar for editing and links
-              className="flex items-center gap-1.5 shrink-0 no-print"
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  const url = `${window.location.origin}/date/${memory.dateISO}`;
-                  navigator.clipboard
-                    .writeText(url)
-                    .then(() => {
-                      onToast(`Link copied: /date/${memory.dateISO}`, 'info');
-                    })
-                    .catch(() => {
-                      onToast(`/date/${memory.dateISO}`, 'info');
-                    });
-                }}
-                title="Copy direct link for this date"
-                className="w-8 h-8 rounded-lg bg-surface-container-low text-secondary hover:text-primary flex items-center justify-center border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
-              >
-                <span className="material-symbols-outlined text-[18px]">link</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onEditMemory(memory)}
-                className="px-3.5 py-1.5 rounded-lg bg-surface-container-low text-primary hover:bg-surface-container font-label-md text-xs uppercase tracking-wider flex items-center gap-1.5 border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
-              >
-                <span className="material-symbols-outlined text-[16px]">edit</span>
-                <span>Edit</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setDeleteConfirmOpen(true)}
-                title="Delete memory"
-                className="w-8 h-8 rounded-lg bg-surface-container-low text-error hover:bg-error/10 flex items-center justify-center border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
-              >
-                <span className="material-symbols-outlined text-[18px]">delete</span>
-              </button>
             </div>
           </div>
         </div>
+
+        <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low text-primary rounded-full shadow-sm border border-outline-variant/30">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="material-symbols-outlined text-[20px] text-tertiary-container">
+              location_on
+            </span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
+                Location
+              </span>
+              <span className="text-sm font-medium text-primary truncate-single">
+                {memory.location || 'Bogo City, Cebu'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Compact Actions Bar (Link, Edit, Delete) */}
+      <div
+        id="editorial-reader-actions-toolbar" // Reader actions toolbar for editing and links
+        className="flex items-center justify-end gap-1.5 mb-space-md no-print"
+      >
+        <button
+          type="button"
+          onClick={() => {
+            const url = `${window.location.origin}/date/${memory.dateISO}`;
+            navigator.clipboard
+              .writeText(url)
+              .then(() => {
+                onToast(`Link copied: /date/${memory.dateISO}`, 'info');
+              })
+              .catch(() => {
+                onToast(`/date/${memory.dateISO}`, 'info');
+              });
+          }}
+          title="Copy direct link for this date"
+          className="w-8 h-8 rounded-lg bg-surface-container-low text-secondary hover:text-primary flex items-center justify-center border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
+        >
+          <span className="material-symbols-outlined text-[18px]">link</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onEditMemory(memory)}
+          className="px-3.5 py-1.5 rounded-lg bg-surface-container-low text-primary hover:bg-surface-container font-label-md text-xs uppercase tracking-wider flex items-center gap-1.5 border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
+        >
+          <span className="material-symbols-outlined text-[16px]">edit</span>
+          <span>Edit</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setDeleteConfirmOpen(true)}
+          title="Delete memory"
+          className="w-8 h-8 rounded-lg bg-surface-container-low text-error hover:bg-error/10 flex items-center justify-center border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
+        >
+          <span className="material-symbols-outlined text-[18px]">delete</span>
+        </button>
       </div>
 
       {/* Main Editorial Letter Parchment Card */}
