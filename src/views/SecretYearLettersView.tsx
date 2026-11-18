@@ -684,18 +684,20 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
         document.body
       )}
 
-      {/* (2026-07-13) Love letter composer full overlay; was modal with navs showing */}
+      {/* (2026-07-13) Add safe insets to overlay top/bottom navbars; was flush edges */}
       {letterComposerOpen && typeof document !== 'undefined' && createPortal(
         <div
           id="love-letter-composer-overlay"
-          className="fixed inset-0 z-[120] bg-[#fbf8f4] text-primary w-full h-full min-h-screen overflow-y-auto flex flex-col select-text no-print"
-          style={{
-            paddingTop: 'env(safe-area-inset-top, 0px)',
-            paddingBottom: 'max(24px, env(safe-area-inset-bottom, 24px))',
-          }}
+          className="fixed inset-0 z-[120] bg-[#fbf8f4] text-primary w-full h-full min-h-screen flex flex-col select-text no-print"
         >
           {/* Top navigation bar */}
-          <div className="sticky top-0 z-10 bg-[#fbf8f4]/95 backdrop-blur-md border-b border-outline-variant/30 px-4 sm:px-6 py-3.5 flex items-center justify-between">
+          <div
+            className="sticky top-0 z-20 bg-[#fbf8f4]/95 backdrop-blur-md border-b border-outline-variant/30 px-4 sm:px-6 flex items-center justify-between shadow-xs shrink-0"
+            style={{
+              paddingTop: 'max(16px, env(safe-area-inset-top, 16px))',
+              paddingBottom: '14px',
+            }}
+          >
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -724,80 +726,89 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
 
           <form
             onSubmit={handleSaveLetterSubmit}
-            className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-5 flex-1"
+            className="flex-1 overflow-y-auto flex flex-col w-full"
           >
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
-                Letter Title
-              </label>
-              <input
-                type="text"
-                value={letterTitle}
-                onChange={(e) => setLetterTitle(e.target.value)}
-                placeholder="E.g., Penelope or To My Favorite Person..."
-                required
-                className="w-full px-4 py-3 rounded-xl bg-surface-container-lowest text-primary font-serif text-base sm:text-lg border border-outline-variant/40 focus:border-primary/60 outline-none transition-colors shadow-xs"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3.5">
+            <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-5 flex-1">
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  value={letterDateISO}
-                  onChange={(e) => setLetterDateISO(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
-                  Occasion / Tag
+                  Letter Title
                 </label>
                 <input
                   type="text"
-                  value={letterOccasion}
-                  onChange={(e) => setLetterOccasion(e.target.value)}
-                  placeholder="E.g., Apology & Love"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
+                  value={letterTitle}
+                  onChange={(e) => setLetterTitle(e.target.value)}
+                  placeholder="E.g., Penelope or To My Favorite Person..."
+                  required
+                  className="w-full px-4 py-3 rounded-xl bg-surface-container-lowest text-primary font-serif text-base sm:text-lg border border-outline-variant/40 focus:border-primary/60 outline-none transition-colors shadow-xs"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3.5">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    value={letterDateISO}
+                    onChange={(e) => setLetterDateISO(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
+                    Occasion / Tag
+                  </label>
+                  <input
+                    type="text"
+                    value={letterOccasion}
+                    onChange={(e) => setLetterOccasion(e.target.value)}
+                    placeholder="E.g., Apology & Love"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5 flex-1">
+                <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
+                  Your Letter
+                </label>
+                <textarea
+                  rows={12}
+                  value={letterBody}
+                  onChange={(e) => setLetterBody(e.target.value)}
+                  placeholder={`Write or paste your letter for ${profile.partner2Name} here...`}
+                  required
+                  className="w-full p-4 rounded-xl bg-[#fdfbf7] text-[#3b2d24] font-['Cormorant_Garamond',Georgia,serif] text-base sm:text-lg leading-relaxed border border-outline-variant/40 focus:border-primary/60 outline-none min-h-[260px] resize-y shadow-xs"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
+                  Sign-off
+                </label>
+                <input
+                  type="text"
+                  value={letterSignOff}
+                  onChange={(e) => setLetterSignOff(e.target.value)}
+                  placeholder="E.g., -JP or Forever yours, JP"
+                  className="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
                 />
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5 flex-1">
-              <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
-                Your Letter
-              </label>
-              <textarea
-                rows={12}
-                value={letterBody}
-                onChange={(e) => setLetterBody(e.target.value)}
-                placeholder={`Write or paste your letter for ${profile.partner2Name} here...`}
-                required
-                className="w-full p-4 rounded-xl bg-[#fdfbf7] text-[#3b2d24] font-['Cormorant_Garamond',Georgia,serif] text-base sm:text-lg leading-relaxed border border-outline-variant/40 focus:border-primary/60 outline-none min-h-[260px] resize-y shadow-xs"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
-                Sign-off
-              </label>
-              <input
-                type="text"
-                value={letterSignOff}
-                onChange={(e) => setLetterSignOff(e.target.value)}
-                placeholder="E.g., -JP or Forever yours, JP"
-                className="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/20 mt-2">
+            {/* Bottom navigation bar */}
+            <div
+              className="sticky bottom-0 z-20 bg-[#fbf8f4]/95 backdrop-blur-md border-t border-outline-variant/25 px-4 sm:px-6 flex items-center justify-end gap-3 shadow-[0_-4px_16px_rgba(74,59,50,0.06)] shrink-0"
+              style={{
+                paddingTop: '12px',
+                paddingBottom: 'max(20px, env(safe-area-inset-bottom, 20px))',
+              }}
+            >
               <button
                 type="button"
                 onClick={() => setLetterComposerOpen(false)}
-                className="px-5 py-2.5 rounded-xl bg-surface-container-low text-secondary text-xs uppercase font-semibold hover:bg-surface-container transition-colors"
+                className="px-5 py-2.5 rounded-xl bg-surface-container-low text-secondary text-xs uppercase font-semibold hover:bg-surface-container transition-colors active:scale-95"
               >
                 Cancel
               </button>
