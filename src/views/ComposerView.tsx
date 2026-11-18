@@ -658,7 +658,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
               value={quoteHighlight}
               onChange={(e) => setQuoteHighlight(e.target.value)}
               placeholder="E.g., A memorable quote, phrase, or heartfelt summary of this day (leave blank if none)..."
-              className="w-full bg-transparent font-italic-quote text-body-md italic text-secondary placeholder:text-outline-variant/80 focus:outline-none pb-space-xs font-serif"
+              // (2026-07-13) Darken quote input text color; was faded text-secondary
+              className="w-full bg-transparent font-italic-quote text-body-md italic font-medium text-primary placeholder:text-outline/50 placeholder:font-normal focus:outline-none pb-space-xs font-serif"
             />
             <div className="w-full h-px bg-surface-container-high" />
           </div>
