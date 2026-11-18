@@ -1429,8 +1429,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 {primaryDateMemory ? 'Recorded Moment' : 'Unwritten Page'}
               </span>
             </div>
-            {/* (2026-07-13) Add big memory icon before title; was plain text */}
-            <h3 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-primary font-bold leading-tight flex items-center gap-2">
+            {/* (2026-07-13) Gray out unwritten quiet day title; was always text-primary */}
+            <h3
+              className={`font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl leading-tight flex items-center gap-2 ${
+                primaryDateMemory ? 'text-primary font-bold' : 'text-outline/70 font-normal italic'
+              }`}
+            >
               {primaryDateMemory && (
                 <span
                   className="material-symbols-outlined text-[24px] sm:text-[28px] text-secondary shrink-0"
@@ -1442,7 +1446,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               )}
               <span>{primaryDateMemory ? primaryDateMemory.title : 'A Quiet Day in Our Story'}</span>
             </h3>
-            <p className="font-['Cormorant_Garamond',serif] italic text-sm sm:text-base text-on-surface-variant leading-relaxed mt-1 line-clamp-3">
+            <p
+              className={`font-['Cormorant_Garamond',serif] italic text-sm sm:text-base leading-relaxed mt-1 line-clamp-3 ${
+                primaryDateMemory ? 'text-on-surface-variant' : 'text-outline/60'
+              }`}
+            >
               “{primaryDateMemory?.snippet || primaryDateMemory?.storyBody || `No memories recorded for this specific date yet. Every moment with ${profile.partner2Name} is a keepsake waiting to be written.`}”
             </p>
           </div>
@@ -1821,8 +1829,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 auto_awesome
               </span>
             </div>
-            {/* (2026-07-13) Add big memory icon before date modal title; was text only */}
-            <h2 className="font-['Playfair_Display',Georgia,serif] text-primary tracking-tight font-semibold text-2xl md:text-3xl flex items-center justify-center gap-2.5">
+            {/* (2026-07-13) Gray out unwritten date modal title; was always text-primary */}
+            <h2
+              className={`font-['Playfair_Display',Georgia,serif] tracking-tight text-2xl md:text-3xl flex items-center justify-center gap-2.5 ${
+                primaryDateMemory ? 'text-primary font-semibold' : 'text-outline/70 font-normal italic'
+              }`}
+            >
               {primaryDateMemory && (
                 <span
                   className="material-symbols-outlined text-[28px] md:text-[32px] text-secondary shrink-0"
