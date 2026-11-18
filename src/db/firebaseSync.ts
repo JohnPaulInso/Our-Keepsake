@@ -17,6 +17,7 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  signInAnonymously,
   signOut as fbSignOut,
   Auth,
 } from 'firebase/auth';
@@ -160,6 +161,10 @@ class FirebaseSyncManager {
 
       this.db = getFirestore(this.app);
       this.auth = getAuth(this.app);
+      // (2026-07-13) Silently sign in anonymously if available; was uncalled
+      if (this.auth && !this.auth.currentUser) {
+        signInAnonymously(this.auth).catch(() => {});
+      }
 
       enableIndexedDbPersistence(this.db).catch(() => {
         // Multi-tab or unsupported browser fallback
