@@ -1,0 +1,58 @@
+{
+  "nodes": [
+    {
+      "id": "PRD_Requirements",
+      "label": "Our Keepsake PRD",
+      "file_type": "document",
+      "source_file": "our_keepsake_project_prd_brief.md",
+      "description": "Product requirements for Our Keepsake: couple timeline, digital vault, secret letters, offline IndexedDB and Firestore sync."
+    },
+    {
+      "id": "Design_Language",
+      "label": "Warm Linen Design Language",
+      "file_type": "document",
+      "source_file": "stitch_our_love_story_journal/warm_linen_capybara_keepsake/DESIGN.md",
+      "description": "Warm linen, tactile paper, capybara mascot, romantic serif typography, and soft neutral earth-tones palette."
+    },
+    {
+      "id": "JP_App_Blueprint",
+      "label": "JP App Blueprint",
+      "file_type": "document",
+      "source_file": "SKILL.md",
+      "description": "Full-stack architectural blueprint: local-first Firestore + IndexedDB, image uploader, and Capacitor Android packaging."
+    },
+    {
+      "id": "CI_CD_Deploy",
+      "label": "GitHub Actions Deployment",
+      "file_type": "document",
+      "source_file": ".github/workflows/deploy.yml",
+      "description": "Automated build and deploy workflow for Our Keepsake web app to GitHub Pages."
+    }
+  ],
+  "edges": [
+    {
+      "source": "PRD_Requirements",
+      "target": "Design_Language",
+      "relation": "specifies_style",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "JP_App_Blueprint",
+      "target": "PRD_Requirements",
+      "relation": "architectural_foundation",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "CI_CD_Deploy",
+      "target": "JP_App_Blueprint",
+      "relation": "builds_and_deploys",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 120,
+  "output_tokens": 80
+}
