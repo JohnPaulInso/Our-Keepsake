@@ -402,7 +402,7 @@ export const MonthlyNotepadView: React.FC<MonthlyNotepadViewProps> = ({
             value={notepadText}
             onChange={handleTextChange}
             onBlur={handleBlur}
-            placeholder={`nov 15 - after mass service niadto tag goldilocks...\n\nnov 16 - fetched u at db and ngaon ta burger...`}
+            // (2026-07-13) Remove notepad placeholder; was nov 15/16 sample text
             rows={20}
             className="w-full bg-transparent font-sans text-[13.5px] sm:text-[14px] leading-relaxed text-[#202124] dark:text-on-surface focus:outline-none resize-none border-0 p-0 m-0 placeholder:text-outline/40 select-text overflow-hidden"
             style={{ minHeight: '65vh' }}
