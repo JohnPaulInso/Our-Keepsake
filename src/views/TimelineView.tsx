@@ -514,13 +514,19 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       .filter((v): v is VideoCapsule => !!v && !!v.url);
   }, [selectedDayMemories]);
 
-  // (2026-07-13) Route editing to ComposerView; was divergent inline edit state
-  const handleOpenComposerForDate = () => {
-    const mStr = String(calendarMonth + 1).padStart(2, '0');
-    const dStr = String(selectedDay || 1).padStart(2, '0');
-    const targetIso = `${calendarYear}-${mStr}-${dStr}`;
+  // (2026-07-13) Pass explicit ISO date to open composer for existing date; was implicit
+  const handleOpenComposerForDate = (explicitIso?: string) => {
+    let targetIso: string;
+    if (typeof explicitIso === 'string' && explicitIso) {
+      targetIso = explicitIso;
+    } else {
+      const mStr = String(calendarMonth + 1).padStart(2, '0');
+      const dStr = String(selectedDay || 1).padStart(2, '0');
+      targetIso = `${calendarYear}-${mStr}-${dStr}`;
+    }
 
-    const memoryToEdit: KeepsakeMemory = primaryDateMemory || {
+    const memoryForDate = memories.find((m) => m.dateISO === targetIso) || null;
+    const memoryToEdit: KeepsakeMemory = memoryForDate || {
       id: `mem-${Date.now()}`,
       keepsakeNumber: memories.length + 1,
       volumeNumber: 1,
@@ -1488,7 +1494,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           <div className="flex items-center gap-2 pt-2 border-t border-outline-variant/20">
             <button
               type="button"
-              onClick={handleOpenComposerForDate}
+              onClick={() => handleOpenComposerForDate()}
               className="flex-1 py-2 px-4 rounded-xl bg-primary text-on-primary font-['Plus_Jakarta_Sans',sans-serif] text-xs uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 shadow-xs hover:bg-primary/95 transition-all active:scale-98"
             >
               <span className="material-symbols-outlined text-[16px]">
@@ -2070,7 +2076,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 <div className="mt-7 pt-4 border-t border-outline-variant/20 flex items-center justify-end w-full">
                   <button
                     type="button"
-                    onClick={handleOpenComposerForDate}
+                    onClick={() => handleOpenComposerForDate()}
                     className="flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-primary text-on-primary font-['Plus_Jakarta_Sans',sans-serif] text-xs uppercase tracking-wider font-semibold shadow-sm hover:bg-primary/95 transition-all active:scale-95"
                   >
                     <span className="material-symbols-outlined text-[17px]">

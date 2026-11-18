@@ -325,11 +325,21 @@ export const App: React.FC = () => {
     requestTabNavigation('new-date');
   };
 
+  // (2026-07-13) Save memory updating in-place by id or dateISO; was id only
   const handleSaveMemory = async (memory: KeepsakeMemory, isDraft: boolean) => {
-    const exists = memories.some((m) => m.id === memory.id);
-    const nextList = exists
-      ? memories.map((m) => (m.id === memory.id ? memory : m))
-      : [memory, ...memories];
+    const existingIndex = memories.findIndex(
+      (m) => m.id === memory.id || m.dateISO === memory.dateISO
+    );
+    let nextList: KeepsakeMemory[];
+    if (existingIndex !== -1) {
+      const targetId = memories[existingIndex].id;
+      const updatedMemory = { ...memory, id: targetId };
+      nextList = memories
+        .filter((m) => m.id !== targetId && m.dateISO !== memory.dateISO)
+        .concat(updatedMemory);
+    } else {
+      nextList = [memory, ...memories];
+    }
 
     // (2026-07-13) Synchronously update memories state; was async listener lag
     setMemories(nextList);

@@ -78,7 +78,10 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
   const [moodVibe, setMoodVibe] = useState(editingMemory?.moodVibe || '');
   const [title, setTitle] = useState(editingMemory?.title || '');
   const [letterHeading, setLetterHeading] = useState(editingMemory?.letterHeading || '');
-  const [storyBody, setStoryBody] = useState(editingMemory?.storyBody || '');
+  // (2026-07-13) Fallback storyBody to snippet when editing memory; was empty
+  const [storyBody, setStoryBody] = useState(
+    editingMemory?.storyBody || editingMemory?.snippet || ''
+  );
   const [quoteHighlight, setQuoteHighlight] = useState(editingMemory?.quoteHighlight || '');
 
   // (2026-07-13) Suggest title from heartfelt note if not entered; was none
@@ -102,15 +105,29 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     editingMemory?.dotIndicators || ['MOCHA']
   );
 
-  // (2026-07-13) Detect duplicate memory on same day; was unconstrained
-  const duplicateMemory = useMemo(() => {
+  // (2026-07-13) Match existing memory for date to allow seamless edits; was duplicate block
+  const existingForDate = useMemo(() => {
     if (!existingMemories) return null;
-    return existingMemories.find(
-      (m) => m.dateISO === dateISO && (!editingMemory || m.id !== editingMemory.id)
-    ) || null;
-  }, [existingMemories, dateISO, editingMemory]);
+    return existingMemories.find((m) => m.dateISO === dateISO) || null;
+  }, [existingMemories, dateISO]);
 
-  const isDuplicateDate = Boolean(duplicateMemory);
+  // (2026-07-13) Auto-load content when date matches existing memory; was blank form
+  useEffect(() => {
+    if (existingForDate && !editingMemory && !storyBody) {
+      setTitle(existingForDate.title || '');
+      setLetterHeading(existingForDate.letterHeading || '');
+      setStoryBody(existingForDate.storyBody || existingForDate.snippet || '');
+      setQuoteHighlight(existingForDate.quoteHighlight || '');
+      setSelectedTags(existingForDate.vibeTags || []);
+      setSelectedDots(existingForDate.dotIndicators || ['MOCHA']);
+      setPhotos(existingForDate.photos || []);
+      if (existingForDate.audioMemo?.url) {
+        setVoiceTitle(existingForDate.audioMemo.title || `Whispered note for ${profile.partner2Name}`);
+        setVoiceDurationSec(existingForDate.audioMemo.durationSeconds || 42);
+        setVoiceDataUrl(existingForDate.audioMemo.url);
+      }
+    }
+  }, [existingForDate, editingMemory, storyBody, profile.partner2Name]);
 
   // Voice Note State
   const [voiceTitle, setVoiceTitle] = useState(
@@ -371,10 +388,11 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     // (2026-07-13) Dynamic chapter number from courting date; was fixed 15 / II
     const calculatedChapter = getChapterNumber(dateISO, profile.courtingDateISO || '2025-11-07');
 
+    // (2026-07-13) Use existing date record ID to update in-place; was always new id
     return {
-      id: editingMemory?.id || `mem-${Date.now()}`,
-      keepsakeNumber: editingMemory?.keepsakeNumber || 85 + totalMemoriesCount,
-      volumeNumber: editingMemory?.volumeNumber || calculatedChapter,
+      id: editingMemory?.id || existingForDate?.id || `mem-${Date.now()}`,
+      keepsakeNumber: editingMemory?.keepsakeNumber || existingForDate?.keepsakeNumber || 85 + totalMemoriesCount,
+      volumeNumber: editingMemory?.volumeNumber || existingForDate?.volumeNumber || calculatedChapter,
       dateISO,
       timeFormatted: timeFormatted.trim() || 'All Day',
       title: cleanTitle,
@@ -428,12 +446,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     };
   };
 
-  // (2026-07-13) Disallow same-day duplicate save; was unguarded submission
+  // (2026-07-13) Seal memory updating record for date in-place; was duplicate block
   const handleSealSubmit = () => {
-    if (isDuplicateDate) {
-      onToast(`A keepsake for ${formatStandardDate(dateISO)} already exists. Choose another date or edit the existing one.`, 'warning');
-      return;
-    }
     setSealingAnim(true);
     setTimeout(() => {
       setSealingAnim(false);
@@ -442,12 +456,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     }, 220);
   };
 
-  // (2026-07-13) Disallow same-day duplicate draft; was unguarded draft save
+  // (2026-07-13) Save draft updating record in-place; was duplicate block
   const handleDraftSubmit = () => {
-    if (isDuplicateDate) {
-      onToast(`A keepsake for ${formatStandardDate(dateISO)} already exists. Choose another date or edit the existing one.`, 'warning');
-      return;
-    }
     const payload = buildMemoryPayload(true);
     onSaveMemory(payload, true);
   };
@@ -540,14 +550,14 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
           </button>
         </div>
 
-        {/* (2026-07-13) Show duplicate date warning banner; was absent */}
-        {isDuplicateDate && (
-          <div className="flex items-center gap-space-sm p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-900 text-body-sm">
-            <span className="material-symbols-outlined text-[20px] text-amber-700 shrink-0">
-              warning
+        {/* (2026-07-13) Show active edit banner for existing date; was blocking alert */}
+        {existingForDate && (
+          <div className="flex items-center gap-space-sm p-3 bg-secondary-container/30 border border-secondary/20 rounded-xl text-primary text-body-sm">
+            <span className="material-symbols-outlined text-[20px] text-secondary shrink-0">
+              edit_note
             </span>
             <span className="flex-1 min-w-0">
-              A keepsake already exists for <strong>{formatStandardDate(dateISO)}</strong>. Same-day duplicate records are disallowed. Please select another date or edit the existing keepsake.
+              Editing keepsake for <strong>{formatStandardDate(dateISO)}</strong>. Sealing will update this date&apos;s memory in your memory box.
             </span>
           </div>
         )}
@@ -1110,10 +1120,10 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                   onChange={(e) => setDateISO(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
                 />
-                {/* (2026-07-13) Inline date conflict alert in modal; was absent */}
-                {isDuplicateDate && (
-                  <p className="text-xs text-amber-700 mt-1 font-medium">
-                    ⚠️ A memory already exists for this date.
+                {/* (2026-07-13) Inline date notice in modal; was blocking alert */}
+                {existingForDate && (
+                  <p className="text-xs text-secondary mt-1 font-medium">
+                    ✓ Existing memory found for this date. Editing will update it.
                   </p>
                 )}
               </div>
