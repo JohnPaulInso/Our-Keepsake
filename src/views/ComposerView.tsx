@@ -138,11 +138,15 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     }
   }, [existingForDate, editingMemory, storyBody, profile.partner2Name]);
 
-  // (2026-07-13) Auto-detect ribbon dots when text changes; was manual dots only
+  const userManuallySetDotsRef = useRef<boolean>(Boolean(editingMemory));
+
+  // (2026-07-13) Auto-detect ribbon dots only if not manually set; was forced
   useEffect(() => {
+    if (userManuallySetDotsRef.current) return;
     if (!title && !storyBody) return;
     const combined = `${title} ${storyBody}`;
-    setSelectedDots((prev) => detectAutoDotIndicators(combined, prev));
+    const detected = detectAutoDotIndicators(combined, []);
+    if (detected.length > 0) setSelectedDots(detected);
   }, [title, storyBody]);
 
   // Voice Note State
@@ -320,13 +324,12 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     setCustomTagInput('');
   };
 
+  // (2026-07-13) Allow unchecking to 1 or 0 dots; was clamped to min 2
   const toggleDot = (dot: DotIndicator) => {
-    setSelectedDots((prev) => {
-      if (prev.includes(dot)) {
-        return prev.length > 1 ? prev.filter((d) => d !== dot) : prev;
-      }
-      return [...prev, dot];
-    });
+    userManuallySetDotsRef.current = true;
+    setSelectedDots((prev) =>
+      prev.includes(dot) ? prev.filter((d) => d !== dot) : [...prev, dot]
+    );
   };
 
   const handleToggleRecording = async () => {
@@ -399,8 +402,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       storyBody.trim() ||
       `Another unforgettable day with ${profile.partner2Name} in ${location}. I wrote this down so we never forget how warm and peaceful this moment felt.`;
     const cleanBody = capitalizeFirstLetters(rawBody);
-    // (2026-07-13) Auto-detect ribbon dots based on keywords; was manual selection
-    const finalDots = detectAutoDotIndicators(`${cleanTitle} ${cleanBody}`, selectedDots);
+    // (2026-07-13) Keep user selected dots exactly; was re-running auto-detector
+    const finalDots = selectedDots;
     const categories: MemoryCategory[] = ['EVENT'];
     if (photos.length > 0) categories.push('PHOTO');
     if (voiceDataUrl) categories.push('VOICE_MEMO');

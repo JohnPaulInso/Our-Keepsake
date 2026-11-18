@@ -698,30 +698,21 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
           <div
             className="sticky top-0 z-20 bg-[#fbf8f4]/95 backdrop-blur-md border-b border-outline-variant/30 px-4 sm:px-6 flex items-center justify-between shadow-xs shrink-0"
             style={{
-              paddingTop: 'max(16px, env(safe-area-inset-top, 16px))',
+              paddingTop: 'max(20px, env(safe-area-inset-top, 20px))',
               paddingBottom: '14px',
             }}
           >
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setLetterComposerOpen(false)}
-                aria-label="Return to letters view"
-                className="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-95"
-              >
-                <span className="material-symbols-outlined text-[22px]">arrow_back</span>
-              </button>
-              <div>
-                <h2 className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-bold text-primary leading-tight">
-                  {editingLetter ? 'Edit Love Letter' : `Write Love Letter for ${profile.partner2Name}`}
-                </h2>
-                <span className="text-xs text-secondary italic">A digital keepsake copy of your heartfelt words</span>
-              </div>
+            {/* (2026-07-13) Clean title and single close button; was dual back & close */}
+            <div>
+              <h2 className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-bold text-primary leading-tight">
+                {editingLetter ? 'Edit Love Letter' : `Write Love Letter for ${profile.partner2Name}`}
+              </h2>
+              <span className="text-xs text-secondary italic">A digital keepsake copy of your heartfelt words</span>
             </div>
             <button
               type="button"
               onClick={() => setLetterComposerOpen(false)}
-              className="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors"
+              className="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-95"
               aria-label="Close composer"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
@@ -743,7 +734,7 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                   onChange={(e) => setLetterTitle(e.target.value)}
                   placeholder="E.g., Penelope or To My Favorite Person..."
                   required
-                  className="w-full px-4 py-3 rounded-xl bg-surface-container-lowest text-primary font-serif text-base sm:text-lg border border-outline-variant/40 focus:border-primary/60 outline-none transition-colors shadow-xs"
+                  className="w-full px-4 py-3 rounded-xl bg-surface-container-low text-primary font-serif text-base sm:text-lg border border-outline-variant/40 focus:border-primary/60 outline-none transition-colors shadow-xs"
                 />
               </div>
 
@@ -756,7 +747,7 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                     type="date"
                     value={letterDateISO}
                     onChange={(e) => setLetterDateISO(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -768,7 +759,7 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                     value={letterOccasion}
                     onChange={(e) => setLetterOccasion(e.target.value)}
                     placeholder="E.g., Apology & Love"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
                   />
                 </div>
               </div>
@@ -796,7 +787,7 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                   value={letterSignOff}
                   onChange={(e) => setLetterSignOff(e.target.value)}
                   placeholder="E.g., -JP or Forever yours, JP"
-                  className="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
+                  className="w-full px-4 py-2.5 rounded-xl bg-surface-container-low text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
                 />
               </div>
             </div>

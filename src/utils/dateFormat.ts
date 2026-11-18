@@ -128,7 +128,7 @@ export function detectAutoDotIndicators(text: string, existingDots: Array<'GOLD'
   if (intimacyKeywords.some(k => lower.includes(k))) dots.add('ROSE');
   if (milestoneKeywords.some(k => lower.includes(k))) dots.add('BURGUNDY');
 
-  if (dots.size === 0) dots.add('MOCHA');
+  // (2026-07-13) Return detected dots without forcing MOCHA; was auto-adding MOCHA
   return Array.from(dots);
 }
 
