@@ -29,6 +29,8 @@ import { CoupleStudioModal } from './components/CoupleStudioModal';
 import { PinLockModal } from './components/PinLockModal';
 // (2026-07-13) Import capitalizeFirstLetters & getTodayISO; was without capitalize
 import { capitalizeFirstLetters, formatStandardDate, getChapterNumber, getTodayISO } from './utils/dateFormat';
+// (2026-07-13) Import modal manager for hierarchical LIFO back dismissal per Rule 16
+import { pushModal, popModal, closeAllModals, getOpenModalCount } from './utils/modalManager';
 
 export const App: React.FC = () => {
   const location = useLocation();
@@ -237,11 +239,38 @@ export const App: React.FC = () => {
     setPendingPath(null);
   };
 
+  const [openModalsCount, setOpenModalsCount] = useState<number>(0);
+
+  useEffect(() => {
+    const handleStackChange = (e: Event) => {
+      const custom = e as CustomEvent<{ count: number }>;
+      setOpenModalsCount(custom.detail?.count || 0);
+    };
+    window.addEventListener('keepsake:modal-stack-changed', handleStackChange);
+    return () => window.removeEventListener('keepsake:modal-stack-changed', handleStackChange);
+  }, []);
+
+  useEffect(() => {
+    if (studioModalOpen) {
+      return pushModal('studio-modal', () => setStudioModalOpen(false));
+    }
+  }, [studioModalOpen]);
+
+  useEffect(() => {
+    if (showUnsavedModal) {
+      return pushModal('unsaved-modal', () => setShowUnsavedModal(false));
+    }
+  }, [showUnsavedModal]);
+
   // Hierarchical Back-Button & Two-Step Exit Flow per SKILL.md Section 2 Rules 8 & 16
   useEffect(() => {
     window.history.pushState({ keepsakeGuard: true }, '');
     const handlePopState = () => {
       window.history.pushState({ keepsakeGuard: true }, '');
+      // (2026-07-13) Dismiss top modal hierarchically in LIFO order; was static checks
+      if (popModal()) {
+        return;
+      }
       if (showUnsavedModal) {
         setShowUnsavedModal(false);
         setPendingTab(null);
@@ -273,6 +302,7 @@ export const App: React.FC = () => {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        if (popModal()) return;
         if (showUnsavedModal) {
           setShowUnsavedModal(false);
           setPendingTab(null);
@@ -996,12 +1026,14 @@ export const App: React.FC = () => {
             onClick={() => requestTabNavigation('timeline')}
             className="flex items-center gap-space-sm cursor-pointer"
           >
-            {activeTab !== 'timeline' && (
+            {/* (2026-07-13) Universal back closes all open modals or navigates to timeline */}
+            {(activeTab !== 'timeline' || openModalsCount > 0) && (
               <button
                 type="button"
-                aria-label="Go back to timeline"
+                aria-label="Universal Back Button"
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (closeAllModals()) return;
                   requestTabNavigation('timeline');
                 }}
                 className="w-8 h-8 -ml-1 mr-1 rounded-full flex items-center justify-center text-primary active:scale-95"

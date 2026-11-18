@@ -35,6 +35,7 @@ import { CustomDropdown } from '../components/CustomDropdown';
 import { DB } from '../db/localDb';
 import { StoryReaderView } from './StoryReaderView';
 import { ComposerView } from './ComposerView';
+import { pushModal } from '../utils/modalManager';
 
 // (2026-07-13) Add digitalLoveLetters to TimelineViewProps vs secretNotes only
 interface TimelineViewProps {
@@ -555,6 +556,35 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       if (callback) callback();
     }, 280);
   };
+
+  // (2026-07-13) Register overlays in global modal manager for LIFO dismissal
+  useEffect(() => {
+    if (isFullscreenDateOpen) {
+      return pushModal('fullscreen-date', () => {
+        closeDateOverlay();
+      });
+    }
+  }, [isFullscreenDateOpen]);
+
+  useEffect(() => {
+    if (overlayEditMemory) {
+      return pushModal('overlay-edit-memory', () => {
+        setOverlayEditMemory(null);
+      });
+    }
+  }, [overlayEditMemory]);
+
+  useEffect(() => {
+    if (overlayDeleteConfirmOpen) {
+      return pushModal('overlay-delete-confirm', () => setOverlayDeleteConfirmOpen(false));
+    }
+  }, [overlayDeleteConfirmOpen]);
+
+  useEffect(() => {
+    if (overlayUnsavedConfirmOpen) {
+      return pushModal('overlay-unsaved-confirm', () => setOverlayUnsavedConfirmOpen(false));
+    }
+  }, [overlayUnsavedConfirmOpen]);
 
   // (2026-07-13) Handle Escape per top-most modal layer; was always closing overlay
   useEffect(() => {

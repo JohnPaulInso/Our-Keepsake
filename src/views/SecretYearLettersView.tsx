@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { CoupleProfile, DigitalLoveLetter, SecretYearNote } from '../types';
 import { formatStandardDate } from '../utils/dateFormat';
 import { CustomDropdown } from '../components/CustomDropdown';
+import { pushModal } from '../utils/modalManager';
 
 interface SecretYearLettersViewProps {
   profile: CoupleProfile;
@@ -79,6 +80,19 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
   const [letterPaperNotes, setLetterPaperNotes] = useState(
     'Drafted digitally first, then handwritten onto cream cotton paper.'
   );
+
+  // (2026-07-13) Register overlays in global modal manager for LIFO back dismissal
+  useEffect(() => {
+    if (readingLetter) return pushModal('reading-letter', () => setReadingLetter(null));
+  }, [readingLetter]);
+
+  useEffect(() => {
+    if (letterComposerOpen) return pushModal('letter-composer', () => setLetterComposerOpen(false));
+  }, [letterComposerOpen]);
+
+  useEffect(() => {
+    if (noteComposerOpen) return pushModal('note-composer', () => setNoteComposerOpen(false));
+  }, [noteComposerOpen]);
 
   useEffect(() => {
     const anyModal =
