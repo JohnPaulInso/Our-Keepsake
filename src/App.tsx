@@ -77,10 +77,16 @@ export const App: React.FC = () => {
   const pullStartYRef = useRef<number | null>(null);
   const [pullOffset, setPullOffset] = useState(0);
 
+  // (2026-07-13) Deduplicate active toasts by message; was unconditional append
   const addToast = useCallback(
     (message: string, type: 'success' | 'info' | 'warning' | 'danger' = 'success') => {
       const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-      setToasts((prev) => [...prev.slice(-2), { id, message, type }]);
+      setToasts((prev) => {
+        if (prev.some((t) => t.message === message)) {
+          return prev;
+        }
+        return [...prev.slice(-2), { id, message, type }];
+      });
       setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== id));
       }, 3400);
@@ -391,7 +397,7 @@ export const App: React.FC = () => {
       addToast(`Draft "${memory.title}" saved to your desk.`, 'info');
       switchTab('timeline');
     } else {
-      // (2026-07-13) Rename sealed toast to saved; was sealed into Memory Box
+      // (2026-07-13) Remove duplicate sealed toast on save; was firing two toasts
       addToast(`"${memory.title}" saved to your Memory Box!`, 'success');
       switchTab('story');
     }
@@ -1029,6 +1035,7 @@ export const App: React.FC = () => {
                   }
                   switchTab('notepad');
                 }}
+                // (2026-07-13) Pass handleSaveMemory to TimelineView; was omitted
                 // (2026-07-13) Pass delete, note & toast handlers for overlay StoryReader
                 onSaveMemory={handleSaveMemory}
                 onDeleteMemory={handleDeleteMemory}
