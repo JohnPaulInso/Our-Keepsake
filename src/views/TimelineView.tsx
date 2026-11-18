@@ -1557,15 +1557,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               </span>
               <span>{selectedDayFormatted}</span>
             </div>
-            <button
-              type="button"
-              onClick={() => setSelectedDay(null)}
-              className="flex items-center gap-1 text-[11px] uppercase tracking-wider font-semibold text-secondary hover:text-primary transition-colors px-2 py-1 rounded-full hover:bg-surface-container"
-              title="Clear date filter to view all memories"
-            >
-              <span className="material-symbols-outlined text-[14px]">close</span>
-              <span>Clear Filter</span>
-            </button>
+            {/* (2026-07-13) Remove Clear Filter button from peep card; was Clear Filter */}
           </div>
 
           {/* Moment title and note */}
