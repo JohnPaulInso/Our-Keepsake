@@ -457,37 +457,43 @@ export const App: React.FC = () => {
     isDraft: boolean,
     stayInOverlay = false
   ) => {
+    const now = Date.now();
     const formattedTitle = capitalizeFirstLetters(memory.title);
     const formattedStory = capitalizeFirstLetters(memory.storyBody);
-    const formattedMemory: KeepsakeMemory = {
-      ...memory,
-      title: formattedTitle,
-      storyBody: formattedStory,
-      snippet: formattedStory.slice(0, 160) + (formattedStory.length > 160 ? '...' : ''),
-    };
     const existingIndex = memories.findIndex(
       (m) => m.id === memory.id || m.dateISO === memory.dateISO
     );
+    const targetId =
+      existingIndex !== -1 && !memories[existingIndex].id.endsWith('-imported')
+        ? memories[existingIndex].id
+        : `mem-${memory.dateISO}-${now}`;
+    const finalId = targetId;
+
+    // (2026-07-13) Set explicit updatedAt timestamp on save; was missing timestamp
+    const formattedMemory: KeepsakeMemory = {
+      ...memory,
+      id: targetId,
+      title: formattedTitle,
+      storyBody: formattedStory,
+      snippet: formattedStory.slice(0, 160) + (formattedStory.length > 160 ? '...' : ''),
+      updatedAt: now,
+    };
     let nextList: KeepsakeMemory[];
-    let finalId = formattedMemory.id;
     if (existingIndex !== -1) {
-      const targetId = memories[existingIndex].id;
-      finalId = targetId;
-      const updatedMemory = { ...formattedMemory, id: targetId };
       nextList = [...memories];
-      nextList[existingIndex] = updatedMemory;
+      nextList[existingIndex] = formattedMemory;
     } else {
       nextList = [formattedMemory, ...memories];
     }
 
-    // (2026-07-13) In-place optimistic memory update & non-blocking DB; was delay
     setMemories(nextList);
     setSelectedMemoryId(finalId);
     DB.setSelectedMemoryId(finalId);
     setHasUnsavedChanges(false);
     setShowUnsavedModal(false);
     setEditingMemory(null);
-    DB.setMemories(nextList).then(() => syncManager.schedulePush());
+    await DB.setMemories(nextList);
+    syncManager.pushSnapshot();
 
     if (isDraft) {
       addToast(`Draft "${formattedMemory.title}" saved to your desk.`, 'info');

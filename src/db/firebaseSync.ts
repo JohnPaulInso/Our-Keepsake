@@ -520,7 +520,8 @@ class FirebaseSyncManager {
     this.unsubscribeSnapshot = onSnapshot(
       docRef,
       async (snap) => {
-        if (!snap.exists() || this.isSyncing) return;
+        // (2026-07-13) Ignore local echo writes in onSnapshot; was echoing write
+        if (!snap.exists() || this.isSyncing || snap.metadata.hasPendingWrites) return;
         const data = snap.data() as BackupSnapshot & { updatedAt?: number };
         // (2026-07-13) Live sync remote memories to cache; was skip on baseline
         const remoteTime = data.exportedAt || data.updatedAt || 0;

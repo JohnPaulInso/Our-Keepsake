@@ -288,9 +288,11 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     onDirtyChange?.(isDirty);
   }, [isDirty, onDirtyChange]);
 
-  // (2026-07-13) Sync form state when editing memory changes; was initial only
+  // (2026-07-13) Guard sync form state by memory ID; was wiping edits on rerender
+  const lastInitializedMemoryIdRef = useRef<string | null>(editingMemory?.id || null);
   useEffect(() => {
-    if (editingMemory) {
+    if (editingMemory && editingMemory.id !== lastInitializedMemoryIdRef.current) {
+      lastInitializedMemoryIdRef.current = editingMemory.id;
       setDateISO(editingMemory.dateISO || getTodayISO());
       setTimeFormatted(editingMemory.timeFormatted || 'All Day');
       setLocation(editingMemory.location || 'Bogo City, Cebu');
@@ -314,7 +316,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       setVideoUrl(editingMemory.videoCapsule?.url);
       setTimeout(() => adjustTextareaHeight(storyTextareaRef.current), 50);
     }
-  }, [editingMemory]);
+  }, [editingMemory?.id]);
 
   useEffect(() => {
     if (metaModalOpen || Boolean(pendingCropSrc)) {

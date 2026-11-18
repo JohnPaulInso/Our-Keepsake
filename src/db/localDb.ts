@@ -229,19 +229,12 @@ class LocalDatabase {
       memCache.secretYearNotes = savedNotes && Array.isArray(savedNotes) ? savedNotes : [];
       memCache.digitalLoveLetters = savedLetters && Array.isArray(savedLetters) ? savedLetters : [];
 
-      // (2026-07-13) Auto-seed imported July & August 2026 keepsakes; was 4 august only
+      // (2026-07-13) Only seed missing dates; was overwriting -imported memories
       let memoriesUpdated = false;
       for (const item of INITIAL_MEMORIES) {
         const existingIdx = memCache.memories.findIndex((m) => m.dateISO === item.dateISO);
         if (existingIdx === -1) {
           memCache.memories.push(item);
-          memoriesUpdated = true;
-        } else if (
-          !memCache.memories[existingIdx].storyBody ||
-          memCache.memories[existingIdx].storyBody.length < 20 ||
-          memCache.memories[existingIdx].id.endsWith('-imported')
-        ) {
-          memCache.memories[existingIdx] = { ...item, id: memCache.memories[existingIdx].id };
           memoriesUpdated = true;
         }
       }
@@ -250,15 +243,12 @@ class LocalDatabase {
         await idbSet('memories', memCache.memories);
       }
 
-      // (2026-07-13) Auto-seed initial digital love letters; was empty list
+      // (2026-07-13) Only seed missing letters; was overwriting -penelope letters
       let lettersUpdated = false;
       for (const letter of INITIAL_DIGITAL_LOVE_LETTERS) {
         const existingIdx = memCache.digitalLoveLetters.findIndex((l) => l.id === letter.id);
         if (existingIdx === -1) {
           memCache.digitalLoveLetters.push(letter);
-          lettersUpdated = true;
-        } else if (memCache.digitalLoveLetters[existingIdx].id.endsWith('-penelope')) {
-          memCache.digitalLoveLetters[existingIdx] = letter;
           lettersUpdated = true;
         }
       }
@@ -648,14 +638,15 @@ class LocalDatabase {
       memCache.coupleProfile = snapshot.coupleProfile;
       await idbSet('coupleProfile', snapshot.coupleProfile);
     }
-    // (2026-07-13) Preserve local photos on remote merge; was wipe on remote
+    // (2026-07-13) Preserve local edits and photos on remote merge; was overwrite
     if (Array.isArray(snapshot.memories)) {
       const existingLocal = memCache.memories || [];
       const remoteIds = new Set(snapshot.memories.map((m) => m.id));
-      const localOnly = existingLocal.filter((m) => !remoteIds.has(m.id));
+      const remoteDates = new Set(snapshot.memories.map((m) => m.dateISO));
+      const localOnly = existingLocal.filter((m) => !remoteIds.has(m.id) && !remoteDates.has(m.dateISO));
 
       const merged = snapshot.memories.map((remoteMem) => {
-        const localMem = existingLocal.find((m) => m.id === remoteMem.id);
+        const localMem = existingLocal.find((m) => m.id === remoteMem.id || m.dateISO === remoteMem.dateISO);
         if (!localMem) return remoteMem;
 
         const localPhotos = localMem.photos || [];
@@ -664,7 +655,7 @@ class LocalDatabase {
         // If local has photos but remote has none, or local was updated more recently: preserve local photos
         const shouldKeepLocalPhotos =
           (localPhotos.length > 0 && remotePhotos.length === 0) ||
-          ((localMem.updatedAt || 0) > (remoteMem.updatedAt || 0) && localPhotos.length > 0);
+          ((localMem.updatedAt || 0) >= (remoteMem.updatedAt || 0) && localPhotos.length > 0);
 
         // Resolve any split_media:// or missing URLs using local cache
         const resolvedPhotos = remotePhotos.map((rp) => {
@@ -681,7 +672,7 @@ class LocalDatabase {
           ? localPhotos
           : (resolvedPhotos.length > 0 ? resolvedPhotos : localPhotos);
 
-        if ((localMem.updatedAt || 0) > (remoteMem.updatedAt || 0)) {
+        if ((localMem.updatedAt || 0) >= (remoteMem.updatedAt || 0)) {
           return { ...localMem, photos: finalPhotos };
         }
         return { ...remoteMem, photos: finalPhotos };
