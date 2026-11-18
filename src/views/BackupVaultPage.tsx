@@ -901,7 +901,6 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
           )}
 
           {/* TAB 2: LIVE KEEPSAKE MEMORIES */}
-          // (2026-07-13) Render live memories/notes preview vs static initial seed lists
           {previewSection === 'MEMORIES' && (
             <div className="flex flex-col gap-3">
               {memories.length === 0 ? (
