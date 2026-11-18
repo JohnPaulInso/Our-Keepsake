@@ -289,18 +289,48 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                disabled={isSigningIn}
-                onClick={handleGoogleSignIn}
-                className="w-full py-2.5 px-4 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
-              >
-                <span className="material-symbols-outlined text-[18px]">account_circle</span>
-                <span>
-                  {isSigningIn ? 'Connecting Google Account...' : 'Sign in with Google'}
-                </span>
-              </button>
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  disabled={isSigningIn}
+                  onClick={handleGoogleSignIn}
+                  className="w-full py-2.5 px-4 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined text-[18px]">account_circle</span>
+                  <span>
+                    {isSigningIn ? 'Connecting Google Account...' : 'Sign in with Google (Optional)'}
+                  </span>
+                </button>
+              </div>
             )}
+
+            {/* (2026-07-13) Clarify PIN 7777 shared vault & lock button; was login only */}
+            <div className="flex flex-col gap-2 pt-2 border-t border-outline-variant/20">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 text-secondary">
+                  <span className="material-symbols-outlined text-[17px]">lock</span>
+                  <span className="font-label-md text-xs font-medium">Sanctuary Passcode: <strong>7777</strong></span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    try {
+                      sessionStorage.removeItem('ok_sanctuary_pin_unlocked');
+                    } catch {
+                      // Ignore
+                    }
+                    window.location.reload();
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-surface-container text-primary font-label-md text-[11px] uppercase tracking-wider border border-outline-variant/30 flex items-center gap-1 active:scale-95"
+                >
+                  <span className="material-symbols-outlined text-[14px]">lock_reset</span>
+                  <span>Lock Now</span>
+                </button>
+              </div>
+              <p className="font-body-sm text-[11px] text-on-surface-variant/80 italic">
+                Google login is optional. As the only two users, your journal saves locally and syncs to your shared Firestore vault using passcode 7777.
+              </p>
+            </div>
           </div>
 
           {/* Interactive Firebase Project Credentials Drawer */}

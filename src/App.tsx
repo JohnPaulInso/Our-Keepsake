@@ -23,6 +23,8 @@ import { BackupVaultPage } from './views/BackupVaultPage';
 import { MonthlyNotepadView } from './views/MonthlyNotepadView';
 import { ToastContainer, ToastItem } from './components/ToastContainer';
 import { CoupleStudioModal } from './components/CoupleStudioModal';
+// (2026-07-13) Import PinLockModal for startup passcode gate; was unimported
+import { PinLockModal } from './components/PinLockModal';
 // (2026-07-13) Import formatStandardDate for responsive desktop sidebar vs none
 import { formatStandardDate } from './utils/dateFormat';
 
@@ -38,6 +40,14 @@ export const App: React.FC = () => {
   const [editingMemory, setEditingMemory] = useState<KeepsakeMemory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [studioModalOpen, setStudioModalOpen] = useState(false);
+  // (2026-07-13) Add startup PIN 7777 unlock state; was unguarded
+  const [isPinUnlocked, setIsPinUnlocked] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('ok_sanctuary_pin_unlocked') === 'true';
+    } catch {
+      return false;
+    }
+  });
 
   // Hydrated DB states
   const [profile, setProfile] = useState<CoupleProfile>(() => DB.getCoupleProfile());
@@ -372,6 +382,11 @@ export const App: React.FC = () => {
     letters: `For ${profile.partner2Name}`,
     notepad: 'Monthly Notepad',
   };
+
+  // (2026-07-13) Guard sanctuary with PIN 7777 screen; was unguarded
+  if (!isPinUnlocked) {
+    return <PinLockModal onUnlock={() => setIsPinUnlocked(true)} />;
+  }
 
   // (2026-07-13) Render full-page /backup settings & daily backups vs 404
   if (location.pathname === '/backup') {
