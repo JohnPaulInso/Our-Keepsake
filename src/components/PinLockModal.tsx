@@ -33,7 +33,8 @@ export const PinLockModal: React.FC<PinLockModalProps> = ({ onUnlock }) => {
             }, 350);
           } else {
             setIsShaking(true);
-            setErrorMsg('Incorrect passcode. Enter 7777 to enter.');
+            // (2026-07-13) Hide passcode in error; was Enter 7777 to enter.
+            setErrorMsg('Incorrect passcode. Try again.');
             setTimeout(() => {
               setPin('');
               setIsShaking(false);
@@ -143,7 +144,7 @@ export const PinLockModal: React.FC<PinLockModalProps> = ({ onUnlock }) => {
               Unlocked! Opening sanctuary... 💕
             </p>
           ) : (
-            /* (2026-07-13) Remove PIN hint; was Hint: 7777 */
+            // (2026-07-13) Hide passcode hint; was visible Hint: 7777 text
             null
           )}
         </div>
