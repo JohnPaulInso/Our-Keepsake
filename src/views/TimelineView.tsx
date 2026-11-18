@@ -1358,8 +1358,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               <button
                 key={idx}
                 type="button"
-                // (2026-07-13) Select date for quick peep; was openDateOverlay
-                onClick={() => setSelectedDay(cell.day)}
+                // (2026-07-13) Open date overlay on calendar click; was setSelectedDay
+                onClick={() => openDateOverlay(cell.day)}
                 className={`flex flex-col items-center justify-center h-10 mx-auto w-10 rounded-xl transition-all relative ${
                   isSelected
                     ? 'bg-primary text-on-primary font-bold shadow-sm active:scale-95'
@@ -1477,8 +1477,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               <button
                 key={item.day}
                 type="button"
-                // (2026-07-13) Select date for quick peep; was openDateOverlay
-                onClick={() => setSelectedDay(item.day)}
+                // (2026-07-13) Open date overlay on week strip click; was setSelectedDay
+                onClick={() => openDateOverlay(item.day)}
                 className={`flex flex-col items-center justify-center min-w-[52px] h-[74px] rounded-xl flex-shrink-0 relative transition-transform active:scale-95 ${
                   isSelected
                     ? 'bg-primary text-on-primary shadow-md'
