@@ -538,7 +538,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       // (2026-07-13) Set default vibeTags to empty array; was hardcoded default tags
       vibeTags: [],
       categories: ['PHOTO'],
-      dotIndicators: ['GOLD', 'MOCHA'],
+      // (2026-07-13) Default dotIndicators to MOCHA only; was GOLD and MOCHA
+      dotIndicators: ['MOCHA'],
       photos: [],
       partnerNotes: [],
       isSealed: false,
