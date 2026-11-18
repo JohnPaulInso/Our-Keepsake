@@ -1028,7 +1028,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             >
               favorite
             </span>
-            {/* (2026-07-13) Clickable month & year words with popovers; was static text */}
+            {/* (2026-07-13) Plain clickable words without dropdown arrows; was with arrows */}
             <div className="flex items-center gap-1">
               {/* Clickable Month Word */}
               <div className="relative inline-block">
@@ -1038,11 +1038,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     setMonthPickerOpen((prev) => !prev);
                     setYearPickerOpen(false);
                   }}
-                  className="calendar-header-font text-base sm:text-[21px] font-semibold text-primary tracking-tight whitespace-nowrap hover:text-secondary transition-colors inline-flex items-center gap-0.5 cursor-pointer rounded-lg px-1 py-0.5 hover:bg-surface-container-low active:scale-95"
+                  className="calendar-header-font text-base sm:text-[21px] font-semibold text-primary tracking-tight whitespace-nowrap hover:text-secondary transition-colors cursor-pointer rounded-lg px-1 py-0.5 hover:bg-surface-container-low active:scale-95"
                   title="Click to select month"
                 >
                   <span>{CALENDAR_MONTH_NAMES[calendarMonth]}</span>
-                  <span className="material-symbols-outlined text-[13px] text-secondary/60">arrow_drop_down</span>
                 </button>
 
                 {monthPickerOpen && (
@@ -1086,11 +1085,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     setYearPickerOpen((prev) => !prev);
                     setMonthPickerOpen(false);
                   }}
-                  className="calendar-header-font text-base sm:text-[21px] font-semibold text-primary tracking-tight whitespace-nowrap hover:text-secondary transition-colors inline-flex items-center gap-0.5 cursor-pointer rounded-lg px-1 py-0.5 hover:bg-surface-container-low active:scale-95"
+                  className="calendar-header-font text-base sm:text-[21px] font-semibold text-primary tracking-tight whitespace-nowrap hover:text-secondary transition-colors cursor-pointer rounded-lg px-1 py-0.5 hover:bg-surface-container-low active:scale-95"
                   title="Click to select year"
                 >
                   <span>{calendarYear}</span>
-                  <span className="material-symbols-outlined text-[13px] text-secondary/60">arrow_drop_down</span>
                 </button>
 
                 {yearPickerOpen && (
