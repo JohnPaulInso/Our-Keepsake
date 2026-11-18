@@ -969,7 +969,8 @@ export const App: React.FC = () => {
       {/* (2026-07-13) Render story actions directly in mobile header; was double bar */}
       <header className="md:hidden fixed top-0 w-full z-50 pt-safe frosted-glass-bar border-b border-outline-variant/25 shadow-[0_2px_12px_rgba(74,59,50,0.05)] no-print">
         {activeTab === 'story' && activeMemory ? (
-          <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-between gap-2">
+          // (2026-07-13) Compact header height to reduce top blank space; was h-16
+          <div className="h-14 px-gutter max-w-[760px] mx-auto flex items-center justify-between gap-2">
             <button
               type="button"
               onClick={() => {
@@ -1021,7 +1022,8 @@ export const App: React.FC = () => {
             </div>
           </div>
         ) : (
-        <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-between">
+          // (2026-07-13) Compact header height to reduce top blank space; was h-16
+          <div className="h-14 px-gutter max-w-[760px] mx-auto flex items-center justify-between">
           <div
             onClick={() => requestTabNavigation('timeline')}
             className="flex items-center gap-space-sm cursor-pointer"
@@ -1131,8 +1133,8 @@ export const App: React.FC = () => {
       </header>
 
       {/* Main Content Area with Exact-Position Shimmering Skeleton Loaders */}
-      {/* (2026-07-13) Responsive main container padding for sidebar vs full mobile */}
-      <main className="flex flex-col relative w-full md:pl-64 lg:pl-72 pt-20 md:pt-6 pb-28 md:pb-12 bg-transparent z-10 flex-1 min-w-0">
+      {/* (2026-07-13) Fix top/bottom insets & blank space; was pt-20 pb-28 */}
+      <main className="flex flex-col relative w-full md:pl-64 lg:pl-72 pt-[calc(3.75rem+env(safe-area-inset-top,0px))] md:pt-6 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-10 bg-transparent z-10 flex-1 min-w-0">
         {isHydrating || isSkeletonRefreshing ? (
           <div className="flex flex-col w-full px-margin pb-space-xl max-w-[760px] mx-auto gap-space-lg">
             <div className="flex flex-col items-center gap-2 mt-2">
@@ -1297,9 +1299,9 @@ export const App: React.FC = () => {
       {/* Global Toast Container above Bottom Navigation */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-      {/* (2026-07-13) Apply milky frosted glass on bottom nav; was transparent /98 */}
+      {/* (2026-07-13) Compact bottom nav to reduce bottom blank space; was h-16 */}
       <nav className="md:hidden fixed bottom-0 w-full z-50 pb-safe frosted-glass-bar border-t border-outline-variant/35 rounded-t-2xl shadow-[0_-6px_24px_rgba(51,37,29,0.08),inset_0_1px_0_rgba(255,255,255,0.75)] no-print">
-        <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-around">
+        <div className="h-14 px-gutter max-w-[760px] mx-auto flex items-center justify-around">
           <button
             type="button"
             onClick={() => requestTabNavigation('timeline')}

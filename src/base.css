@@ -110,7 +110,8 @@ body,
   padding: 0;
   overscroll-behavior: none;
   font-family: var(--font-sans);
-  font-size: 15px;
+  /* (2026-07-13) Scale base font-size -8%; was 15px */
+  font-size: 13.8px;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   background-color: var(--background);

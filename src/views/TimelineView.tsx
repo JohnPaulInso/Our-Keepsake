@@ -153,16 +153,8 @@ const SortableMemoryCard: React.FC<SortableMemoryCardProps> = ({
         onClick={() => onOpenMemory(memory.id)}
         className="cursor-pointer group"
       >
-        {/* (2026-07-13) Add big memory icon before card title; was plain title */}
-        <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-primary font-serif leading-snug mb-space-xs group-hover:text-secondary transition-colors flex items-center gap-2">
-          <span
-            className="material-symbols-outlined text-[24px] sm:text-[28px] text-secondary shrink-0"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-            aria-hidden="true"
-          >
-            auto_awesome
-          </span>
-          {/* (2026-07-13) Capitalize memory title; was raw memory.title */}
+        {/* (2026-07-13) Remove sparkle icon before memory title; was auto_awesome */}
+        <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-primary font-serif leading-snug mb-space-xs group-hover:text-secondary transition-colors">
           <span>{capitalizeFirstLetters(memory.title) || 'Untitled Memory'}</span>
         </h2>
         {/* (2026-07-13) Auto-capitalize snippet lines; was raw text */}
@@ -1265,9 +1257,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col w-full px-margin pb-space-xl max-w-[760px] mx-auto">
+    // (2026-07-13) Tighten vertical padding/margins; was pb-space-xl mt-space-sm
+    <div className="flex flex-col w-full px-margin pb-4 max-w-[760px] mx-auto">
       {/* Top Curated Editorial Invitation Header */}
-      <section className="flex flex-col items-center text-center mt-space-sm mb-space-lg relative">
+      <section className="flex flex-col items-center text-center mt-1 mb-space-md relative">
         <div className="inline-flex items-center gap-space-xs px-space-md py-1 rounded-full bg-surface-container-high/80 text-secondary mb-space-sm shadow-sm">
           <span
             className="material-symbols-outlined text-[15px]"

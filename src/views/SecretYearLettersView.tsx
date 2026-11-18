@@ -253,9 +253,10 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
   }, [secretNotes, search, categoryFilter]);
 
   return (
-    <div className="flex flex-col w-full px-margin pb-space-xl max-w-[760px] mx-auto">
+    // (2026-07-13) Tighten vertical padding/margins; was pb-space-xl mt-space-sm
+    <div className="flex flex-col w-full px-margin pb-4 max-w-[760px] mx-auto">
       {/* Romantic Editorial Reveal Banner */}
-      <section className="flex flex-col items-center text-center mt-space-sm mb-space-lg relative bg-surface-container-lowest rounded-2xl p-space-lg shadow-md border border-outline-variant/35 overflow-hidden">
+      <section className="flex flex-col items-center text-center mt-1 mb-space-md relative bg-surface-container-lowest rounded-2xl p-space-lg shadow-md border border-outline-variant/35 overflow-hidden">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container mb-space-sm shadow-xs">
           <span
             className="material-symbols-outlined text-[15px]"
