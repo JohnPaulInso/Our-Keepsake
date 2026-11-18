@@ -637,15 +637,49 @@ class LocalDatabase {
       memCache.coupleProfile = snapshot.coupleProfile;
       await idbSet('coupleProfile', snapshot.coupleProfile);
     }
-    // (2026-07-13) Merge remote with unpushed local memories vs hard overwrite
+    // (2026-07-13) Preserve local photos on remote merge; was wipe on remote
     if (Array.isArray(snapshot.memories)) {
       const existingLocal = memCache.memories || [];
       const remoteIds = new Set(snapshot.memories.map((m) => m.id));
       const localOnly = existingLocal.filter((m) => !remoteIds.has(m.id));
-      const merged = [...snapshot.memories, ...localOnly];
-      memCache.memories = merged;
-      await idbSet('memories', merged);
-      saveLightweightMirror(merged);
+
+      const merged = snapshot.memories.map((remoteMem) => {
+        const localMem = existingLocal.find((m) => m.id === remoteMem.id);
+        if (!localMem) return remoteMem;
+
+        const localPhotos = localMem.photos || [];
+        const remotePhotos = remoteMem.photos || [];
+
+        // If local has photos but remote has none, or local was updated more recently: preserve local photos
+        const shouldKeepLocalPhotos =
+          (localPhotos.length > 0 && remotePhotos.length === 0) ||
+          ((localMem.updatedAt || 0) > (remoteMem.updatedAt || 0) && localPhotos.length > 0);
+
+        // Resolve any split_media:// or missing URLs using local cache
+        const resolvedPhotos = remotePhotos.map((rp) => {
+          if (rp.url?.startsWith('split_media://') || !rp.url) {
+            const matchedLocal = localPhotos.find((lp) => lp.id === rp.id);
+            if (matchedLocal?.url) {
+              return { ...rp, url: matchedLocal.url };
+            }
+          }
+          return rp;
+        });
+
+        const finalPhotos = shouldKeepLocalPhotos
+          ? localPhotos
+          : (resolvedPhotos.length > 0 ? resolvedPhotos : localPhotos);
+
+        if ((localMem.updatedAt || 0) > (remoteMem.updatedAt || 0)) {
+          return { ...localMem, photos: finalPhotos };
+        }
+        return { ...remoteMem, photos: finalPhotos };
+      });
+
+      const finalMemories = [...merged, ...localOnly];
+      memCache.memories = finalMemories;
+      await idbSet('memories', finalMemories);
+      saveLightweightMirror(finalMemories);
     }
     // (2026-07-13) Merge remote with unpushed local notes vs hard overwrite
     if (Array.isArray(snapshot.secretYearNotes)) {

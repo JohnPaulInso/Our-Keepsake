@@ -290,6 +290,8 @@ class FirebaseSyncManager {
 
         if (shouldRestore) {
           this.isApplyingRemoteSnapshot = true;
+          // (2026-07-13) Resolve split media URLs before restoring snapshot; was raw
+          await this.resolveMediaUrls(remote);
           await DB.restoreSnapshot(remote);
           this.isApplyingRemoteSnapshot = false;
           if (remoteTime > 0) {
@@ -329,19 +331,60 @@ class FirebaseSyncManager {
     }, 900);
   }
 
-  // (2026-07-13) Sanitize snapshots and split large media for Firestore limits
+  // (2026-07-13) Resolve split media URLs from IndexedDB & Firestore subcollection
+  private async resolveMediaUrls(data: BackupSnapshot): Promise<void> {
+    if (!Array.isArray(data.memories)) return;
+    for (const mem of data.memories) {
+      if (!Array.isArray(mem.photos)) continue;
+      for (const photo of mem.photos) {
+        if (photo.url?.startsWith('split_media://')) {
+          const mediaId = photo.url.replace('split_media://', '');
+          let resolved = await idbGet<string>(mediaId, 'post_media');
+          if (!resolved && this.db) {
+            try {
+              const photoSnap = await getDoc(doc(this.db, 'couples', 'jp_zea_vault', 'photos', mediaId));
+              if (photoSnap.exists()) {
+                resolved = photoSnap.data()?.dataUrl;
+                if (resolved) {
+                  await idbSet(mediaId, resolved, 'post_media');
+                }
+              }
+            } catch {
+              // Ignore
+            }
+          }
+          if (!resolved) {
+            const existingMem = DB.getMemories().find((m) => m.id === mem.id);
+            const matchedPhoto = existingMem?.photos?.find((p) => p.id === photo.id);
+            if (matchedPhoto?.url && !matchedPhoto.url.startsWith('split_media://')) {
+              resolved = matchedPhoto.url;
+            }
+          }
+          if (resolved) {
+            photo.url = resolved;
+          }
+        }
+      }
+    }
+  }
+
+  // (2026-07-13) Split photos > 80KB into subcollection; was root post_media >150k
   private async sanitizeSnapshotForFirestore(snapshot: BackupSnapshot): Promise<BackupSnapshot> {
     const cloned: BackupSnapshot = JSON.parse(JSON.stringify(snapshot));
     if (Array.isArray(cloned.memories)) {
       for (const mem of cloned.memories) {
         if (Array.isArray(mem.photos)) {
           for (const photo of mem.photos) {
-            if (photo.url && photo.url.length > 150000) {
+            if (photo.url && photo.url.length > 80000) {
               const mediaDocId = `${mem.id}_${photo.id}`;
               await idbSet(mediaDocId, photo.url, 'post_media');
               if (this.db) {
-                const mediaRef = doc(this.db, 'post_media', mediaDocId);
-                await setDoc(mediaRef, { id: mediaDocId, dataUrl: photo.url, updatedAt: Date.now() });
+                try {
+                  const mediaRef = doc(this.db, 'couples', 'jp_zea_vault', 'photos', mediaDocId);
+                  await setDoc(mediaRef, { id: mediaDocId, dataUrl: photo.url, updatedAt: Date.now() });
+                } catch (e) {
+                  console.warn('[FirebaseSync] Could not upload split photo:', e);
+                }
               }
               photo.url = `split_media://${mediaDocId}`;
             }
@@ -492,19 +535,8 @@ class FirebaseSyncManager {
         if (!shouldApply) return;
 
         this.isApplyingRemoteSnapshot = true;
-        if (Array.isArray(data.memories)) {
-          for (const mem of data.memories) {
-            for (const photo of mem.photos) {
-              if (photo.url?.startsWith('split_media://')) {
-                const mediaId = photo.url.replace('split_media://', '');
-                const cached = await idbGet<string>(mediaId, 'post_media');
-                if (cached) {
-                  photo.url = cached;
-                }
-              }
-            }
-          }
-        }
+        // (2026-07-13) Resolve media URLs from cache/subcollection; was loop
+        await this.resolveMediaUrls(data);
         await DB.restoreSnapshot(data);
         if (remoteTime > 0) {
           localStorage.setItem('ok_sync_baseline', String(remoteTime));

@@ -20,13 +20,14 @@ interface DateGalleryPickerModalProps {
   onToast?: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
 }
 
+// (2026-07-13) Optimize image compression to ~50KB; was 1600px at 0.88 quality
 function compressImageFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        const MAX_DIM = 1600;
+        const MAX_DIM = 1200;
         let { width, height } = img;
         if (width > MAX_DIM || height > MAX_DIM) {
           if (width > height) {
@@ -46,7 +47,7 @@ function compressImageFile(file: File): Promise<string> {
           return;
         }
         ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.88));
+        resolve(canvas.toDataURL('image/jpeg', 0.74));
       };
       img.onerror = () => resolve(e.target?.result as string);
       img.src = e.target?.result as string;
