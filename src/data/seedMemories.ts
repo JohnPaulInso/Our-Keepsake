@@ -41,8 +41,38 @@ export const DEFAULT_COUPLE_PROFILE: CoupleProfile = {
   updatedAt: 1730000000000,
 };
 
-// (2026-07-13) Import Our First Sleepover & Vacation keepsake; was absent
+// (2026-07-13) Import May 9 theater rehearsal keepsake; was absent
 export const INITIAL_MEMORIES: KeepsakeMemory[] = [
+  {
+    id: 'mem-2026-05-09-imported',
+    keepsakeNumber: 1,
+    volumeNumber: 1,
+    dateISO: '2026-05-09',
+    timeFormatted: '6:00 AM',
+    title: 'Theater Rehearsal, Props & A Private World',
+    letterHeading: 'Theater Rehearsal, Props & A Private World',
+    snippet:
+      'Theater rehearsal at CTU DB campus, making Penelope costume props, Jollibee, and being part of your private world.',
+    storyBody:
+      'May 9 - Nagaway ta tungod dika pakuhas db nastress ko seg hunahuna nya afters 6am mass, huwam kas wedding dress ni ante sonya nya nangadto tag db, eat ta jolibee nya himo props costume ni penelope gamit katol sunog² sa tela nya lunch ta gireflex nako imo tiil nya pakaon ganay para muinom gaviscon, nya lunch gamay makeout dako, nya tanaw kos rehearsal, mas intimate feeling pjd nakita nako ang imperfections and to be part of your own private world na nagpasulod jd tag sakyanan sa gym ctu db campus, nya nguli ta sayo pa nails ka anne, even tho mothers day, mubawi rkos ako mama puhon, it was well spent w u man sad bb, thanks for the new core memory, idk if makakita bakos theater najd but know that being able to be part of the rehearsal and saw everything meant a lot more than the actual play jd, thank you',
+    quoteHighlight:
+      'Being able to be part of the rehearsal and saw everything meant a lot more than the actual play jd, thank you.',
+    signOffAuthor: 'JP • St. 1',
+    location: 'CTU DB Campus & Jollibee',
+    weatherTemp: '31°C',
+    weatherConditions: 'Warm Rehearsal Day',
+    moodVibe: 'Intimate, Meaningful & Sweet',
+    vibeTags: ['Date', 'Events', 'Intimacy', 'Theater Rehearsal'],
+    categories: ['EVENT', 'PHOTO'],
+    dotIndicators: ['MOCHA', 'GOLD', 'ROSE'],
+    photos: [],
+    partnerNotes: [],
+    isSealed: true,
+    sealLabel: 'Sealed in Chapter 1 • JP & Zea',
+    sealIcon: 'favorite',
+    sortOrder: 0,
+    updatedAt: 1778300000000,
+  },
   {
     id: 'mem-2026-06-22-imported',
     keepsakeNumber: 1,
