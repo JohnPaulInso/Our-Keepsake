@@ -1,5 +1,5 @@
-// (2026-07-13) Add useRef for gesture handling; was without useRef
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+// (2026-07-13) Add useCallback for swipe navigation; was without useCallback
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
   DndContext,
@@ -672,21 +672,41 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     };
   }, []);
 
-  const handleNextOverlayDate = () => {
+  // (2026-07-13) Universal swipe & key handlers for date overlay; was touch-only
+  const isOverlayPointerDownRef = useRef(false);
+  const overlayPointerStartXRef = useRef<number | null>(null);
+  const overlayPointerStartYRef = useRef<number | null>(null);
+  const overlayIsHorizontalRef = useRef<boolean | null>(null);
+  const lastWheelNavTimeRef = useRef(0);
+
+  const handleNextOverlayDate = useCallback(() => {
     if (selectedDay === null || dateSlideStage !== 'idle') return;
     setDateSlideStage('sliding-out-left');
     setTimeout(() => {
-      const daysInCurrentMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
-      if (selectedDay < daysInCurrentMonth) {
-        setSelectedDay((d) => (d ? d + 1 : 1));
+      const curIso = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
+      const recordedDates = Array.from(
+        new Set(memories.map((m) => m.dateISO).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)))
+      ).sort();
+      const nextRecorded = recordedDates.find((d) => d > curIso);
+
+      if (nextRecorded) {
+        const [ny, nm, nd] = nextRecorded.split('-').map(Number);
+        setCalendarYear(ny);
+        setCalendarMonth(nm - 1);
+        setSelectedDay(nd);
       } else {
-        if (calendarMonth === 11) {
-          setCalendarMonth(0);
-          setCalendarYear((y) => y + 1);
+        const daysInCurrentMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+        if (selectedDay < daysInCurrentMonth) {
+          setSelectedDay((d) => (d ? d + 1 : 1));
         } else {
-          setCalendarMonth((m) => m + 1);
+          if (calendarMonth === 11) {
+            setCalendarMonth(0);
+            setCalendarYear((y) => y + 1);
+          } else {
+            setCalendarMonth((m) => m + 1);
+          }
+          setSelectedDay(1);
         }
-        setSelectedDay(1);
       }
       setDateSlideStage('sliding-in-right');
       requestAnimationFrame(() => {
@@ -695,21 +715,34 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         });
       });
     }, 220);
-  };
+  }, [selectedDay, dateSlideStage, calendarYear, calendarMonth, memories]);
 
-  const handlePrevOverlayDate = () => {
+  const handlePrevOverlayDate = useCallback(() => {
     if (selectedDay === null || dateSlideStage !== 'idle') return;
     setDateSlideStage('sliding-out-right');
     setTimeout(() => {
-      if (selectedDay > 1) {
-        setSelectedDay((d) => (d ? d - 1 : 1));
+      const curIso = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
+      const recordedDates = Array.from(
+        new Set(memories.map((m) => m.dateISO).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)))
+      ).sort();
+      const prevRecorded = [...recordedDates].reverse().find((d) => d < curIso);
+
+      if (prevRecorded) {
+        const [py, pm, pd] = prevRecorded.split('-').map(Number);
+        setCalendarYear(py);
+        setCalendarMonth(pm - 1);
+        setSelectedDay(pd);
       } else {
-        const prevMonth = calendarMonth === 0 ? 11 : calendarMonth - 1;
-        const prevYear = calendarMonth === 0 ? calendarYear - 1 : calendarYear;
-        const daysInPrevMonth = new Date(prevYear, prevMonth + 1, 0).getDate();
-        setCalendarMonth(prevMonth);
-        setCalendarYear(prevYear);
-        setSelectedDay(daysInPrevMonth);
+        if (selectedDay > 1) {
+          setSelectedDay((d) => (d ? d - 1 : 1));
+        } else {
+          const prevMonth = calendarMonth === 0 ? 11 : calendarMonth - 1;
+          const prevYear = calendarMonth === 0 ? calendarYear - 1 : calendarYear;
+          const daysInPrevMonth = new Date(prevYear, prevMonth + 1, 0).getDate();
+          setCalendarMonth(prevMonth);
+          setCalendarYear(prevYear);
+          setSelectedDay(daysInPrevMonth);
+        }
       }
       setDateSlideStage('sliding-in-left');
       requestAnimationFrame(() => {
@@ -718,6 +751,80 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         });
       });
     }, 220);
+  }, [selectedDay, dateSlideStage, calendarYear, calendarMonth, memories]);
+
+  useEffect(() => {
+    if (!isFullscreenDateOpen || !isOverlayVisible || overlayEditMemory || dateSlideStage !== 'idle') return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrevOverlayDate();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleNextOverlayDate();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreenDateOpen, isOverlayVisible, overlayEditMemory, dateSlideStage, handlePrevOverlayDate, handleNextOverlayDate]);
+
+  const handleOverlayPointerDown = (e: React.PointerEvent) => {
+    if (dateSlideStage !== 'idle' || e.button !== 0) return;
+    const target = e.target as HTMLElement | null;
+    if (target?.closest('button, a, input, textarea, select, [role="button"], audio, video')) return;
+    isOverlayPointerDownRef.current = true;
+    overlayPointerStartXRef.current = e.clientX;
+    overlayPointerStartYRef.current = e.clientY;
+    overlayIsHorizontalRef.current = null;
+  };
+
+  const handleOverlayPointerMove = (e: React.PointerEvent) => {
+    if (!isOverlayPointerDownRef.current || overlayPointerStartXRef.current === null || overlayPointerStartYRef.current === null) return;
+    const deltaX = e.clientX - overlayPointerStartXRef.current;
+    const deltaY = e.clientY - overlayPointerStartYRef.current;
+    if (overlayIsHorizontalRef.current === null) {
+      if (Math.abs(deltaY) > 8 && Math.abs(deltaY) >= Math.abs(deltaX)) {
+        overlayIsHorizontalRef.current = false;
+        return;
+      } else if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        overlayIsHorizontalRef.current = true;
+        setIsDraggingHorizontal(true);
+        setDragDeltaX(deltaX);
+      }
+    } else if (overlayIsHorizontalRef.current === true) {
+      setDragDeltaX(deltaX);
+    }
+  };
+
+  const handleOverlayPointerUp = () => {
+    if (overlayIsHorizontalRef.current === true) {
+      if (dragDeltaX < -40) {
+        handleNextOverlayDate();
+      } else if (dragDeltaX > 40) {
+        handlePrevOverlayDate();
+      }
+    }
+    isOverlayPointerDownRef.current = false;
+    setIsDraggingHorizontal(false);
+    setDragDeltaX(0);
+    overlayPointerStartXRef.current = null;
+    overlayPointerStartYRef.current = null;
+    overlayIsHorizontalRef.current = null;
+  };
+
+  const handleOverlayWheel = (e: React.WheelEvent) => {
+    if (dateSlideStage !== 'idle') return;
+    if (Math.abs(e.deltaX) > 30 && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      const now = Date.now();
+      if (now - lastWheelNavTimeRef.current < 450) return;
+      lastWheelNavTimeRef.current = now;
+      if (e.deltaX > 30) {
+        handleNextOverlayDate();
+      } else {
+        handlePrevOverlayDate();
+      }
+    }
   };
   const [audioState, setAudioState] = useState(audioEngine.getState());
 
@@ -2005,10 +2112,15 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         </p>
       </div>
 
-      {/* (2026-07-13) Inset for Samsung 3-button navbar; was unpadded bottom */}
+      {/* (2026-07-13) Add pointer & wheel listeners to date overlay; was touch-only */}
       {isFullscreenDateOpen && selectedDay !== null && typeof document !== 'undefined' && createPortal(
         <div
           id="specific-date-fullscreen-view"
+          onPointerDown={handleOverlayPointerDown}
+          onPointerMove={handleOverlayPointerMove}
+          onPointerUp={handleOverlayPointerUp}
+          onPointerCancel={handleOverlayPointerUp}
+          onWheel={handleOverlayWheel}
           style={{
             touchAction: 'pan-y',
             WebkitOverflowScrolling: 'touch',
@@ -2023,6 +2135,33 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         >
           {/* Subtle paper dot background texture */}
           <div className="fixed inset-0 pointer-events-none opacity-[0.035] bg-[radial-gradient(#4a3b32_1px,transparent_1px)] [background-size:20px_20px] -z-10" />
+
+          {/* Floating Left and Right Chevrons for Desktop / Tablet */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrevOverlayDate();
+            }}
+            title="Previous date (Left Arrow or Swipe Right)"
+            aria-label="Previous date"
+            className="hidden md:flex fixed left-4 lg:left-8 top-1/2 -translate-y-1/2 z-40 w-11 h-11 rounded-full bg-surface-container-high/90 text-primary hover:bg-surface-variant hover:scale-110 active:scale-95 shadow-md border border-outline-variant/30 items-center justify-center transition-all cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[24px]">chevron_left</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNextOverlayDate();
+            }}
+            title="Next date (Right Arrow or Swipe Left)"
+            aria-label="Next date"
+            className="hidden md:flex fixed right-4 lg:right-8 top-1/2 -translate-y-1/2 z-40 w-11 h-11 rounded-full bg-surface-container-high/90 text-primary hover:bg-surface-variant hover:scale-110 active:scale-95 shadow-md border border-outline-variant/30 items-center justify-center transition-all cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[24px]">chevron_right</span>
+          </button>
 
           {/* (2026-07-13) Use frosted-glass-bar on overlay top inset; was raw /85 var */}
           <div
@@ -2155,10 +2294,34 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               className="w-full flex flex-col items-center"
             >
 
-          {/* (2026-07-13) Add swipe hint in date overlay; was missing guidance */}
-          <div className="flex items-center gap-1.5 text-[11px] text-secondary/80 font-medium mb-4 select-none">
-            <span className="material-symbols-outlined text-[14px]">swipe</span>
-            <span>Swipe left or right to switch dates</span>
+          {/* (2026-07-13) Swipe hint with interactive chevrons; was static text */}
+          <div className="flex items-center gap-2 text-[11px] text-secondary/80 font-medium mb-4 select-none">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePrevOverlayDate();
+              }}
+              className="w-6 h-6 rounded-full hover:bg-surface-container-high flex items-center justify-center text-secondary active:scale-90 transition-transform"
+              title="Previous Date (Left)"
+            >
+              <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+            </button>
+            <div className="flex items-center gap-1">
+              <span className="material-symbols-outlined text-[14px]">swipe</span>
+              <span>Swipe left or right to switch dates</span>
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNextOverlayDate();
+              }}
+              className="w-6 h-6 rounded-full hover:bg-surface-container-high flex items-center justify-center text-secondary active:scale-90 transition-transform"
+              title="Next Date (Right)"
+            >
+              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+            </button>
           </div>
 
           {/* (2026-07-13) Render exact StoryReaderView inside overlay for saved dates; was separate copy */}
