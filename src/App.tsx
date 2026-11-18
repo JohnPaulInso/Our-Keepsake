@@ -1031,7 +1031,7 @@ export const App: React.FC = () => {
       {/* Global Toast Container above Bottom Navigation */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-      {/* (2026-07-13) Symmetrical mobile bottom nav with Notepad tab; was without notepad */}
+      {/* (2026-07-13) Reorder tabs: timeline, story, letters, notepad; was notepad first */}
       <nav className="md:hidden fixed bottom-0 w-full z-50 pb-safe bg-surface-bright/98 backdrop-blur-md border-t border-outline-variant/30 rounded-t-2xl shadow-[0_-4px_20px_rgba(74,59,50,0.08)] no-print">
         <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-around">
           <button
@@ -1054,16 +1054,16 @@ export const App: React.FC = () => {
             type="button"
             onClick={() => {
               setEditingMemory(null);
-              switchTab('notepad');
+              switchTab('story');
             }}
             className={`flex flex-col items-center justify-center min-w-[50px] min-h-[44px] gap-0.5 transition-colors ${
-              activeTab === 'notepad'
+              activeTab === 'story'
                 ? 'text-primary font-bold'
                 : 'text-on-surface-variant hover:text-on-surface font-medium'
             }`}
           >
-            <span className="material-symbols-outlined text-[22px]">edit_note</span>
-            <span className="font-label-md text-[11px] tracking-wider">Notepad</span>
+            <span className="material-symbols-outlined text-[22px]">menu_book</span>
+            <span className="font-label-md text-[11px] tracking-wider">Story</span>
           </button>
 
           <div className="flex items-center justify-center -mt-5">
@@ -1084,22 +1084,6 @@ export const App: React.FC = () => {
             type="button"
             onClick={() => {
               setEditingMemory(null);
-              switchTab('story');
-            }}
-            className={`flex flex-col items-center justify-center min-w-[50px] min-h-[44px] gap-0.5 transition-colors ${
-              activeTab === 'story'
-                ? 'text-primary font-bold'
-                : 'text-on-surface-variant hover:text-on-surface font-medium'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[22px]">menu_book</span>
-            <span className="font-label-md text-[11px] tracking-wider">Story</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setEditingMemory(null);
               switchTab('letters');
             }}
             className={`flex flex-col items-center justify-center min-w-[50px] min-h-[44px] gap-0.5 transition-colors relative ${
@@ -1110,6 +1094,22 @@ export const App: React.FC = () => {
           >
             <span className="material-symbols-outlined text-[22px]">mail</span>
             <span className="font-label-md text-[11px] tracking-wider">Letters</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setEditingMemory(null);
+              switchTab('notepad');
+            }}
+            className={`flex flex-col items-center justify-center min-w-[50px] min-h-[44px] gap-0.5 transition-colors ${
+              activeTab === 'notepad'
+                ? 'text-primary font-bold'
+                : 'text-on-surface-variant hover:text-on-surface font-medium'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[22px]">edit_note</span>
+            <span className="font-label-md text-[11px] tracking-wider">Notepad</span>
           </button>
         </div>
       </nav>
