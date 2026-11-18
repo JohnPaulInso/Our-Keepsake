@@ -2275,6 +2275,37 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     sortOrder: 74,
     updatedAt: 1770717600000,
   },
+  // (2026-07-13) Seed Jan 29, 2026 first kiss keepsake; was up to Feb 10
+  {
+    id: 'mem-2026-01-29-imported',
+    keepsakeNumber: 57,
+    volumeNumber: 1,
+    dateISO: '2026-01-29',
+    timeFormatted: '7:00 PM',
+    title: 'Our 1st Kiss & The Aisle Under The Stars',
+    letterHeading: 'Our 1st Kiss & The Aisle Under The Stars',
+    snippet:
+      'DB trip, Artea Kawit date explaining aurora borealis, foot massage, stopped at the aisle with jacket-covered windows, and our unforgettable, soul-melting first kiss.',
+    storyBody:
+      'Went to db, gikapoy kayka nag taki² ug softball nya padulong uli stories kas imong soccer moments nga nabunog imo right na aping niitom nya mga taki² nimo na stories sge rkog katawa kay pa may² kayka, adto ta kawit artea nya date gamay explains aurora borealis\npag padung uli hapit tas aisle, daghan nakayg nahitabos aisle ba, diy patag cover sa windshield gamits jacket para di makitan\n\ngibikogan pa imong tiil ako gihilot, and i really missed u alot, went for a cuddle hug... my arms wrapped around you...\n\nthe world stopped for a moment... tasted every part of you... every scent... the taste of your neck.. every touch... \n\nthe aggressive deep breaths of sucking every part of you... my hands brushed against your body... until...\n\nevery slow... deep.. breaths... words cant explain how much in love I am with you...\n\nwe stopped for a moment checking the time if we\'ll be late... but head to head... eye to eye..\n\nas we stared at each other feeling each others heat.. feeling the tension..... your breath against my breath as we spoke... i buried my face against your neck... as our quiet groans filling the quiet roads... i want this feeling... im in love...... i wanna be inside you.... i wanna taste your soul.... \n\n\ni went for it... as I slowly pressed my lips against yours..... the taste of your lips..... tastes like mine.... as both our tongues intertwined... it felt like time stopped whilst tasting your soft and gentle lips... as I tasted every part of your soul.. i loved every moment of it.. I dont want it to stop... every deep breath makes us crave each others\' bodies closer.... so this is the feeling... of.... love.... of my first kiss....\n\nyour lips.... my lips.... apocalypse...\n\n\nas you grasped for every slow touch i had... ws my fingers ran through your body.. i could already taste your wet clit... the hardness of my dick pressed unto your clit as i tasted every part of you. \nhard. \n\nwe kissed. bodies interwined...\n\nthe love of my life... my greatest love.\n\ni felt more closer to you.... i really... love you... i had streaks of almost crying while hugging your body, maklaro ang gamayng sipon cuz i just cant believe I\'m so blessed to have someone as divine as you...\n\nnya bday mn ni kim² ngaon ta paghuman duwag uno ug impostor² and car duets sa sakyanan nindota jug tingog uy wtff\n\nand as i went home, tears randomly fell from my eyes as I just cant believe what happened...  it was just a memorable day..\n\nif only youd see yourself through my eyes.. \n\ni love you, bam...',
+    quoteHighlight:
+      'As I slowly pressed my lips against yours... It felt like time stopped. So this is the feeling of my first kiss.',
+    signOffAuthor: 'JP • St. 1',
+    location: 'DB, Artea Kawit & The Aisle',
+    weatherTemp: '26°C',
+    weatherConditions: 'Starry & Enchanting Night',
+    moodVibe: 'Eternal, Electric, Soul-Melting First Kiss',
+    vibeTags: ['First Time', 'Deep Talks', 'Sweet Treats', 'Roadtrip'],
+    categories: ['EVENT', 'ANNIVERSARY'],
+    dotIndicators: ['MOCHA', 'GOLD', 'ROSE', 'BURGUNDY'],
+    photos: [],
+    partnerNotes: [],
+    isSealed: true,
+    sealLabel: 'Sealed in Chapter 1 • JP & Zea',
+    sealIcon: 'favorite',
+    sortOrder: 75,
+    updatedAt: 1769680800000,
+  },
 ];
 
 export const INITIAL_SECRET_YEAR_NOTES: SecretYearNote[] = [];
