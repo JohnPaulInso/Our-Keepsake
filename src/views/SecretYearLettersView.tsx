@@ -787,13 +787,14 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                 <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
                   Letter Title
                 </label>
+                {/* (2026-07-13) Normal sans placeholder for letter title; was font-serif */}
                 <input
                   type="text"
                   value={letterTitle}
                   onChange={(e) => setLetterTitle(e.target.value)}
                   placeholder="E.g., Penelope or To My Favorite Person..."
                   required
-                  className="w-full px-4 py-3 rounded-xl bg-surface-container-low text-primary font-serif text-base sm:text-lg border border-outline-variant/40 focus:border-primary/60 outline-none transition-colors shadow-xs"
+                  className="w-full px-4 py-2.5 rounded-xl bg-surface-container-low text-primary text-sm sm:text-base border border-outline-variant/40 focus:border-primary/60 outline-none transition-colors shadow-xs placeholder:font-sans placeholder:text-outline/60"
                 />
               </div>
 
@@ -827,13 +828,14 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                 <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
                   Your Letter
                 </label>
+                {/* (2026-07-13) Normal sans placeholder for letter body; was serif font */}
                 <textarea
                   rows={12}
                   value={letterBody}
                   onChange={(e) => setLetterBody(e.target.value)}
                   placeholder={`Write or paste your letter for ${profile.partner2Name} here...`}
                   required
-                  className="w-full p-4 rounded-xl bg-[#fdfbf7] text-[#3b2d24] font-['Cormorant_Garamond',Georgia,serif] text-base sm:text-lg leading-relaxed border border-outline-variant/40 focus:border-primary/60 outline-none min-h-[260px] resize-y shadow-xs"
+                  className="w-full p-4 rounded-xl bg-[#fdfbf7] text-[#3b2d24] font-['Cormorant_Garamond',Georgia,serif] text-base sm:text-lg leading-relaxed border border-outline-variant/40 focus:border-primary/60 outline-none min-h-[260px] resize-y shadow-xs placeholder:font-sans placeholder:text-sm placeholder:text-outline/60"
                 />
               </div>
 
