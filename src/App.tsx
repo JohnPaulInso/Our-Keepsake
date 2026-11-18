@@ -140,13 +140,76 @@ export const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
+  // (2026-07-13) Guard tab navigation when composer has unsaved changes; was none
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [pendingTab, setPendingTab] = useState<ActiveTab | null>(null);
+  const [pendingPath, setPendingPath] = useState<string | null>(null);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+
+  const requestTabNavigation = useCallback(
+    (targetTab: ActiveTab) => {
+      if (targetTab === activeTab) return;
+      if (activeTab === 'new-date' && hasUnsavedChanges) {
+        setPendingTab(targetTab);
+        setShowUnsavedModal(true);
+        return;
+      }
+      setEditingMemory(null);
+      switchTab(targetTab);
+    },
+    [activeTab, hasUnsavedChanges, switchTab]
+  );
+
+  const requestRouteNavigation = useCallback(
+    (targetPath: string) => {
+      if (activeTab === 'new-date' && hasUnsavedChanges) {
+        setPendingPath(targetPath);
+        setShowUnsavedModal(true);
+        return;
+      }
+      setEditingMemory(null);
+      navigate(targetPath);
+    },
+    [activeTab, hasUnsavedChanges, navigate]
+  );
+
+  const handleConfirmDiscard = () => {
+    setHasUnsavedChanges(false);
+    setShowUnsavedModal(false);
+    setEditingMemory(null);
+    if (pendingTab) {
+      switchTab(pendingTab);
+      setPendingTab(null);
+    } else if (pendingPath) {
+      navigate(pendingPath);
+      setPendingPath(null);
+    }
+  };
+
+  const handleCancelDiscard = () => {
+    setShowUnsavedModal(false);
+    setPendingTab(null);
+    setPendingPath(null);
+  };
+
   // Hierarchical Back-Button & Two-Step Exit Flow per SKILL.md Section 2 Rules 8 & 16
   useEffect(() => {
     window.history.pushState({ keepsakeGuard: true }, '');
     const handlePopState = () => {
       window.history.pushState({ keepsakeGuard: true }, '');
+      if (showUnsavedModal) {
+        setShowUnsavedModal(false);
+        setPendingTab(null);
+        setPendingPath(null);
+        return;
+      }
       if (studioModalOpen) {
         setStudioModalOpen(false);
+        return;
+      }
+      if (activeTab === 'new-date' && hasUnsavedChanges) {
+        setPendingTab('timeline');
+        setShowUnsavedModal(true);
         return;
       }
       if (activeTab !== 'timeline') {
@@ -164,8 +227,14 @@ export const App: React.FC = () => {
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && studioModalOpen) {
-        setStudioModalOpen(false);
+      if (e.key === 'Escape') {
+        if (showUnsavedModal) {
+          setShowUnsavedModal(false);
+          setPendingTab(null);
+          setPendingPath(null);
+        } else if (studioModalOpen) {
+          setStudioModalOpen(false);
+        }
       }
     };
 
@@ -175,7 +244,7 @@ export const App: React.FC = () => {
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [activeTab, studioModalOpen, switchTab, addToast]);
+  }, [activeTab, studioModalOpen, showUnsavedModal, hasUnsavedChanges, switchTab, addToast]);
 
   // (2026-07-13) Suppress synchronized toast; was addToast on refresh
   const triggerInAppRefresh = useCallback(() => {
@@ -255,6 +324,9 @@ export const App: React.FC = () => {
     DB.setSelectedMemoryId(memory.id);
     await DB.setMemories(nextList);
     syncManager.schedulePush();
+    // (2026-07-13) Clear unsaved changes flag on successful save; was untouched
+    setHasUnsavedChanges(false);
+    setShowUnsavedModal(false);
     setEditingMemory(null);
 
     if (isDraft) {
@@ -575,10 +647,7 @@ export const App: React.FC = () => {
       <aside className="hidden md:flex flex-col w-64 lg:w-72 fixed inset-y-0 left-0 z-40 bg-surface-bright/98 backdrop-blur-md border-r border-outline-variant/30 p-5 justify-between no-print overflow-y-auto">
         <div className="flex flex-col gap-6">
           <div
-            onClick={() => {
-              setEditingMemory(null);
-              switchTab('timeline');
-            }}
+            onClick={() => requestTabNavigation('timeline')}
             className="flex items-center gap-3 cursor-pointer group"
           >
             <img
@@ -598,10 +667,7 @@ export const App: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => {
-              setEditingMemory(null);
-              switchTab('new-date');
-            }}
+            onClick={() => requestTabNavigation('new-date')}
             className={`w-full py-3 px-4 rounded-xl font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 ${
               activeTab === 'new-date'
                 ? 'bg-primary text-on-primary ring-2 ring-primary-container'
@@ -615,10 +681,7 @@ export const App: React.FC = () => {
           <nav className="flex flex-col gap-1.5">
             <button
               type="button"
-              onClick={() => {
-                setEditingMemory(null);
-                switchTab('timeline');
-              }}
+              onClick={() => requestTabNavigation('timeline')}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md tracking-wide transition-all ${
                 activeTab === 'timeline'
                   ? 'bg-secondary-container/70 text-on-secondary-container font-bold shadow-xs'
@@ -636,10 +699,7 @@ export const App: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => {
-                setEditingMemory(null);
-                switchTab('story');
-              }}
+              onClick={() => requestTabNavigation('story')}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md tracking-wide transition-all ${
                 activeTab === 'story'
                   ? 'bg-secondary-container/70 text-on-secondary-container font-bold shadow-xs'
@@ -654,10 +714,7 @@ export const App: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => {
-                setEditingMemory(null);
-                switchTab('capsule');
-              }}
+              onClick={() => requestTabNavigation('capsule')}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md tracking-wide transition-all ${
                 activeTab === 'capsule'
                   ? 'bg-secondary-container/70 text-on-secondary-container font-bold shadow-xs'
@@ -672,10 +729,7 @@ export const App: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => {
-                setEditingMemory(null);
-                switchTab('letters');
-              }}
+              onClick={() => requestTabNavigation('letters')}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md tracking-wide transition-all ${
                 activeTab === 'letters'
                   ? 'bg-secondary-container/70 text-on-secondary-container font-bold shadow-xs'
@@ -694,10 +748,7 @@ export const App: React.FC = () => {
             {/* (2026-07-13) Add Monthly Notepads button in sidebar; was absent from nav */}
             <button
               type="button"
-              onClick={() => {
-                setEditingMemory(null);
-                switchTab('notepad');
-              }}
+              onClick={() => requestTabNavigation('notepad')}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md tracking-wide transition-all ${
                 activeTab === 'notepad'
                   ? 'bg-secondary-container/70 text-on-secondary-container font-bold shadow-xs'
@@ -714,7 +765,7 @@ export const App: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => navigate('/backup')}
+              onClick={() => requestRouteNavigation('/backup')}
               className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md tracking-wide text-secondary hover:bg-surface-container-low hover:text-primary transition-all"
             >
               <div className="flex items-center gap-3">
@@ -778,10 +829,7 @@ export const App: React.FC = () => {
       <header className="md:hidden fixed top-0 w-full z-50 pt-safe bg-surface-bright/98 backdrop-blur-md shadow-[0_1px_8px_rgba(74,59,50,0.04)] no-print">
         <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-between">
           <div
-            onClick={() => {
-              setEditingMemory(null);
-              switchTab('timeline');
-            }}
+            onClick={() => requestTabNavigation('timeline')}
             className="flex items-center gap-space-sm cursor-pointer"
           >
             {activeTab !== 'timeline' && (
@@ -790,8 +838,7 @@ export const App: React.FC = () => {
                 aria-label="Go back to timeline"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setEditingMemory(null);
-                  switchTab('timeline');
+                  requestTabNavigation('timeline');
                 }}
                 className="w-8 h-8 -ml-1 mr-1 rounded-full flex items-center justify-center text-primary active:scale-95"
               >
@@ -822,7 +869,7 @@ export const App: React.FC = () => {
               type="button"
               aria-label="Open /backup vault"
               title="Open /backup Vault"
-              onClick={() => navigate('/backup')}
+              onClick={() => requestRouteNavigation('/backup')}
               className="px-2.5 h-9 rounded-full bg-surface-container-low flex items-center justify-center gap-1 text-secondary hover:text-primary transition-colors active:scale-95 font-label-md text-[10px] uppercase tracking-wider border border-outline-variant/30"
             >
               <span className="material-symbols-outlined text-[16px]">folder_zip</span>
@@ -834,7 +881,7 @@ export const App: React.FC = () => {
               type="button"
               aria-label="Search memories"
               onClick={() => {
-                switchTab('timeline');
+                requestTabNavigation('timeline');
                 setTimeout(() => {
                   const el = document.getElementById('keepsake-search-section');
                   el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -975,18 +1022,16 @@ export const App: React.FC = () => {
               ))}
 
             {activeTab === 'new-date' && (
-              // (2026-07-13) Add key to reinitialize on edit change; was unkeyed
+              // (2026-07-13) Connect onDirtyChange and safe tab cancel; was immediate
               <ComposerView
                 key={editingMemory?.id || 'new-composer'}
                 profile={profile}
                 editingMemory={editingMemory}
                 totalMemoriesCount={memories.length}
                 onSaveMemory={handleSaveMemory}
-                onCancel={() => {
-                  setEditingMemory(null);
-                  switchTab('timeline');
-                }}
+                onCancel={() => requestTabNavigation('timeline')}
                 onToast={addToast}
+                onDirtyChange={setHasUnsavedChanges}
               />
             )}
 
@@ -1038,10 +1083,7 @@ export const App: React.FC = () => {
         <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-around">
           <button
             type="button"
-            onClick={() => {
-              setEditingMemory(null);
-              switchTab('timeline');
-            }}
+            onClick={() => requestTabNavigation('timeline')}
             className={`flex flex-col items-center justify-center min-w-[50px] min-h-[44px] gap-0.5 transition-colors ${
               activeTab === 'timeline'
                 ? 'text-primary font-bold'
@@ -1054,10 +1096,7 @@ export const App: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => {
-              setEditingMemory(null);
-              switchTab('story');
-            }}
+            onClick={() => requestTabNavigation('story')}
             className={`flex flex-col items-center justify-center min-w-[50px] min-h-[44px] gap-0.5 transition-colors ${
               activeTab === 'story'
                 ? 'text-primary font-bold'
@@ -1072,10 +1111,7 @@ export const App: React.FC = () => {
             <button
               type="button"
               aria-label="Record New Date Memory"
-              onClick={() => {
-                setEditingMemory(null);
-                switchTab('new-date');
-              }}
+              onClick={() => requestTabNavigation('new-date')}
               className="w-12 h-12 rounded-full bg-gradient-to-tr from-secondary to-primary-container text-surface-bright flex items-center justify-center shadow-[0_6px_14px_-3px_rgba(74,59,50,0.28)] ring-2 ring-tertiary-fixed/80 active:scale-95 transition-transform"
             >
               <span className="material-symbols-outlined text-[26px]">add</span>
@@ -1084,10 +1120,7 @@ export const App: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => {
-              setEditingMemory(null);
-              switchTab('letters');
-            }}
+            onClick={() => requestTabNavigation('letters')}
             className={`flex flex-col items-center justify-center min-w-[50px] min-h-[44px] gap-0.5 transition-colors relative ${
               activeTab === 'letters' || activeTab === 'capsule'
                 ? 'text-primary font-bold'
@@ -1100,10 +1133,7 @@ export const App: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => {
-              setEditingMemory(null);
-              switchTab('notepad');
-            }}
+            onClick={() => requestTabNavigation('notepad')}
             className={`flex flex-col items-center justify-center min-w-[50px] min-h-[44px] gap-0.5 transition-colors ${
               activeTab === 'notepad'
                 ? 'text-primary font-bold'
@@ -1115,6 +1145,54 @@ export const App: React.FC = () => {
           </button>
         </div>
       </nav>
+
+      {/* (2026-07-13) Modal asking to discard unsaved changes; was silent leave */}
+      {showUnsavedModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="unsaved-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-xs animate-fade-in"
+        >
+          <div
+            id="unsaved-changes-dialog"
+            className="w-full max-w-sm rounded-2xl bg-surface-container-lowest border border-outline-variant/35 p-6 shadow-xl flex flex-col items-center text-center gap-4 animate-scale-up"
+          >
+            <div className="w-12 h-12 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[26px]">edit_note</span>
+            </div>
+
+            <div>
+              <h3
+                id="unsaved-modal-title"
+                className="font-headline-sm text-lg sm:text-xl font-serif text-primary font-bold"
+              >
+                Unsaved Changes
+              </h3>
+              <p className="font-body-sm text-sm text-secondary mt-1.5 leading-relaxed font-sans">
+                You have unsaved changes in this keepsake chapter. Navigating to another tab will discard your unsealed memories.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full mt-1">
+              <button
+                type="button"
+                onClick={handleCancelDiscard}
+                className="w-full py-2.5 px-4 rounded-xl border border-outline-variant/40 bg-surface-container-low text-primary font-sans font-semibold text-xs uppercase tracking-wider hover:bg-surface-container transition-colors active:scale-98"
+              >
+                Keep Writing
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDiscard}
+                className="w-full py-2.5 px-4 rounded-xl bg-primary text-on-primary font-sans font-semibold text-xs uppercase tracking-wider hover:bg-primary/95 shadow-sm transition-colors active:scale-98"
+              >
+                Discard &amp; Leave
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Couple Studio & Backup/Restore Modal */}
       {studioModalOpen && (

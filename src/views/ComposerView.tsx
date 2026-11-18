@@ -21,6 +21,8 @@ interface ComposerViewProps {
   onSaveMemory: (memory: KeepsakeMemory, isDraft: boolean) => void;
   onCancel: () => void;
   onToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
+  // (2026-07-13) Add onDirtyChange prop for unsaved changes guard; was absent
+  onDirtyChange?: (isDirty: boolean) => void;
 }
 
 const DEFAULT_VIBE_TAGS = [
@@ -55,6 +57,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
   totalMemoriesCount,
   onSaveMemory,
   onToast,
+  // (2026-07-13) Destructure onDirtyChange; was unhandled
+  onDirtyChange,
 }) => {
   const [dateISO, setDateISO] = useState(editingMemory?.dateISO || '2026-11-16');
   // (2026-07-13) Set default location to Bogo City, Cebu & all-day; was Soho
@@ -146,6 +150,43 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
   useEffect(() => {
     adjustTextareaHeight(storyTextareaRef.current);
   }, [storyBody]);
+
+  // (2026-07-13) Emit unsaved dirty status for tab switch modal; was untracked
+  const isDirty = useMemo(() => {
+    if (!editingMemory) {
+      return Boolean(
+        title.trim() ||
+        storyBody.trim() ||
+        quoteHighlight.trim() ||
+        photos.length > 0 ||
+        voiceDataUrl ||
+        videoUrl ||
+        location !== 'Bogo City, Cebu'
+      );
+    }
+    return (
+      title !== (editingMemory.title || '') ||
+      storyBody !== (editingMemory.storyBody || editingMemory.snippet || '') ||
+      quoteHighlight !== (editingMemory.quoteHighlight || '') ||
+      location !== (editingMemory.location || 'Bogo City, Cebu') ||
+      photos.length !== (editingMemory.photos?.length || 0) ||
+      voiceDataUrl !== editingMemory.audioMemo?.url ||
+      videoUrl !== editingMemory.videoCapsule?.url
+    );
+  }, [
+    editingMemory,
+    title,
+    storyBody,
+    quoteHighlight,
+    photos,
+    voiceDataUrl,
+    videoUrl,
+    location,
+  ]);
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   // (2026-07-13) Sync form state when editing memory changes; was initial only
   useEffect(() => {
