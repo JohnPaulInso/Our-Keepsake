@@ -14,7 +14,8 @@ interface MonthlyNotepadViewProps {
   onUpdateMemoriesLive?: (entries: { dateISO: string; story: string }[]) => void;
 }
 
-const DATE_CHAR_LIMIT = 3000;
+// (2026-07-13) Increase date entry char limit to 5000; was 3000
+const DATE_CHAR_LIMIT = 5000;
 
 // (2026-07-13) Parse date entries like 'Nov 16, 2026 - content' vs raw plain text
 export function parseDateEntriesFromNotepad(
@@ -187,7 +188,7 @@ export const MonthlyNotepadView: React.FC<MonthlyNotepadViewProps> = ({
 
     const finalVal = exceeded ? validated.join('\n\n') : raw;
     if (exceeded) {
-      onToast('Limit reached: 3,000 characters per date entry', 'warning');
+      onToast('Limit reached: 5,000 characters per date entry', 'warning');
     }
     setNotepadText(finalVal);
     DB.setMonthlyNotepad(monthKey, finalVal);
@@ -351,7 +352,7 @@ export const MonthlyNotepadView: React.FC<MonthlyNotepadViewProps> = ({
 
         <div className="flex items-center gap-1.5 text-xs text-secondary font-sans">
           <span className="hidden sm:inline text-[11px] text-outline">
-            {maxDateBlockLength > 0 ? `${maxDateBlockLength} / ${DATE_CHAR_LIMIT} chars` : 'Max 3,000 chars/date'}
+            {maxDateBlockLength > 0 ? `${maxDateBlockLength} / ${DATE_CHAR_LIMIT} chars` : 'Max 5,000 chars/date'}
           </span>
           <button
             type="button"
@@ -414,12 +415,12 @@ export const MonthlyNotepadView: React.FC<MonthlyNotepadViewProps> = ({
             <span className="material-symbols-outlined text-[14px] text-emerald-600">cloud_done</span>
             <span>Saved to Vault</span>
             <span className="hidden sm:inline opacity-40">•</span>
-            <span className="hidden sm:inline">Limit 3,000 chars per date</span>
+            <span className="hidden sm:inline">Limit 5,000 chars per date</span>
           </div>
 
           <div className="flex items-center gap-3">
             <span className="text-secondary/70">
-              {maxDateBlockLength > 0 ? `${maxDateBlockLength} / ${DATE_CHAR_LIMIT} chars` : '0 / 3,000 chars'}
+              {maxDateBlockLength > 0 ? `${maxDateBlockLength} / ${DATE_CHAR_LIMIT} chars` : '0 / 5,000 chars'}
             </span>
             <button
               type="button"
