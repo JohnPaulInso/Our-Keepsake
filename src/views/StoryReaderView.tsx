@@ -181,7 +181,11 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
 
     ctx.fillStyle = '#755844';
     ctx.font = '500 28px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`Sealed with love • ${memory.signOffAuthor}`, 540, 1680);
+    // (2026-07-13) Format lockscreen sign-off to bb John Paul; was memory.signOffAuthor
+    const signOff = !memory.signOffAuthor || memory.signOffAuthor.includes('St.') || memory.signOffAuthor === 'JP' || memory.signOffAuthor.includes('Your baby')
+      ? 'bb John Paul'
+      : memory.signOffAuthor;
+    ctx.fillText(`Sealed with love • ${signOff}`, 540, 1680);
 
     const dataUrl = canvas.toDataURL('image/png');
     const a = document.createElement('a');

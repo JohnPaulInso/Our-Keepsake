@@ -428,8 +428,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       snippet: cleanBody.slice(0, 175) + (cleanBody.length > 175 ? '...' : ''),
       storyBody: cleanBody,
       quoteHighlight: quoteHighlight.trim(),
-      // (2026-07-13) Set author sign-off to John Paul . Your baby; was St. chapter
-      signOffAuthor: 'John Paul . Your baby',
+      // (2026-07-13) Set author sign-off to bb John Paul; was John Paul . Your baby
+      signOffAuthor: 'bb John Paul',
       location: location.trim() || 'Bogo City, Cebu',
       weatherTemp: '',
       weatherConditions: '',
