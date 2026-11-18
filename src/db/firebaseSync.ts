@@ -13,11 +13,13 @@ import {
   Firestore,
   Unsubscribe,
 } from 'firebase/firestore';
+// (2026-07-13) Add onAuthStateChanged for live auth sync; was static user
 import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
   signInAnonymously,
+  onAuthStateChanged,
   signOut as fbSignOut,
   Auth,
 } from 'firebase/auth';
@@ -161,19 +163,26 @@ class FirebaseSyncManager {
 
       this.db = getFirestore(this.app);
       this.auth = getAuth(this.app);
-      // (2026-07-13) Silently sign in anonymously if available; was uncalled
+      // (2026-07-13) Fix APK initial sync & auth state; was unawaited anon login
       if (this.auth && !this.auth.currentUser) {
-        signInAnonymously(this.auth).catch(() => {});
+        try {
+          await signInAnonymously(this.auth);
+        } catch {
+          // Continue if offline or anonymous auth not enabled
+        }
       }
 
-      enableIndexedDbPersistence(this.db).catch(() => {
-        // Multi-tab or unsupported browser fallback
-      });
+      try {
+        await enableIndexedDbPersistence(this.db);
+      } catch {
+        // Multi-tab or unsupported WebView fallback
+      }
 
       await DB.ready;
       await this.pullSnapshot();
-      // (2026-07-13) Auto-push local unpushed memories online on startup; was idle
-      if (this.db && this.status !== 'permission-denied' && this.status !== 'quota') {
+      // Only push on startup if local memories exist (> 4) and remote was clean
+      const initialLocal = DB.getMemories();
+      if (this.db && this.status !== 'permission-denied' && this.status !== 'quota' && initialLocal.length > 4) {
         this.schedulePush();
       }
       // Sync local daily backups (including showcase archive) to Firestore daily_backups
@@ -181,7 +190,7 @@ class FirebaseSyncManager {
       for (const b of localBackups) {
         this.pushDailyBackupToFirestore(b).catch(() => {});
       }
-      // (2026-07-13) Auto-sync local DB mutations to Firestore vs manual push only
+      // Auto-sync local DB mutations to Firestore
       DB.subscribe(() => {
         if (!this.isApplyingRemoteSnapshot && this.db && this.status !== 'quota') {
           this.schedulePush();
@@ -189,6 +198,15 @@ class FirebaseSyncManager {
       });
       this.startRealtimeListener();
       this.startDailyBackupsListener();
+
+      if (this.auth) {
+        onAuthStateChanged(this.auth, (user) => {
+          if (user) {
+            this.userEmail = user.email || (user.isAnonymous ? 'anonymous' : null);
+            this.pullSnapshot(true);
+          }
+        });
+      }
     } catch {
       this.status = 'local-ready';
       this.notify();
@@ -249,7 +267,8 @@ class FirebaseSyncManager {
     this.notify();
   }
 
-  async pullSnapshot(): Promise<void> {
+  // (2026-07-13) Pull and restore live cloud memories on launch; was strict baseline
+  async pullSnapshot(force = false): Promise<void> {
     if (!this.db || this.status === 'quota') return;
     try {
       this.status = 'syncing';
@@ -258,17 +277,30 @@ class FirebaseSyncManager {
       const snap = await getDoc(docRef);
       if (snap.exists()) {
         const remote = snap.data() as BackupSnapshot & { updatedAt?: number };
-        // (2026-07-13) Support updatedAt fallback for Firestore pull vs exportedAt only
         const remoteTime = remote.exportedAt || remote.updatedAt || 0;
         const localBaseline = Number(localStorage.getItem('ok_sync_baseline') || 0);
-        if (remoteTime > localBaseline) {
+        const localMemories = DB.getMemories();
+        const remoteCount = Array.isArray(remote.memories) ? remote.memories.length : 0;
+
+        const shouldRestore =
+          force ||
+          remoteTime > localBaseline ||
+          (remoteCount > 0 && localMemories.length <= 4) ||
+          remoteCount > localMemories.length;
+
+        if (shouldRestore) {
           this.isApplyingRemoteSnapshot = true;
           await DB.restoreSnapshot(remote);
           this.isApplyingRemoteSnapshot = false;
+          if (remoteTime > 0) {
+            localStorage.setItem('ok_sync_baseline', String(remoteTime));
+          }
         }
       } else {
-        // (2026-07-13) Seed empty remote Firestore with local data; was no-op
-        await this.pushSnapshot();
+        const localMemories = DB.getMemories();
+        if (localMemories.length > 4) {
+          await this.pushSnapshot();
+        }
       }
       this.status = 'cloud-live';
       this.notify();
@@ -445,11 +477,19 @@ class FirebaseSyncManager {
       docRef,
       async (snap) => {
         if (!snap.exists() || this.isSyncing) return;
-        const data = snap.data() as BackupSnapshot;
-        // (2026-07-13) Check remote exportedAt/updatedAt vs local baseline comparison
-        const remoteTime = data.exportedAt || (data as { updatedAt?: number }).updatedAt || 0;
+        const data = snap.data() as BackupSnapshot & { updatedAt?: number };
+        // (2026-07-13) Live sync remote memories to cache; was skip on baseline
+        const remoteTime = data.exportedAt || data.updatedAt || 0;
         const localBaseline = Number(localStorage.getItem('ok_sync_baseline') || 0);
-        if (remoteTime <= localBaseline) return;
+        const localMemories = DB.getMemories();
+        const remoteCount = Array.isArray(data.memories) ? data.memories.length : 0;
+
+        const shouldApply =
+          remoteTime > localBaseline ||
+          remoteCount > localMemories.length ||
+          (remoteCount > 0 && localMemories.length <= 4);
+
+        if (!shouldApply) return;
 
         this.isApplyingRemoteSnapshot = true;
         if (Array.isArray(data.memories)) {
@@ -466,6 +506,9 @@ class FirebaseSyncManager {
           }
         }
         await DB.restoreSnapshot(data);
+        if (remoteTime > 0) {
+          localStorage.setItem('ok_sync_baseline', String(remoteTime));
+        }
         this.isApplyingRemoteSnapshot = false;
       },
       (err) => {

@@ -535,7 +535,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     onConsumedOpenDate?.();
   }, [initialOpenDateISO, onConsumedOpenDate]);
 
-  // (2026-07-13) Bypass overlay delay if closed; was unconditional timeout
+  // (2026-07-13) Dismiss date overlay immediately on back; was 280ms lag
   const closeDateOverlay = (callback?: () => void) => {
     if (!isFullscreenDateOpen) {
       if (callback) callback();
@@ -543,11 +543,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     }
     setIsOverlayClosing(true);
     setIsOverlayVisible(false);
+    setIsFullscreenDateOpen(false);
     setTimeout(() => {
-      setIsFullscreenDateOpen(false);
       setIsOverlayClosing(false);
       if (callback) callback();
-    }, 280);
+    }, 120);
   };
 
   // (2026-07-13) Register overlays in global modal manager for LIFO dismissal

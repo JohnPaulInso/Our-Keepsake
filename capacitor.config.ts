@@ -7,10 +7,13 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     androidScheme: 'https',
+    // (2026-07-13) Add Firestore & Firebase endpoints to allowNavigation; was 4 domains
     allowNavigation: [
       'accounts.google.com',
       '*.googleapis.com',
       '*.firebaseapp.com',
+      '*.firebaseio.com',
+      '*.firebasestorage.app',
       '*.gstatic.com',
     ],
   },

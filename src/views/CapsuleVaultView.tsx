@@ -12,6 +12,8 @@ import {
   formatStandardDate,
 } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
+// (2026-07-13) Register Capsule modals with modalManager; was unhandled
+import { pushModal } from '../utils/modalManager';
 
 interface CapsuleVaultViewProps {
   profile: CoupleProfile;
@@ -43,6 +45,19 @@ export const CapsuleVaultView: React.FC<CapsuleVaultViewProps> = ({
   const [passcodeInput, setPasscodeInput] = useState('');
   const [newCapsuleLetterTitle, setNewCapsuleLetterTitle] = useState('');
   const [newCapsuleLetterBody, setNewCapsuleLetterBody] = useState('');
+
+  // (2026-07-13) Register Capsule modals for back dismissal; was unhandled
+  useEffect(() => {
+    if (selectedPolaroid) {
+      return pushModal('polaroid-lightbox', () => setSelectedPolaroid(null));
+    }
+  }, [selectedPolaroid]);
+
+  useEffect(() => {
+    if (capsuleModalOpen) {
+      return pushModal('capsule-modal', () => setCapsuleModalOpen(false));
+    }
+  }, [capsuleModalOpen]);
 
   useEffect(() => {
     return audioEngine.subscribe(() => {

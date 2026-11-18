@@ -29,6 +29,8 @@ import { CoupleStudioModal } from './components/CoupleStudioModal';
 import { PinLockModal } from './components/PinLockModal';
 // (2026-07-13) Import capitalizeFirstLetters & getTodayISO; was without capitalize
 import { capitalizeFirstLetters, formatStandardDate, getChapterNumber, getTodayISO } from './utils/dateFormat';
+// (2026-07-13) Import Capacitor App for hardware back button; was unhandled
+import { App as CapApp } from '@capacitor/app';
 // (2026-07-13) Import modal manager for hierarchical LIFO back dismissal per Rule 16
 import { pushModal, popModal, closeAllModals, getOpenModalCount } from './utils/modalManager';
 
@@ -152,6 +154,8 @@ export const App: React.FC = () => {
       setDailyBackups(DB.getDailyBackups());
       setSelectedMemoryId(DB.getSelectedMemoryId());
       setIsHydrating(false);
+      // (2026-07-13) Pull live Firestore memories on startup; was local cache only
+      syncManager.pullSnapshot();
     });
 
     const unsub = DB.subscribe(() => {
@@ -262,64 +266,100 @@ export const App: React.FC = () => {
     }
   }, [showUnsavedModal]);
 
-  // Hierarchical Back-Button & Two-Step Exit Flow per SKILL.md Section 2 Rules 8 & 16
   useEffect(() => {
-    window.history.pushState({ keepsakeGuard: true }, '');
+    if (storyHeaderDeleteConfirmOpen) {
+      return pushModal('story-delete-modal', () => setStoryHeaderDeleteConfirmOpen(false));
+    }
+  }, [storyHeaderDeleteConfirmOpen]);
+
+  // (2026-07-13) Universal back: close modals & subviews; was popstate only
+  const handleUniversalBack = useCallback(() => {
+    // 1. Close all open modals & overlays in application stack
+    if (closeAllModals()) {
+      return;
+    }
+    if (showUnsavedModal) {
+      setShowUnsavedModal(false);
+      setPendingTab(null);
+      setPendingPath(null);
+      return;
+    }
+    if (studioModalOpen) {
+      setStudioModalOpen(false);
+      return;
+    }
+    if (storyHeaderDeleteConfirmOpen) {
+      setStoryHeaderDeleteConfirmOpen(false);
+      return;
+    }
+    if (activeTab === 'new-date' && hasUnsavedChanges) {
+      setPendingTab('timeline');
+      setShowUnsavedModal(true);
+      return;
+    }
+    // 2. Return to root timeline from any opened subview
+    if (activeTab !== 'timeline') {
+      setEditingMemory(null);
+      switchTab('timeline');
+      return;
+    }
+    // 3. Two-step exit confirmation on root timeline
+    const now = Date.now();
+    if (now - lastBackPressRef.current < 2500) {
+      try {
+        CapApp.exitApp();
+      } catch {
+        addToast('Keepsake Vault minimized.', 'info');
+      }
+    } else {
+      lastBackPressRef.current = now;
+      addToast('Press back again to exit.', 'warning');
+    }
+  }, [
+    activeTab,
+    hasUnsavedChanges,
+    showUnsavedModal,
+    studioModalOpen,
+    storyHeaderDeleteConfirmOpen,
+    switchTab,
+    addToast,
+  ]);
+
+  // Universal hardware, browser, and keyboard back listener
+  useEffect(() => {
+    let removeCapListener: (() => void) | undefined;
+    try {
+      const handlePromise = CapApp.addListener('backButton', () => {
+        handleUniversalBack();
+      });
+      removeCapListener = () => {
+        handlePromise.then((h) => h.remove()).catch(() => {});
+      };
+    } catch {
+      // Running outside Capacitor
+    }
+
     const handlePopState = () => {
       window.history.pushState({ keepsakeGuard: true }, '');
-      // (2026-07-13) Dismiss top modal hierarchically in LIFO order; was static checks
-      if (popModal()) {
-        return;
-      }
-      if (showUnsavedModal) {
-        setShowUnsavedModal(false);
-        setPendingTab(null);
-        setPendingPath(null);
-        return;
-      }
-      if (studioModalOpen) {
-        setStudioModalOpen(false);
-        return;
-      }
-      if (activeTab === 'new-date' && hasUnsavedChanges) {
-        setPendingTab('timeline');
-        setShowUnsavedModal(true);
-        return;
-      }
-      if (activeTab !== 'timeline') {
-        setEditingMemory(null);
-        switchTab('timeline');
-        return;
-      }
-      const now = Date.now();
-      if (now - lastBackPressRef.current < 2500) {
-        addToast('Keepsake Vault minimized.', 'info');
-      } else {
-        lastBackPressRef.current = now;
-        addToast('Press back again to exit.', 'warning');
-      }
+      handleUniversalBack();
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (popModal()) return;
-        if (showUnsavedModal) {
-          setShowUnsavedModal(false);
-          setPendingTab(null);
-          setPendingPath(null);
-        } else if (studioModalOpen) {
-          setStudioModalOpen(false);
-        }
+        handleUniversalBack();
       }
     };
 
+    window.history.pushState({ keepsakeGuard: true }, '');
     window.addEventListener('popstate', handlePopState);
     window.addEventListener('keydown', handleKeyDown);
+
     return () => {
+      if (removeCapListener) removeCapListener();
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [activeTab, studioModalOpen, showUnsavedModal, hasUnsavedChanges, switchTab, addToast]);
+  }, [handleUniversalBack]);
 
   // (2026-07-13) Suppress synchronized toast; was addToast on refresh
   const triggerInAppRefresh = useCallback(() => {
@@ -1035,8 +1075,7 @@ export const App: React.FC = () => {
                 aria-label="Universal Back Button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (closeAllModals()) return;
-                  requestTabNavigation('timeline');
+                  handleUniversalBack();
                 }}
                 className="w-8 h-8 -ml-1 mr-1 rounded-full flex items-center justify-center text-primary active:scale-95"
               >

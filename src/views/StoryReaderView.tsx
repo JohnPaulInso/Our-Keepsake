@@ -6,6 +6,8 @@ import { CoupleProfile, DigitalLoveLetter, DotIndicator, KeepsakeMemory, Polaroi
 // (2026-07-13) Import capitalizeFirstLetters to ensure proper case; was missing
 import { formatDuration, formatStandardDate, capitalizeFirstLetters } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
+// (2026-07-13) Register modals with modalManager for universal back; was none
+import { pushModal } from '../utils/modalManager';
 
 // (2026-07-13) Format long weekday date matching date overlay header; was short
 function formatLongWeekdayDate(dateInput: string | undefined): string {
@@ -82,6 +84,37 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
       setAudioState(audioEngine.getState());
     });
   }, []);
+
+  // (2026-07-13) Register StoryReader modals for back dismissal; was unhandled
+  useEffect(() => {
+    if (lightboxPhoto) {
+      return pushModal('reader-lightbox', () => setLightboxPhoto(null));
+    }
+  }, [lightboxPhoto]);
+
+  useEffect(() => {
+    if (activeReadingLetter) {
+      return pushModal('reader-letter', () => setActiveReadingLetter(null));
+    }
+  }, [activeReadingLetter]);
+
+  useEffect(() => {
+    if (noteDrawerOpen) {
+      return pushModal('reader-note-drawer', () => setNoteDrawerOpen(false));
+    }
+  }, [noteDrawerOpen]);
+
+  useEffect(() => {
+    if (lockscreenModalOpen) {
+      return pushModal('reader-lockscreen', () => setLockscreenModalOpen(false));
+    }
+  }, [lockscreenModalOpen]);
+
+  useEffect(() => {
+    if (deleteConfirmOpen) {
+      return pushModal('reader-delete-confirm', () => setDeleteConfirmOpen(false));
+    }
+  }, [deleteConfirmOpen]);
 
   useEffect(() => {
     const anyModal =
