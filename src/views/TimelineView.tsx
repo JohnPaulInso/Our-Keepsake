@@ -457,8 +457,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const [overlayEditMemory, setOverlayEditMemory] = useState<KeepsakeMemory | null>(null);
   const [overlayComposerDirty, setOverlayComposerDirty] = useState(false);
   const [overlayUnsavedConfirmOpen, setOverlayUnsavedConfirmOpen] = useState(false);
+  // (2026-07-13) Guard ghost-click close & expose header Save ref; was unguarded
+  const stackedComposerOpenedAtRef = useRef<number>(0);
+  const stackedComposerSubmitRef = useRef<(() => void) | null>(null);
 
   const openStackedComposerForMemory = (mem: KeepsakeMemory) => {
+    stackedComposerOpenedAtRef.current = Date.now();
     setOverlayComposerDirty(false);
     setOverlayUnsavedConfirmOpen(false);
     setOverlayEditMemory(mem);
@@ -499,6 +503,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   };
 
   const requestCloseStackedComposer = () => {
+    // (2026-07-13) Ignore ghost clicks within 300ms of opening modal; was instant
+    if (Date.now() - stackedComposerOpenedAtRef.current < 300) return;
     if (overlayComposerDirty) {
       setOverlayUnsavedConfirmOpen(true);
     } else {
@@ -2382,14 +2388,25 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 <span className="font-label-md text-xs uppercase tracking-widest text-secondary font-semibold truncate">
                   {overlayEditMemory.title || overlayEditMemory.storyBody ? 'Edit Keepsake' : 'Write Keepsake'}
                 </span>
-                <button
-                  type="button"
-                  onClick={requestCloseStackedComposer}
-                  title="Close editor"
-                  className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 shrink-0"
-                >
-                  <span className="material-symbols-outlined text-[18px]">close</span>
-                </button>
+                {/* (2026-07-13) Add Save button to edit modal header; was close button only */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => stackedComposerSubmitRef.current?.()}
+                    className="flex items-center gap-1 px-4 py-1.5 rounded-full bg-primary text-on-primary font-semibold text-xs uppercase tracking-wider shadow-xs hover:bg-primary/95 transition-all active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">save</span>
+                    <span>Save</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={requestCloseStackedComposer}
+                    title="Close editor"
+                    className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">close</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -2400,6 +2417,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 editingMemory={overlayEditMemory}
                 existingMemories={memories}
                 totalMemoriesCount={memories.length}
+                submitRef={stackedComposerSubmitRef}
                 onSaveMemory={(savedMemory, isDraft) => {
                   onSaveMemory?.(savedMemory, isDraft, true);
                   if (/^\d{4}-\d{2}-\d{2}$/.test(savedMemory.dateISO)) {

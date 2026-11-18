@@ -172,12 +172,18 @@ export const App: React.FC = () => {
     document.documentElement.setAttribute('data-theme', profile.theme || 'light');
   }, [profile.theme]);
 
-  // Persist active tab & selected memory in localStorage
-  const switchTab = useCallback((tab: ActiveTab) => {
-    setActiveTab(tab);
-    DB.setActiveTab(tab);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+  // (2026-07-13) Clear /date/ URL when leaving story tab; was stale path hijack
+  const switchTab = useCallback(
+    (tab: ActiveTab) => {
+      if (tab !== 'story' && location.pathname.startsWith('/date/')) {
+        navigate('/', { replace: true });
+      }
+      setActiveTab(tab);
+      DB.setActiveTab(tab);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [location.pathname, navigate]
+  );
 
   // (2026-07-13) Guard tab navigation when composer has unsaved changes; was none
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -319,18 +325,23 @@ export const App: React.FC = () => {
     pullStartYRef.current = null;
   };
 
-  // (2026-07-13) Support routing links for each date (/date/:dateISO); was unrouted
+  // (2026-07-13) Guard /date/ effect so memories refresh never closes editor; was loop
+  const lastHandledDatePathRef = useRef<string | null>(null);
   useEffect(() => {
-    if (location.pathname.startsWith('/date/')) {
-      const targetDate = location.pathname.replace('/date/', '').trim();
-      if (targetDate) {
-        const found = memories.find((m) => m.dateISO === targetDate);
-        if (found) {
-          setSelectedMemoryId(found.id);
-          DB.setSelectedMemoryId(found.id);
-          setActiveTab('story');
-          DB.setActiveTab('story');
-        }
+    if (!location.pathname.startsWith('/date/')) {
+      lastHandledDatePathRef.current = null;
+      return;
+    }
+    if (lastHandledDatePathRef.current === location.pathname) return;
+    const targetDate = location.pathname.replace('/date/', '').trim();
+    if (targetDate) {
+      const found = memories.find((m) => m.dateISO === targetDate);
+      if (found) {
+        lastHandledDatePathRef.current = location.pathname;
+        setSelectedMemoryId(found.id);
+        DB.setSelectedMemoryId(found.id);
+        setActiveTab('story');
+        DB.setActiveTab('story');
       }
     }
   }, [location.pathname, memories]);

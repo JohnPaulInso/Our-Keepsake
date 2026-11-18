@@ -22,9 +22,10 @@ interface ComposerViewProps {
   onSaveMemory: (memory: KeepsakeMemory, isDraft: boolean) => void;
   onCancel: () => void;
   onToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
-  // (2026-07-13) Add onDirtyChange prop for unsaved changes guard; was absent
+  // (2026-07-13) Add onDirtyChange & submitRef for header Save button; was absent
   onDirtyChange?: (isDirty: boolean) => void;
   existingMemories?: KeepsakeMemory[];
+  submitRef?: React.MutableRefObject<(() => void) | null>;
 }
 
 const DEFAULT_VIBE_TAGS = [
@@ -59,9 +60,10 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
   totalMemoriesCount,
   onSaveMemory,
   onToast,
-  // (2026-07-13) Destructure onDirtyChange; was unhandled
+  // (2026-07-13) Destructure onDirtyChange & submitRef; was without submitRef
   onDirtyChange,
   existingMemories,
+  submitRef,
 }) => {
   // (2026-07-13) Default date to today & tags empty; was hardcoded date and tags
   const [dateISO, setDateISO] = useState(editingMemory?.dateISO || getTodayISO());
@@ -476,6 +478,11 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       onSaveMemory(payload, false);
     }, 220);
   };
+
+  // (2026-07-13) Expose handleSealSubmit to header Save button via submitRef
+  if (submitRef) {
+    submitRef.current = handleSealSubmit;
+  }
 
   // (2026-07-13) Save draft updating record in-place; was duplicate block
   const handleDraftSubmit = () => {
