@@ -447,10 +447,10 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
             <span className="relative z-10 font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl text-secondary italic">
               Yours always,
             </span>
-            {/* (2026-07-13) Set author sign-off to John Paul . Your baby; was JP • St. 1 */}
+            {/* (2026-07-13) Set author sign-off to bb John Paul; was John Paul . Your baby */}
             <span className="relative z-10 font-['Plus_Jakarta_Sans',sans-serif] text-xs font-semibold uppercase tracking-[0.14em] text-outline mt-0.5">
-              {!memory.signOffAuthor || memory.signOffAuthor.includes('St.') || memory.signOffAuthor === 'JP'
-                ? 'John Paul . Your baby'
+              {!memory.signOffAuthor || memory.signOffAuthor.includes('St.') || memory.signOffAuthor === 'JP' || memory.signOffAuthor.includes('Your baby') || memory.signOffAuthor === 'John Paul . Your baby'
+                ? 'bb John Paul'
                 : memory.signOffAuthor}
             </span>
           </div>
