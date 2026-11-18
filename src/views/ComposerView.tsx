@@ -381,7 +381,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     if (photos.length > 0) categories.push('PHOTO');
     if (voiceDataUrl) categories.push('VOICE_MEMO');
     if (hasVideo && videoUrl) categories.push('VIDEO');
-    if (selectedDots.includes('ROSE') || selectedTags.includes('Anniversary')) {
+    // (2026-07-13) Check BURGUNDY or Anniversary for milestone category; was ROSE
+    if (selectedDots.includes('BURGUNDY') || selectedTags.includes('Anniversary')) {
       categories.push('ANNIVERSARY');
     }
 
@@ -663,10 +664,12 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
               Calendar Ribbon Dots
             </span>
             <div className="flex flex-wrap gap-2">
+              {/* (2026-07-13) Add Intimacy rose & Milestone burgundy dots; was 3 dots */}
               {[
                 { id: 'GOLD' as DotIndicator, label: 'Events', color: '#E5A93C' },
                 { id: 'MOCHA' as DotIndicator, label: 'Date', color: '#5C4033' },
-                { id: 'ROSE' as DotIndicator, label: 'Milestone', color: '#C96B78' },
+                { id: 'ROSE' as DotIndicator, label: 'Intimacy', color: '#C96B78' },
+                { id: 'BURGUNDY' as DotIndicator, label: 'Milestone', color: '#8B263E' },
               ].map((d) => {
                 const active = selectedDots.includes(d.id);
                 return (

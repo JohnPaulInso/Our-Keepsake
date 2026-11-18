@@ -1,6 +1,7 @@
 // (2026-07-13) Define core TypeScript interfaces per PRD & SKILL.md vs untyped
 export type MemoryCategory = 'EVENT' | 'VOICE_MEMO' | 'PHOTO' | 'VIDEO' | 'ANNIVERSARY';
-export type DotIndicator = 'GOLD' | 'MOCHA' | 'ROSE';
+// (2026-07-13) Add BURGUNDY indicator for milestone & ROSE for intimacy; was 3 dots
+export type DotIndicator = 'GOLD' | 'MOCHA' | 'ROSE' | 'BURGUNDY';
 
 export interface PolaroidPhoto {
   id: string;

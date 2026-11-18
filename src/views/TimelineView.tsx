@@ -949,13 +949,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             value={sortBy}
             onChange={(val) => setSortBy(val as 'custom' | 'newest' | 'oldest')}
           />
-          {/* (2026-07-13) Update dropdown dots to Events, Date, Milestone; was Media */}
+          {/* (2026-07-13) Add Rose Intimacy & Burgundy Milestone filter options; was 3 */}
           <CustomDropdown
             options={[
               { value: 'ALL', label: 'All Dot Colors', icon: 'palette' },
               { value: 'GOLD', label: 'Gold • Events', icon: 'event' },
               { value: 'MOCHA', label: 'Mocha • Date', icon: 'calendar_month' },
-              { value: 'ROSE', label: 'Rose • Milestone', icon: 'stars' },
+              { value: 'ROSE', label: 'Rose • Intimacy', icon: 'favorite' },
+              { value: 'BURGUNDY', label: 'Burgundy • Milestone', icon: 'stars' },
             ]}
             value={dotFilter}
             onChange={(val) => setDotFilter(val as 'ALL' | DotIndicator)}
@@ -1252,6 +1253,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                         style={{ backgroundColor: '#C96B78' }}
                       />
                     )}
+                    {/* (2026-07-13) Render BURGUNDY milestone dot in calendar cell; was none */}
+                    {cell.dots.includes('BURGUNDY') && (
+                      <span
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{ backgroundColor: '#8B263E' }}
+                      />
+                    )}
                   </div>
                 )}
               </button>
@@ -1385,6 +1393,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     <span
                       className="w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: '#C96B78' }}
+                    />
+                  )}
+                  {/* (2026-07-13) Render BURGUNDY milestone dot in sliding strip; was none */}
+                  {item.dots.includes('BURGUNDY') && (
+                    <span
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ backgroundColor: '#8B263E' }}
                     />
                   )}
                 </div>
