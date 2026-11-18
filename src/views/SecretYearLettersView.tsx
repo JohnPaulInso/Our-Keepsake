@@ -264,20 +264,16 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
             mail
           </span>
           <span className="font-label-md text-label-md uppercase tracking-widest">
-            Letters &amp; Secret Year Vault • {profile.partner1Name} to {profile.partner2Name}
+            Love Letters • {profile.partner1Name} &amp; {profile.partner2Name}
           </span>
         </div>
 
-        <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary font-serif mb-2">
+        {/* (2026-07-13) Simplify header & remove quote; was verbose title and quote */}
+        <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary font-serif mb-1">
           {activeMode === 'DIGITAL_LETTERS'
-            ? `Digital Copies of Every Love Letter I Wrote on Paper for ${profile.partner2Name}`
-            : `Everything I Secretly Noted About You This Past Year, ${profile.partner2Name}`}
+            ? `Love Letters for ${profile.partner2Name}`
+            : `Past-Year Notes for ${profile.partner2Name}`}
         </h1>
-        <p className="font-italic-quote text-body-md text-on-surface-variant italic font-serif max-w-md leading-relaxed">
-          {activeMode === 'DIGITAL_LETTERS'
-            ? `“Before I ever wrote our love letters onto physical paper, I typed every word right here so we would always have the original digital manuscripts forever.”`
-            : `“You did not know this, ${profile.partner2Name}, but for the past year I kept a secret note of every little thing that happened—how you laughed, what you said, and all the quiet moments.”`}
-        </p>
 
         {/* Segmented Mode Switcher: Digital Love Letters vs Past-Year Secret Notes */}
         <div
@@ -318,7 +314,8 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
               className="px-4 py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform"
             >
               <span className="material-symbols-outlined text-[17px]">post_add</span>
-              <span>Add / Paste Digital Love Letter</span>
+              {/* (2026-07-13) Simplify button label; was Add / Paste Digital Love Letter */}
+              <span>Add Love Letter</span>
             </button>
           ) : (
             <button
