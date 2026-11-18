@@ -70,8 +70,12 @@ if exist "android\app\build\outputs\apk\debug\app-debug.apk" (
     echo  - Root Copy: %CD%\Our-Keepsake.apk
     echo  - Gradle Output: android\app\build\outputs\apk\debug\app-debug.apk
     echo ============================================
+    echo [*] Opening APK in file directory...
+    :: (2026-07-13) Open directory with APK highlighted in Explorer; was text only
+    explorer /select,"%CD%\Our-Keepsake.apk"
 ) else (
     echo [WARNING] APK built, check android\app\build\outputs\apk\debug\
+    explorer "%CD%\android\app\build\outputs\apk\debug"
 )
 
 echo.
