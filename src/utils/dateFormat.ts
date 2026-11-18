@@ -94,3 +94,41 @@ export function capitalizeFirstLetters(text: string): string {
     .replace(/(\r?\n\s*[-*•"“‘(]*\s*)([a-z])/g, (_, s, c) => s + c.toUpperCase())
     .replace(/([.!?]["'”’)]*\s+["'“‘(]*)([a-z])/g, (_, s, c) => s + c.toUpperCase());
 }
+
+// (2026-07-13) Auto-detect ribbon dots by text keywords; was manual dots only
+export function detectAutoDotIndicators(text: string, existingDots: Array<'GOLD' | 'MOCHA' | 'ROSE' | 'BURGUNDY'> = []): Array<'GOLD' | 'MOCHA' | 'ROSE' | 'BURGUNDY'> {
+  const lower = (text || '').toLowerCase();
+  const dots = new Set<'GOLD' | 'MOCHA' | 'ROSE' | 'BURGUNDY'>(existingDots);
+
+  const dateKeywords = [
+    'date', 'dates', 'lunch', 'dinner', 'cafe', 'plaza', 'ice cream',
+    'empanada', 'eat', 'eating', 'laag', 'hangout', 'outing', 'kuyog', 'panta',
+    'coffee', 'jollibee', 'mcdo', 'restaurant', 'food'
+  ];
+  const eventKeywords = [
+    'concert', 'peryahan', 'market', 'nightmarket', 'games', 'rehearsal',
+    'summit', 'party', 'trip', 'event', 'vacation', 'festival', 'pista',
+    'mass', 'misa', 'serve', 'service', 'choir', 'meeting', 'funeral',
+    'lubong', 'shrine', 'play', 'musical', 'theater', 'outing'
+  ];
+  const intimacyKeywords = [
+    'finger', 'fingering', 'fingered', 'intimate', 'intimacy', 'fck', 'fucked',
+    'fuck', 'makeout', 'kiss', 'kissed', 'chula', 'naked', 'hubo', 'hug',
+    'hugs', 'huggiess', 'moan', 'moans', 'pussy', 'tilap', 'lulu', 'gakos',
+    'kuot', 'chechay', 'liquid', 'sleeping together', 'sleepover', 'cum',
+    'oral', 'condom', 'shower together', 'back hug'
+  ];
+  const milestoneKeywords = [
+    'first time', '1st time', 'died', 'unboxed', 'leadership summit',
+    'peckyy', 'milestone', 'anniversary', 'monthsary', 'core memory', 'first theater'
+  ];
+
+  if (dateKeywords.some(k => lower.includes(k))) dots.add('MOCHA');
+  if (eventKeywords.some(k => lower.includes(k))) dots.add('GOLD');
+  if (intimacyKeywords.some(k => lower.includes(k))) dots.add('ROSE');
+  if (milestoneKeywords.some(k => lower.includes(k))) dots.add('BURGUNDY');
+
+  if (dots.size === 0) dots.add('MOCHA');
+  return Array.from(dots);
+}
+

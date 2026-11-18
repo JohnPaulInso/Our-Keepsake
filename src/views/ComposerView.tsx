@@ -10,8 +10,8 @@ import {
   PartnerReplyNote,
   PolaroidPhoto,
 } from '../types';
-// (2026-07-13) Import capitalizeFirstLetters & getTodayISO; was without capitalize
-import { capitalizeFirstLetters, formatDuration, formatStandardDate, getChapterNumber, getTodayISO } from '../utils/dateFormat';
+// (2026-07-13) Import capitalizeFirstLetters & detectAutoDotIndicators; was without
+import { capitalizeFirstLetters, detectAutoDotIndicators, formatDuration, formatStandardDate, getChapterNumber, getTodayISO } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 import { ImageCropperModal } from '../components/ImageCropperModal';
 
@@ -137,6 +137,13 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       }
     }
   }, [existingForDate, editingMemory, storyBody, profile.partner2Name]);
+
+  // (2026-07-13) Auto-detect ribbon dots when text changes; was manual dots only
+  useEffect(() => {
+    if (!title && !storyBody) return;
+    const combined = `${title} ${storyBody}`;
+    setSelectedDots((prev) => detectAutoDotIndicators(combined, prev));
+  }, [title, storyBody]);
 
   // Voice Note State
   const [voiceTitle, setVoiceTitle] = useState(
@@ -392,12 +399,14 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       storyBody.trim() ||
       `Another unforgettable day with ${profile.partner2Name} in ${location}. I wrote this down so we never forget how warm and peaceful this moment felt.`;
     const cleanBody = capitalizeFirstLetters(rawBody);
+    // (2026-07-13) Auto-detect ribbon dots based on keywords; was manual selection
+    const finalDots = detectAutoDotIndicators(`${cleanTitle} ${cleanBody}`, selectedDots);
     const categories: MemoryCategory[] = ['EVENT'];
     if (photos.length > 0) categories.push('PHOTO');
     if (voiceDataUrl) categories.push('VOICE_MEMO');
     if (hasVideo && videoUrl) categories.push('VIDEO');
     // (2026-07-13) Check BURGUNDY or Anniversary for milestone category; was ROSE
-    if (selectedDots.includes('BURGUNDY') || selectedTags.includes('Anniversary')) {
+    if (finalDots.includes('BURGUNDY') || selectedTags.includes('Anniversary')) {
       categories.push('ANNIVERSARY');
     }
 
@@ -423,7 +432,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       moodVibe: '',
       vibeTags: selectedTags,
       categories,
-      dotIndicators: selectedDots,
+      dotIndicators: finalDots,
       photos,
       // (2026-07-13) Only attach audioMemo if user actually uploaded audio vs dummy
       audioMemo: voiceDataUrl
