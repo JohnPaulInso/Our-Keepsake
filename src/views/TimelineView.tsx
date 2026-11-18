@@ -1385,9 +1385,20 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
           {/* Moment title and note */}
           <div>
-            <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-0.5">
-              {primaryDateMemory ? 'Recorded Moment' : 'Unwritten Page'}
-            </span>
+            {/* (2026-07-13) Add icon on left of recorded moment label; was text only */}
+            <div className="flex items-center gap-1.5 mb-1">
+              <span
+                className={`material-symbols-outlined text-[15px] shrink-0 ${
+                  primaryDateMemory ? 'text-secondary' : 'text-outline/70'
+                }`}
+                style={primaryDateMemory ? { fontVariationSettings: "'FILL' 1" } : undefined}
+              >
+                {primaryDateMemory ? 'auto_awesome' : 'edit_note'}
+              </span>
+              <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
+                {primaryDateMemory ? 'Recorded Moment' : 'Unwritten Page'}
+              </span>
+            </div>
             <h3 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-primary font-bold leading-tight">
               {primaryDateMemory ? primaryDateMemory.title : 'A Quiet Day in Our Story'}
             </h3>
