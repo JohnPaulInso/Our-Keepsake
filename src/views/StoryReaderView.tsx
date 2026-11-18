@@ -258,7 +258,8 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
       {/* (2026-07-13) Render top bar & swipe hint only when not embedded in overlay */}
       {!embeddedInOverlay && (
         <>
-          <div className="w-full flex items-center justify-between mb-3 pt-1 pb-2 no-print gap-2">
+          {/* (2026-07-13) Hide duplicate bar on mobile since mobile header shows it */}
+          <div className="w-full hidden md:flex items-center justify-between mb-3 pt-1 pb-2 no-print gap-2">
             <button
               type="button"
               onClick={handleCloseWithAnimation}

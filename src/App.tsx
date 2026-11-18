@@ -46,6 +46,8 @@ export const App: React.FC = () => {
   const [notepadTarget, setNotepadTarget] = useState<{ year: number; month: number } | null>(null);
   // (2026-07-13) Track saved dateISO to reopen fullscreen overlay; was Story tab
   const [pendingOverlayDateISO, setPendingOverlayDateISO] = useState<string | null>(null);
+  // (2026-07-13) Confirm modal state for Story mobile header delete; was in child
+  const [storyHeaderDeleteConfirmOpen, setStoryHeaderDeleteConfirmOpen] = useState(false);
   // (2026-07-13) Add startup PIN 7777 unlock state; was unguarded
   const [isPinUnlocked, setIsPinUnlocked] = useState<boolean>(() => {
     try {
@@ -925,8 +927,61 @@ export const App: React.FC = () => {
         </div>
       </aside>
 
-      {/* (2026-07-13) Apply true frosted glass on mobile header; was broken /98 */}
+      {/* (2026-07-13) Render story actions directly in mobile header; was double bar */}
       <header className="md:hidden fixed top-0 w-full z-50 pt-safe frosted-glass-bar border-b border-outline-variant/25 shadow-[0_2px_12px_rgba(74,59,50,0.05)] no-print">
+        {activeTab === 'story' && activeMemory ? (
+          <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                navigate('/');
+                switchTab('timeline');
+              }}
+              aria-label="Return to timeline"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high/90 text-primary border border-outline-variant/30 text-[13px] font-medium shadow-sm hover:bg-surface-variant transition-colors active:scale-95 shrink-0"
+            >
+              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+              <span>Back to Timeline</span>
+            </button>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  const url = `${window.location.origin}/date/${activeMemory.dateISO}`;
+                  navigator.clipboard
+                    .writeText(url)
+                    .then(() => {
+                      addToast(`Link copied: /date/${activeMemory.dateISO}`, 'info');
+                    })
+                    .catch(() => {
+                      addToast(`/date/${activeMemory.dateISO}`, 'info');
+                    });
+                }}
+                title="Copy direct link for this date"
+                className="w-9 h-9 rounded-full bg-surface-container-low text-secondary hover:text-primary flex items-center justify-center border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
+              >
+                <span className="material-symbols-outlined text-[18px]">link</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleStartEditMemory(activeMemory)}
+                className="px-3.5 py-2 rounded-full bg-surface-container-low text-primary hover:bg-surface-container font-label-md text-xs uppercase tracking-wider flex items-center gap-1.5 border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
+              >
+                <span className="material-symbols-outlined text-[16px]">edit</span>
+                <span>Edit</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setStoryHeaderDeleteConfirmOpen(true)}
+                title="Delete memory"
+                className="w-9 h-9 rounded-full bg-surface-container-low text-error hover:bg-error/10 flex items-center justify-center border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
+              >
+                <span className="material-symbols-outlined text-[18px]">delete</span>
+              </button>
+            </div>
+          </div>
+        ) : (
         <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-between">
           <div
             onClick={() => requestTabNavigation('timeline')}
@@ -1031,6 +1086,7 @@ export const App: React.FC = () => {
             </button>
           </div>
         </div>
+        )}
       </header>
 
       {/* Main Content Area with Exact-Position Shimmering Skeleton Loaders */}
@@ -1306,6 +1362,49 @@ export const App: React.FC = () => {
                 className="w-full py-2.5 px-4 rounded-xl bg-primary text-on-primary font-sans font-semibold text-xs uppercase tracking-wider hover:bg-primary/95 shadow-sm transition-colors active:scale-98"
               >
                 Discard &amp; Leave
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* (2026-07-13) Delete confirm modal for Story mobile header; was in child */}
+      {storyHeaderDeleteConfirmOpen && activeMemory && (
+        <div
+          className="fixed inset-0 z-[150] bg-black/65 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setStoryHeaderDeleteConfirmOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm bg-surface-container-lowest rounded-2xl p-5 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col gap-4 text-center"
+          >
+            <div className="w-11 h-11 mx-auto rounded-full bg-error-container text-error flex items-center justify-center">
+              <span className="material-symbols-outlined text-[22px]">delete_forever</span>
+            </div>
+            <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+              Remove This Keepsake?
+            </h3>
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              Are you sure you want to remove &ldquo;{activeMemory.title}&rdquo; from your shared archive?
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setStoryHeaderDeleteConfirmOpen(false)}
+                className="flex-1 py-2.5 rounded-xl bg-surface-container-low text-secondary font-label-md text-label-md uppercase"
+              >
+                Keep Memory
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const id = activeMemory.id;
+                  setStoryHeaderDeleteConfirmOpen(false);
+                  handleDeleteMemory(id);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-error text-on-error font-label-md text-label-md uppercase shadow-md"
+              >
+                Remove
               </button>
             </div>
           </div>
