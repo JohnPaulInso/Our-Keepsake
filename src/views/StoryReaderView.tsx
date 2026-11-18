@@ -191,10 +191,11 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
   };
 
   const longFormattedDate = formatLongWeekdayDate(memory.dateISO);
+  // (2026-07-13) Omit Whole Day Note label from display; was 'Whole Day Note'
   const displayTimeLabel =
     memory.timeFormatted && memory.timeFormatted.toLowerCase() !== 'all day'
       ? memory.timeFormatted
-      : 'Whole Day Note';
+      : '';
 
   // (2026-07-13) Support embeddedInOverlay mode for identical overlay view; was tab only
   return (
@@ -341,34 +342,34 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
         </p>
       </div>
 
-      {/* Context Pills: Date & Location */}
-      <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 font-['Plus_Jakarta_Sans',sans-serif]">
-        <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low text-primary rounded-full shadow-sm border border-outline-variant/30">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="material-symbols-outlined text-[20px] text-secondary">
+      {/* (2026-07-13) Date & Location side by side on all screens; was stacked */}
+      <div className="w-full grid grid-cols-2 gap-2 sm:gap-3 mb-4 font-['Plus_Jakarta_Sans',sans-serif]">
+        <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-surface-container-low text-primary rounded-full shadow-sm border border-outline-variant/30">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+            <span className="material-symbols-outlined text-[18px] sm:text-[20px] text-secondary shrink-0">
               calendar_today
             </span>
             <div className="flex flex-col min-w-0">
-              <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-outline font-semibold">
                 Date
               </span>
-              <span className="text-sm font-medium text-primary truncate-single">
-                {longFormattedDate} • {displayTimeLabel}
+              <span className="text-xs sm:text-sm font-medium text-primary truncate-single">
+                {longFormattedDate}{displayTimeLabel ? ` • ${displayTimeLabel}` : ''}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low text-primary rounded-full shadow-sm border border-outline-variant/30">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="material-symbols-outlined text-[20px] text-tertiary-container">
+        <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-surface-container-low text-primary rounded-full shadow-sm border border-outline-variant/30">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+            <span className="material-symbols-outlined text-[18px] sm:text-[20px] text-tertiary-container shrink-0">
               location_on
             </span>
             <div className="flex flex-col min-w-0">
-              <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-outline font-semibold">
                 Location
               </span>
-              <span className="text-sm font-medium text-primary truncate-single">
+              <span className="text-xs sm:text-sm font-medium text-primary truncate-single">
                 {memory.location || 'Bogo City, Cebu'}
               </span>
             </div>

@@ -530,27 +530,27 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
 
       {/* Primary Journal Desk Canvas */}
       <div className="flex flex-col gap-space-lg">
-        {/* Context Pills: Date & Location Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+        {/* (2026-07-13) Date & Location side by side; was stacked grid-cols-1 */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-space-sm">
           <button
             type="button"
             onClick={() => setMetaModalOpen(true)}
-            className="group flex items-center justify-between px-space-md py-space-sm bg-surface-container-low text-primary rounded-full shadow-sm active:scale-[0.99] transition-transform text-left border border-outline-variant/30"
+            className="group flex items-center justify-between px-3 sm:px-space-md py-2.5 sm:py-space-sm bg-surface-container-low text-primary rounded-full shadow-sm active:scale-[0.99] transition-transform text-left border border-outline-variant/30"
           >
-            <div className="flex items-center gap-space-sm min-w-0">
-              <span className="material-symbols-outlined text-[20px] text-secondary">
+            <div className="flex items-center gap-1.5 sm:gap-space-sm min-w-0">
+              <span className="material-symbols-outlined text-[18px] sm:text-[20px] text-secondary shrink-0">
                 calendar_today
               </span>
               <div className="flex flex-col min-w-0">
-                <span className="font-label-md text-label-md uppercase tracking-wider text-outline">
+                <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-outline font-semibold">
                   Date
                 </span>
-                <span className="font-body-md text-body-md font-medium text-primary truncate-single">
-                  {formatStandardDate(dateISO)} • Whole Day Note
+                <span className="text-xs sm:text-sm font-medium text-primary truncate-single">
+                  {formatStandardDate(dateISO)}
                 </span>
               </div>
             </div>
-            <span className="material-symbols-outlined text-[18px] text-outline-variant group-hover:text-primary">
+            <span className="material-symbols-outlined text-[16px] sm:text-[18px] text-outline-variant group-hover:text-primary shrink-0">
               expand_more
             </span>
           </button>
@@ -558,22 +558,22 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
           <button
             type="button"
             onClick={() => setMetaModalOpen(true)}
-            className="group flex items-center justify-between px-space-md py-space-sm bg-surface-container-low text-primary rounded-full shadow-sm active:scale-[0.99] transition-transform text-left border border-outline-variant/30"
+            className="group flex items-center justify-between px-3 sm:px-space-md py-2.5 sm:py-space-sm bg-surface-container-low text-primary rounded-full shadow-sm active:scale-[0.99] transition-transform text-left border border-outline-variant/30"
           >
-            <div className="flex items-center gap-space-sm min-w-0">
-              <span className="material-symbols-outlined text-[20px] text-tertiary-container">
+            <div className="flex items-center gap-1.5 sm:gap-space-sm min-w-0">
+              <span className="material-symbols-outlined text-[18px] sm:text-[20px] text-tertiary-container shrink-0">
                 location_on
               </span>
               <div className="flex flex-col min-w-0">
-                <span className="font-label-md text-label-md uppercase tracking-wider text-outline">
+                <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-outline font-semibold">
                   Location
                 </span>
-                <span className="font-body-md text-body-md font-medium text-primary truncate-single">
+                <span className="text-xs sm:text-sm font-medium text-primary truncate-single">
                   {location}
                 </span>
               </div>
             </div>
-            <span className="material-symbols-outlined text-[18px] text-outline-variant group-hover:text-primary">
+            <span className="material-symbols-outlined text-[16px] sm:text-[18px] text-outline-variant group-hover:text-primary shrink-0">
               edit
             </span>
           </button>

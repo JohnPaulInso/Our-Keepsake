@@ -2385,34 +2385,34 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 </p>
               </div>
 
-              {/* Empty Date Context Pills (Grayed) */}
-              <div className="w-full max-w-xl grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5 font-['Plus_Jakarta_Sans',sans-serif]">
-                <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low rounded-full shadow-sm border border-outline-variant/30 text-outline/60 opacity-75">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="material-symbols-outlined text-[20px] text-outline/50">
+              {/* (2026-07-13) Date & Location side by side; was stacked sm:grid-cols-2 */}
+              <div className="w-full max-w-xl grid grid-cols-2 gap-2 sm:gap-3 mb-5 font-['Plus_Jakarta_Sans',sans-serif]">
+                <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-surface-container-low rounded-full shadow-sm border border-outline-variant/30 text-outline/60 opacity-75">
+                  <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                    <span className="material-symbols-outlined text-[18px] sm:text-[20px] text-outline/50 shrink-0">
                       calendar_today
                     </span>
                     <div className="flex flex-col min-w-0">
-                      <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
+                      <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-outline font-semibold">
                         Date
                       </span>
-                      <span className="text-sm font-medium truncate-single text-outline/60">
-                        {selectedDayFormatted} • Whole Day Note
+                      <span className="text-xs sm:text-sm font-medium truncate-single text-outline/60">
+                        {selectedDayFormatted}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low rounded-full shadow-sm border border-outline-variant/30 text-outline/60 opacity-75">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="material-symbols-outlined text-[20px] text-outline/50">
+                <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-surface-container-low rounded-full shadow-sm border border-outline-variant/30 text-outline/60 opacity-75">
+                  <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                    <span className="material-symbols-outlined text-[18px] sm:text-[20px] text-outline/50 shrink-0">
                       location_on
                     </span>
                     <div className="flex flex-col min-w-0">
-                      <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
+                      <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-outline font-semibold">
                         Location
                       </span>
-                      <span className="text-sm font-medium truncate-single text-outline/60">
+                      <span className="text-xs sm:text-sm font-medium truncate-single text-outline/60">
                         Bogo City, Cebu
                       </span>
                     </div>
