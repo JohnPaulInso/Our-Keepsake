@@ -23,12 +23,13 @@ import {
 import { DB, idbGet, idbSet } from './localDb';
 import { BackupSnapshot, DailyBackupRecord, FirebaseRuntimeConfig } from '../types';
 
-export type SyncStatus = 'local-ready' | 'syncing' | 'cloud-live' | 'quota' | 'offline';
+// (2026-07-13) Add permission-denied status and sync google-services apiKey
+export type SyncStatus = 'local-ready' | 'syncing' | 'cloud-live' | 'quota' | 'offline' | 'permission-denied';
 
 const RUNTIME_CONFIG_KEY = 'ok_firebase_runtime_config';
 
 export const DEFAULT_FIREBASE_CONFIG: FirebaseRuntimeConfig = {
-  apiKey: 'AIzaSyCDFiQjKif3cbtd_J4nG2Qr-uTNw0YC6JA',
+  apiKey: 'AIzaSyCPDlWQlj9awT7JpEOBTvhemNErs3ubLJU',
   authDomain: 'our-keepsake.firebaseapp.com',
   projectId: 'our-keepsake',
   storageBucket: 'our-keepsake.firebasestorage.app',
@@ -260,9 +261,13 @@ class FirebaseSyncManager {
       this.status = 'cloud-live';
       this.notify();
     } catch (err: unknown) {
+      // (2026-07-13) Surface permission-denied for Firestore rules; was silent local fallback
       const msg = String((err as { code?: string })?.code || err);
+      console.error('[FirebaseSync] pullSnapshot error:', err);
       if (msg.includes('resource-exhausted') || msg.includes('quota')) {
         this.status = 'quota';
+      } else if (msg.includes('permission-denied') || msg.includes('Missing or insufficient permissions')) {
+        this.status = 'permission-denied';
       } else {
         this.status = 'local-ready';
       }
@@ -340,9 +345,13 @@ class FirebaseSyncManager {
       localStorage.setItem('ok_sync_baseline', String(snapshot.exportedAt));
       this.status = 'cloud-live';
     } catch (err: unknown) {
+      // (2026-07-13) Surface permission-denied on push error; was silent fallback
       const msg = String((err as { code?: string })?.code || err);
+      console.error('[FirebaseSync] pushSnapshot error:', err);
       if (msg.includes('resource-exhausted') || msg.includes('quota')) {
         this.status = 'quota';
+      } else if (msg.includes('permission-denied') || msg.includes('Missing or insufficient permissions')) {
+        this.status = 'permission-denied';
       } else {
         this.status = 'local-ready';
       }

@@ -266,14 +266,37 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
                   Local-First &amp; Cloud Sync
                 </span>
               </div>
-              <span className="px-2.5 py-0.5 rounded-full bg-secondary-container/70 text-on-secondary-container font-label-md text-[10px] uppercase tracking-wider">
+              {/* (2026-07-13) Display permission-denied status badge; was 3 statuses */}
+              <span className={`px-2.5 py-0.5 rounded-full font-label-md text-[10px] uppercase tracking-wider ${
+                syncInfo.status === 'permission-denied'
+                  ? 'bg-red-100 text-red-800 border border-red-300'
+                  : 'bg-secondary-container/70 text-on-secondary-container'
+              }`}>
                 {syncInfo.status === 'quota'
                   ? 'Quota Reached (Local)'
-                  : syncInfo.status === 'cloud-live'
-                    ? `Firestore Live (${syncInfo.projectId})`
-                    : 'IndexedDB Ready'}
+                  : syncInfo.status === 'permission-denied'
+                    ? 'Firestore Rules Denied'
+                    : syncInfo.status === 'cloud-live'
+                      ? `Firestore Live (${syncInfo.projectId})`
+                      : 'IndexedDB Ready'}
               </span>
             </div>
+
+            {/* (2026-07-13) Banner explaining how to allow rules in Firebase console */}
+            {syncInfo.status === 'permission-denied' && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-800 text-xs font-body-sm flex flex-col gap-1">
+                <span className="font-semibold flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[16px]">lock</span>
+                  Firestore Security Rules Are Blocking Sync
+                </span>
+                <p>
+                  To sync between your devices without Google sign-in, open Firebase Console &gt; Firestore Database &gt; Rules, and set:
+                </p>
+                <div className="bg-white/80 p-1.5 rounded font-mono text-[11px] text-red-900 border border-red-200">
+                  allow read, write: if true;
+                </div>
+              </div>
+            )}
 
             {syncInfo.userEmail ? (
               <div className="flex items-center justify-between gap-2 pt-1">
