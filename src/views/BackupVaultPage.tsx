@@ -971,8 +971,9 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
                     className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/25 flex flex-col gap-1.5"
                   >
                     <div className="flex items-center justify-between text-secondary font-label-md text-[10px] uppercase tracking-wider">
+                      {/* (2026-07-13) Omit letter number prefix; was Letter # */}
                       <span>
-                        Letter #{letter.letterNumber} • {letter.occasion}
+                        Love Letter • {letter.occasion}
                       </span>
                       <span>{formatStandardDate(letter.dateISO)}</span>
                     </div>

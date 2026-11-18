@@ -1441,8 +1441,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               onClick={onOpenSecretNotesTab}
               className="bg-surface-container-lowest rounded-lg p-3 shadow-xs cursor-pointer hover:bg-surface-bright transition-colors border-l-2 border-primary"
             >
+              {/* (2026-07-13) Omit letter number prefix; was Digital Love Letter # */}
               <div className="flex items-center justify-between text-secondary font-label-md text-[10px] uppercase tracking-wider mb-0.5">
-                <span>Digital Love Letter #{letter.letterNumber} • {letter.occasion}</span>
+                <span>Digital Love Letter • {letter.occasion}</span>
                 <span>{formatStandardDate(letter.dateISO)}</span>
               </div>
               <p className="font-headline-sm text-body-md text-primary font-serif">{letter.title}</p>
