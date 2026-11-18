@@ -1995,39 +1995,68 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               {/* (2026-07-13) Capitalize modal header title; was raw title */}
               <span>{primaryDateMemory ? capitalizeFirstLetters(primaryDateMemory.title) || "Preserve Today's Chapter" : "Preserve Today's Chapter"}</span>
             </h2>
-            <p className="text-secondary mt-1 max-w-xs leading-relaxed font-['Cormorant_Garamond',serif] italic text-base">
+            {/* (2026-07-13) Gray out subtitle & pills when date is empty; was dark */}
+            <p
+              className={`mt-1 max-w-xs leading-relaxed font-['Cormorant_Garamond',serif] italic text-base ${
+                primaryDateMemory ? 'text-secondary' : 'text-outline/60'
+              }`}
+            >
               Every little moment with {profile.partner2Name} is worth remembering forever.
             </p>
           </div>
 
           {/* Context Pills: Date & Time and Location & Vibe matching screenshot */}
           <div className="w-full max-w-xl grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5 font-['Plus_Jakarta_Sans',sans-serif]">
-            <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low text-primary rounded-full shadow-sm border border-outline-variant/30">
+            <div
+              className={`flex items-center justify-between px-4 py-3 bg-surface-container-low rounded-full shadow-sm border border-outline-variant/30 ${
+                primaryDateMemory ? 'text-primary' : 'text-outline/60 opacity-75'
+              }`}
+            >
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="material-symbols-outlined text-[20px] text-secondary">
+                <span
+                  className={`material-symbols-outlined text-[20px] ${
+                    primaryDateMemory ? 'text-secondary' : 'text-outline/50'
+                  }`}
+                >
                   calendar_today
                 </span>
                 <div className="flex flex-col min-w-0">
                   <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
                     Date
                   </span>
-                  <span className="text-sm font-medium text-primary truncate-single">
+                  <span
+                    className={`text-sm font-medium truncate-single ${
+                      primaryDateMemory ? 'text-primary' : 'text-outline/60'
+                    }`}
+                  >
                     {selectedDayFormatted} • Whole Day Note
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low text-primary rounded-full shadow-sm border border-outline-variant/30">
+            <div
+              className={`flex items-center justify-between px-4 py-3 bg-surface-container-low rounded-full shadow-sm border border-outline-variant/30 ${
+                primaryDateMemory ? 'text-primary' : 'text-outline/60 opacity-75'
+              }`}
+            >
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="material-symbols-outlined text-[20px] text-tertiary-container">
+                <span
+                  className={`material-symbols-outlined text-[20px] ${
+                    primaryDateMemory ? 'text-tertiary-container' : 'text-outline/50'
+                  }`}
+                >
                   location_on
                 </span>
                 <div className="flex flex-col min-w-0">
                   <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
                     Location
                   </span>
-                  <span className="text-sm font-medium text-primary truncate-single">
+                  <span
+                    className={`text-sm font-medium truncate-single ${
+                      primaryDateMemory ? 'text-primary' : 'text-outline/60'
+                    }`}
+                  >
                     {primaryDateMemory?.location || 'Bogo City, Cebu'}
                   </span>
                 </div>
@@ -2036,7 +2065,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           </div>
 
           {/* Editorial Title & Ruled Note Card matching screenshot */}
-          <div className="w-full max-w-xl bg-surface-container-lowest rounded-2xl p-6 sm:p-7 shadow-md relative overflow-hidden flex flex-col border border-outline-variant/30 mb-8 font-['Plus_Jakarta_Sans',sans-serif]">
+          {/* (2026-07-13) Gray out empty date card surface & placeholders; was dark */}
+          <div
+            className={`w-full max-w-xl rounded-2xl p-6 sm:p-7 shadow-md relative overflow-hidden flex flex-col border mb-8 font-['Plus_Jakarta_Sans',sans-serif] ${
+              primaryDateMemory
+                ? 'bg-surface-container-lowest border-outline-variant/30'
+                : 'bg-surface-container-low/70 border-outline-variant/25'
+            }`}
+          >
             {/* Watermark in corner */}
             <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-[0.05] pointer-events-none text-primary">
               <svg fill="currentColor" viewBox="0 0 100 100">
@@ -2052,8 +2088,16 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-1">
                     Title of this moment
                   </span>
-                  <h3 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-primary font-semibold">
-                    {primaryDateMemory?.title || "Sunday morning pastries and warm coffee..."}
+                  <h3
+                    className={`font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl ${
+                      primaryDateMemory?.title
+                        ? 'text-primary font-semibold'
+                        : 'text-outline/55 font-normal italic'
+                    }`}
+                  >
+                    {primaryDateMemory?.title
+                      ? capitalizeFirstLetters(primaryDateMemory.title)
+                      : 'Sunday morning pastries and warm coffee...'}
                   </h3>
                 </div>
 
@@ -2063,7 +2107,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block mb-2">
                     The Heartfelt Note
                   </span>
-                  <div className="min-h-[160px] text-on-surface font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[15px] sm:text-base leading-relaxed">
+                  <div
+                    className={`min-h-[160px] font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[15px] sm:text-base leading-relaxed ${
+                      primaryDateMemory?.storyBody || primaryDateMemory?.snippet
+                        ? 'text-on-surface'
+                        : 'text-outline/55 italic'
+                    }`}
+                  >
                     {/* (2026-07-13) Auto-capitalize heartfelt note lines; was raw text */}
                     <p className="whitespace-pre-wrap">
                       {capitalizeFirstLetters(
