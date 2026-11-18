@@ -14,8 +14,6 @@ import {
 import { capitalizeFirstLetters, detectAutoDotIndicators, formatDuration, formatStandardDate, getChapterNumber, getTodayISO } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 import { ImageCropperModal } from '../components/ImageCropperModal';
-// (2026-07-13) Add DateGalleryPickerModal for date-scoped photo picking; was none
-import { DateGalleryPickerModal } from '../components/DateGalleryPickerModal';
 
 interface ComposerViewProps {
   profile: CoupleProfile;
@@ -210,8 +208,15 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
   );
   const [pendingCropSrc, setPendingCropSrc] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
-  // (2026-07-13) Manage date gallery picker modal state; was unhandled
-  const [isDateGalleryOpen, setIsDateGalleryOpen] = useState<boolean>(Boolean(initialOpenGallery));
+  // (2026-07-13) Auto-open device gallery on intent; was modal popup
+  useEffect(() => {
+    if (initialOpenGallery) {
+      const timer = setTimeout(() => {
+        photoInputRef.current?.click();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [initialOpenGallery]);
 
   // Video Capsule State
   const [hasVideo, setHasVideo] = useState<boolean>(Boolean(editingMemory?.videoCapsule));
@@ -410,36 +415,27 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     onToast(`Voice note captured (${formatDuration(res.durationSeconds)})!`, 'success');
   };
 
-  // (2026-07-13) Support batch multiple image upload & crop; was first file only
+  // (2026-07-13) Batch up to 5 photos from gallery; was single crop modal
   const handleSelectPhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+    const rawFiles = e.target.files;
     e.target.value = '';
-    if (!files || files.length === 0) return;
+    if (!rawFiles || rawFiles.length === 0) return;
 
-    if (files.length === 1) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          setPendingCropSrc(reader.result);
-        }
-      };
-      reader.readAsDataURL(files[0]);
-    } else {
-      const newPolaroids: PolaroidPhoto[] = [];
-      const now = Date.now();
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const compressedUrl = await compressImageFile(file);
-        newPolaroids.push({
-          id: `ph-${now}-${i}`,
-          url: compressedUrl,
-          caption: file.name.replace(/\.[^.]+$/, ''),
-          tag: 'POLAROID',
-        });
-      }
-      setPhotos((prev) => [...prev, ...newPolaroids]);
-      onToast(`Attached ${newPolaroids.length} photos!`, 'success');
+    const files = Array.from(rawFiles).slice(0, 5);
+    const newPolaroids: PolaroidPhoto[] = [];
+    const now = Date.now();
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const compressedUrl = await compressImageFile(file);
+      newPolaroids.push({
+        id: `ph-${now}-${i}`,
+        url: compressedUrl,
+        caption: file.name.replace(/\.[^.]+$/, '') || `Photo ${i + 1}`,
+        tag: 'POLAROID',
+      });
     }
+    setPhotos((prev) => [...prev, ...newPolaroids]);
+    onToast(`Attached ${newPolaroids.length} photo${newPolaroids.length > 1 ? 's' : ''}!`, 'success');
   };
 
   const handleSelectVideoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -998,37 +994,20 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
               </span>
             </div>
 
-            {/* (2026-07-13) Add Date Gallery action card; was single upload box */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <div
-                onClick={() => setIsDateGalleryOpen(true)}
-                className="border-2 border-dashed border-primary/45 hover:border-primary bg-primary/5 hover:bg-primary/10 rounded-xl p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1 group active:scale-[0.99]"
-              >
-                <div className="w-10 h-10 rounded-full bg-primary/15 text-primary group-hover:scale-105 transition-all flex items-center justify-center mb-0.5">
-                  <span className="material-symbols-outlined text-[22px]">photo_library</span>
-                </div>
-                <span className="text-xs sm:text-sm font-bold text-primary">
-                  Choose from Date Gallery
-                </span>
-                <span className="text-[11px] text-outline">
-                  Browse {formatStandardDate(dateISO).replace(/, \d{4}$/, '')} &amp; adjacent dates
-                </span>
+            {/* (2026-07-13) Open native phone gallery directly; was in-app modal */}
+            <div
+              onClick={() => photoInputRef.current?.click()}
+              className="border-2 border-dashed border-primary/45 hover:border-primary bg-primary/5 hover:bg-primary/10 rounded-xl p-4 sm:p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 group active:scale-[0.99]"
+            >
+              <div className="w-12 h-12 rounded-full bg-primary/15 text-primary group-hover:scale-105 transition-all flex items-center justify-center mb-0.5 shadow-xs">
+                <span className="material-symbols-outlined text-[26px]">photo_library</span>
               </div>
-
-              <div
-                onClick={() => photoInputRef.current?.click()}
-                className="border-2 border-dashed border-outline-variant/40 hover:border-primary/50 bg-surface-container-low/40 hover:bg-surface-container-low rounded-xl p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1 group active:scale-[0.99]"
-              >
-                <div className="w-10 h-10 rounded-full bg-surface-container-high text-secondary group-hover:text-primary group-hover:scale-105 transition-all flex items-center justify-center mb-0.5">
-                  <span className="material-symbols-outlined text-[22px]">upload_file</span>
-                </div>
-                <span className="text-xs sm:text-sm font-semibold text-primary">
-                  Upload Photos from Phone
-                </span>
-                <span className="text-[11px] text-outline">
-                  Multi-select images • Auto-compressed
-                </span>
-              </div>
+              <span className="text-sm sm:text-base font-bold text-primary">
+                Choose from Date Gallery
+              </span>
+              <span className="text-xs text-outline font-medium">
+                Select up to 5 photos from your phone • Auto-compressed to ~50KB
+              </span>
             </div>
 
             {photos.length > 0 && (
@@ -1081,6 +1060,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
               ref={photoInputRef}
               type="file"
               accept="image/*"
+              multiple
               onChange={handleSelectPhotoFile}
               className="hidden"
             />
@@ -1260,18 +1240,6 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       </div>
 
       {/* (2026-07-13) Render modals with createPortal to escape navbar z-index */}
-      {/* (2026-07-13) Render DateGalleryPickerModal for multi-select gallery; was none */}
-      <DateGalleryPickerModal
-        isOpen={isDateGalleryOpen}
-        onClose={() => setIsDateGalleryOpen(false)}
-        targetDateISO={dateISO}
-        allMemories={existingMemories || []}
-        onSelectPhotos={(selected) => {
-          setPhotos((prev) => [...prev, ...selected]);
-        }}
-        onToast={onToast}
-      />
-
       {pendingCropSrc &&
         createPortal(
           <ImageCropperModal
