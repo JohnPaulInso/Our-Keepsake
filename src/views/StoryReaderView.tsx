@@ -295,14 +295,8 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
             auto_awesome
           </span>
         </div>
-        <h2 className="font-['Playfair_Display',Georgia,serif] tracking-tight text-2xl md:text-3xl flex items-center justify-center gap-2.5 text-primary font-semibold">
-          <span
-            className="material-symbols-outlined text-[28px] md:text-[32px] text-secondary shrink-0"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-            aria-hidden="true"
-          >
-            auto_awesome
-          </span>
+        {/* (2026-07-13) Remove icon left of story header title; was auto_awesome */}
+        <h2 className="font-['Playfair_Display',Georgia,serif] tracking-tight text-2xl md:text-3xl text-center text-primary font-semibold">
           <span>{capitalizeFirstLetters(memory.letterHeading || memory.title)}</span>
         </h2>
         <p className="mt-1 max-w-xs leading-relaxed font-['Cormorant_Garamond',serif] italic text-base text-secondary">
@@ -388,23 +382,17 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
 
       {/* (2026-07-13) Refine parchment card typography & proportions; was oversized */}
       <article className="relative bg-surface-container-lowest rounded-2xl shadow-sm p-5 sm:p-6 mb-space-lg overflow-hidden border border-outline-variant/30">
+        {/* (2026-07-13) Remove icon left of card title & size 2-line drop cap; was 30px */}
         <header className="mb-4">
-          <h1 className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-semibold text-primary tracking-tight leading-snug flex items-start gap-2">
-            <span
-              className="material-symbols-outlined text-[20px] text-secondary shrink-0 mt-0.5"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-              aria-hidden="true"
-            >
-              auto_awesome
-            </span>
-            <span>{capitalizeFirstLetters(memory.letterHeading || memory.title)}</span>
+          <h1 className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-semibold text-primary tracking-tight leading-snug">
+            {capitalizeFirstLetters(memory.letterHeading || memory.title)}
           </h1>
           <div className="w-10 h-0.5 bg-secondary-container mt-2.5 rounded-full" />
         </header>
 
         <div className="relative z-10 text-on-surface-variant">
-          <p className="font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[14px] sm:text-[15px] text-on-surface/95 leading-[1.7] text-left mb-4 whitespace-pre-line">
-            <span className="float-left font-['Playfair_Display',Georgia,serif] text-[30px] leading-[0.82] font-semibold text-secondary pr-1.5 pt-1">
+          <p className="font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[14px] sm:text-[15px] text-on-surface/95 leading-[1.65] text-left mb-4 whitespace-pre-line">
+            <span className="float-left font-['Playfair_Display',Georgia,serif] text-[44px] sm:text-[48px] leading-[0.82] font-semibold text-secondary pr-2 pt-[3px]">
               {dropCapChar}
             </span>
             {firstParaRest}

@@ -1912,7 +1912,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             WebkitOverflowScrolling: 'touch',
             paddingBottom: 'max(24px, env(safe-area-inset-bottom, 36px))',
           }}
-          className={`fixed inset-0 z-[100] bg-background text-on-surface overflow-y-auto overscroll-y-contain px-4 py-4 md:px-8 md:py-6 select-text no-print transition-transform duration-300 ease-out ${
+          // (2026-07-13) Full-bleed blurred top safe-area inset; was py-4 gap
+          className={`fixed inset-0 z-[100] bg-background text-on-surface overflow-y-auto overscroll-y-contain pt-0 pb-4 md:pb-6 select-text no-print transition-transform duration-300 ease-out ${
             !isOverlayVisible || isOverlayClosing
               ? 'translate-x-full pointer-events-none'
               : 'translate-x-0'
@@ -1921,35 +1922,41 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           {/* Subtle paper dot background texture */}
           <div className="fixed inset-0 pointer-events-none opacity-[0.035] bg-[radial-gradient(#4a3b32_1px,transparent_1px)] [background-size:20px_20px] -z-10" />
 
-          {/* Centered Column Wrapper for robust vertical scrolling */}
-          <div className="w-full max-w-xl mx-auto flex flex-col items-center min-h-full pb-36">
-            {/* Top discreet bar with date switcher without navbars */}
-            <div className="w-full flex items-center justify-between mb-3 sticky top-0 z-30 pt-2 pb-2 bg-background/95 backdrop-blur-md">
+          {/* (2026-07-13) Enforce webkit/standard blur over APK top inset; was unblurred */}
+          <div
+            style={{
+              paddingTop: 'max(12px, env(safe-area-inset-top, 12px))',
+              WebkitBackdropFilter: 'blur(20px)',
+              backdropFilter: 'blur(20px)',
+            }}
+            className="w-full sticky top-0 z-30 bg-background/85 backdrop-blur-xl border-b border-outline-variant/15 pb-3 px-4 md:px-8"
+          >
+            <div className="w-full max-w-xl mx-auto flex items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={() => closeDateOverlay()}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high/90 text-primary border border-outline-variant/30 text-[13px] font-medium shadow-sm hover:bg-surface-variant transition-colors active:scale-95"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high/90 text-primary border border-outline-variant/30 text-[13px] font-medium shadow-sm hover:bg-surface-variant transition-colors active:scale-95 shrink-0"
               >
                 <span className="material-symbols-outlined text-[18px]">arrow_back</span>
                 <span>Back to Timeline</span>
               </button>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 min-w-0">
                 <button
                   type="button"
                   onClick={handlePrevOverlayDate}
                   title="Previous Date"
-                  className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90"
+                  className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 shrink-0"
                 >
                   <span className="material-symbols-outlined text-[18px]">chevron_left</span>
                 </button>
-                <span className="text-[11px] uppercase font-bold tracking-widest text-secondary bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant/30">
+                <span className="text-[11px] uppercase font-bold tracking-widest text-secondary bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant/30 truncate">
                   {selectedDayFormatted}
                 </span>
                 <button
                   type="button"
                   onClick={handleNextOverlayDate}
                   title="Next Date"
-                  className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90"
+                  className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 shrink-0"
                 >
                   <span className="material-symbols-outlined text-[18px]">chevron_right</span>
                 </button>
@@ -1957,12 +1964,16 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   type="button"
                   onClick={() => closeDateOverlay()}
                   title="Close overlay"
-                  className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 ml-1"
+                  className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 ml-1 shrink-0"
                 >
                   <span className="material-symbols-outlined text-[18px]">close</span>
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* Centered Column Wrapper for robust vertical scrolling */}
+          <div className="w-full max-w-xl mx-auto px-4 md:px-8 pt-3 flex flex-col items-center min-h-full pb-36">
 
             {/* Date Content Card that animates horizontally */}
             <div
@@ -2054,22 +2065,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 auto_awesome
               </span>
             </div>
-            {/* (2026-07-13) Gray out unwritten date modal title; was always text-primary */}
+            {/* (2026-07-13) Remove icon left of modal title; was auto_awesome */}
             <h2
-              className={`font-['Playfair_Display',Georgia,serif] tracking-tight text-2xl md:text-3xl flex items-center justify-center gap-2.5 ${
+              className={`font-['Playfair_Display',Georgia,serif] tracking-tight text-2xl md:text-3xl text-center ${
                 primaryDateMemory ? 'text-primary font-semibold' : 'text-outline/70 font-normal italic'
               }`}
             >
-              {primaryDateMemory && (
-                <span
-                  className="material-symbols-outlined text-[28px] md:text-[32px] text-secondary shrink-0"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                  aria-hidden="true"
-                >
-                  auto_awesome
-                </span>
-              )}
-              {/* (2026-07-13) Capitalize modal header title; was raw title */}
               <span>{primaryDateMemory ? capitalizeFirstLetters(primaryDateMemory.title) || "Preserve Today's Chapter" : "Preserve Today's Chapter"}</span>
             </h2>
             {/* (2026-07-13) Gray out subtitle & pills when date is empty; was dark */}
@@ -2161,25 +2162,17 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 const overlayRestParas = overlayParas.slice(1);
                 return (
                   <>
+                    {/* (2026-07-13) Remove icon left of card title & size 2-line drop cap; was 30px */}
                     <header className="mb-4 relative z-10">
-                      <h3 className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-semibold text-primary tracking-tight leading-snug flex items-start gap-2">
-                        <span
-                          className="material-symbols-outlined text-[20px] text-secondary shrink-0 mt-0.5"
-                          style={{ fontVariationSettings: "'FILL' 1" }}
-                          aria-hidden="true"
-                        >
-                          auto_awesome
-                        </span>
-                        <span>
-                          {capitalizeFirstLetters(primaryDateMemory.letterHeading || primaryDateMemory.title)}
-                        </span>
+                      <h3 className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-semibold text-primary tracking-tight leading-snug">
+                        {capitalizeFirstLetters(primaryDateMemory.letterHeading || primaryDateMemory.title)}
                       </h3>
                       <div className="w-10 h-0.5 bg-secondary-container mt-2.5 rounded-full" />
                     </header>
 
                     <div id="heartfelt-note-view-container" className="relative z-10 text-on-surface-variant">
-                      <p className="font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[14px] sm:text-[15px] text-on-surface/95 leading-[1.7] text-left mb-4 whitespace-pre-line">
-                        <span className="float-left font-['Playfair_Display',Georgia,serif] text-[30px] leading-[0.82] font-semibold text-secondary pr-1.5 pt-1">
+                      <p className="font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[14px] sm:text-[15px] text-on-surface/95 leading-[1.65] text-left mb-4 whitespace-pre-line">
+                        <span className="float-left font-['Playfair_Display',Georgia,serif] text-[44px] sm:text-[48px] leading-[0.82] font-semibold text-secondary pr-2 pt-[3px]">
                           {overlayDropCap}
                         </span>
                         {overlayFirstRest}
