@@ -410,97 +410,90 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
               </p>
             </div>
           ) : (
-            // (2026-07-13) Envelope letter drawing with outer title and date; was card
+            // (2026-07-13) Envelope peek shows only big title; was body and salutation
             filteredLetters.map((letter) => (
-              <div key={letter.id} className="flex flex-col gap-1.5 mb-2">
+              <div key={letter.id} className="flex flex-col gap-1.5 mb-3">
                 {/* Outside the envelope drawing: date and small title */}
                 <div className="flex items-center justify-between px-2 pt-1 text-primary">
-                  <span className="font-['Playfair_Display',Georgia,serif] text-sm sm:text-base font-bold tracking-tight">
-                    {letter.title}
+                  <span className="font-['Playfair_Display',Georgia,serif] text-xs sm:text-sm font-semibold tracking-wide text-secondary uppercase">
+                    {letter.occasion || 'Love Letter'}
                   </span>
                   <span className="calendar-num-font text-[11px] sm:text-xs font-semibold text-secondary">
                     {formatStandardDate(letter.dateISO)}
                   </span>
                 </div>
 
-                {/* Real Envelope Drawing */}
-                <article className="relative bg-[#ebdcc9] rounded-2xl border border-[#d5c2ad] shadow-md overflow-hidden hover-lift transition-all">
+                {/* Real Kraft Envelope Drawing */}
+                <article className="relative bg-[#bfa07d] rounded-2xl border border-[#ab8a66] shadow-md overflow-hidden hover-lift transition-all">
                   {/* Top interior / open flap of envelope */}
-                  <div className="w-full h-8 bg-[#e0ceb9] relative overflow-hidden flex items-end justify-center">
-                    <div className="w-0 h-0 border-l-[150px] sm:border-l-[220px] border-l-transparent border-r-[150px] sm:border-r-[220px] border-r-transparent border-b-[24px] border-b-[#d5bf9f] opacity-70" />
+                  <div className="w-full h-12 bg-[#ab8c69] relative overflow-hidden flex items-start justify-center">
+                    <div className="w-0 h-0 border-l-[160px] sm:border-l-[260px] border-l-transparent border-r-[160px] sm:border-r-[260px] border-r-transparent border-t-[36px] border-t-[#967654] opacity-55" />
                   </div>
 
-                  {/* Letter Paper Peeking Out */}
+                  {/* Letter Paper Peeking Out - Title Only */}
                   <div
                     onClick={() => setReadingLetter(letter)}
-                    className="relative mx-3 sm:mx-4 -mt-3 mb-0 bg-[#fffefc] rounded-t-xl border-x border-t border-[#dfd4c5] p-4 sm:p-5 shadow-sm cursor-pointer hover:-translate-y-1 transition-transform z-10 group"
+                    className="relative mx-5 sm:mx-8 -mt-6 bg-[#fffdfa] rounded-t-xl border border-[#ded5c7] shadow-md px-5 py-6 sm:py-7 cursor-pointer hover:-translate-y-1.5 transition-transform z-10 flex flex-col items-center justify-center text-center group"
                   >
-                    <div className="w-10 h-0.5 bg-[#e4d8c8] mx-auto mb-2.5 rounded-full" />
-                    <p className="font-['Playfair_Display',Georgia,serif] text-sm sm:text-base text-primary/85 italic font-medium mb-1.5">
-                      {letter.salutation}
-                    </p>
-                    <p className="font-['Cormorant_Garamond',Georgia,serif] text-base sm:text-lg text-[#3b2d24] leading-relaxed whitespace-pre-line line-clamp-3">
-                      {letter.body}
-                    </p>
-                    <div className="mt-2.5 pt-2 flex items-center justify-between text-secondary border-t border-[#f0e6da]">
-                      <span className="text-xs italic font-sans group-hover:text-primary transition-colors flex items-center gap-1">
-                        <span>Unfold &amp; read letter</span>
-                        <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
-                      </span>
-                      <p className="font-['Playfair_Display',Georgia,serif] text-sm text-secondary italic">
-                        {letter.signOff}
-                      </p>
-                    </div>
+                    <div className="w-10 h-0.5 bg-[#e4d8c8] mx-auto mb-3 rounded-full" />
+                    <h2 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl font-bold text-primary group-hover:text-secondary transition-colors tracking-tight leading-snug">
+                      {letter.title}
+                    </h2>
                   </div>
 
-                  {/* Envelope Front Pocket */}
-                  <div className="relative z-20 bg-[#eddcc8] border-t-2 border-[#d6c1a8] rounded-b-2xl px-4 py-3 shadow-[0_-3px_10px_rgba(60,40,25,0.08)] flex items-center justify-between">
-                    <button
-                      type="button"
-                      onClick={() => setReadingLetter(letter)}
-                      className="flex items-center gap-2 hover:opacity-85 transition-opacity active:scale-95"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-[#822a36] text-[#fff6f0] flex items-center justify-center shadow-xs">
-                        <span className="material-symbols-outlined text-[13px]">favorite</span>
-                      </div>
-                      <span className="font-label-md text-xs uppercase tracking-wider text-primary font-bold">
-                        Read Full Letter
-                      </span>
-                    </button>
+                  {/* Envelope Front Pocket with V-notch */}
+                  <div className="relative -mt-4 z-20">
+                    <svg viewBox="0 0 100 24" preserveAspectRatio="none" className="w-full h-6 text-[#c4a17a] fill-current drop-shadow-[0_-3px_4px_rgba(50,30,10,0.14)] block">
+                      <path d="M 0,0 L 24,24 L 76,24 L 100,0 L 100,24 L 0,24 Z" />
+                    </svg>
+                    <div className="bg-[#c4a17a] px-4 py-3 rounded-b-2xl border-b border-x border-[#b38f68] flex items-center justify-between shadow-xs">
+                      <button
+                        type="button"
+                        onClick={() => setReadingLetter(letter)}
+                        className="flex items-center gap-2 hover:opacity-85 transition-opacity active:scale-95"
+                      >
+                        <div className="w-7 h-7 rounded-full bg-[#822a36] text-[#fff6f0] flex items-center justify-center shadow-xs ring-1 ring-[#9e3846]/40">
+                          <span className="material-symbols-outlined text-[14px]">favorite</span>
+                        </div>
+                        <span className="font-label-md text-xs uppercase tracking-wider text-[#3d2716] font-bold">
+                          Read Full Letter
+                        </span>
+                      </button>
 
-                    {!surpriseRevealMode && (
-                      <div className="flex items-center gap-2.5">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard?.writeText(
-                              `${letter.salutation}\n\n${letter.body}\n\n${letter.signOff}`
-                            );
-                            onToast('Digital love letter copied to clipboard!', 'info');
-                          }}
-                          className="w-7 h-7 rounded-full bg-[#dfccb6]/70 flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-95"
-                          title="Copy letter"
-                        >
-                          <span className="material-symbols-outlined text-[14px]">content_copy</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => openEditLetterModal(letter)}
-                          className="w-7 h-7 rounded-full bg-[#dfccb6]/70 flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-95"
-                          title="Edit letter"
-                        >
-                          <span className="material-symbols-outlined text-[14px]">edit</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleteLetterTargetId(letter.id)}
-                          className="w-7 h-7 rounded-full bg-[#dfccb6]/70 flex items-center justify-center text-error hover:bg-error/15 transition-colors active:scale-95"
-                          title="Delete letter"
-                        >
-                          <span className="material-symbols-outlined text-[14px]">delete</span>
-                        </button>
-                      </div>
-                    )}
+                      {!surpriseRevealMode && (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard?.writeText(
+                                `${letter.salutation}\n\n${letter.body}\n\n${letter.signOff}`
+                              );
+                              onToast('Digital love letter copied to clipboard!', 'info');
+                            }}
+                            className="w-7 h-7 rounded-full bg-[#ad8a64]/35 hover:bg-[#ad8a64]/60 text-[#3d2716] flex items-center justify-center transition-colors active:scale-95"
+                            title="Copy letter"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">content_copy</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openEditLetterModal(letter)}
+                            className="w-7 h-7 rounded-full bg-[#ad8a64]/35 hover:bg-[#ad8a64]/60 text-[#3d2716] flex items-center justify-center transition-colors active:scale-95"
+                            title="Edit letter"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">edit</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeleteLetterTargetId(letter.id)}
+                            className="w-7 h-7 rounded-full bg-[#ad8a64]/35 hover:bg-error/20 text-[#6d1b27] flex items-center justify-center transition-colors active:scale-95"
+                            title="Delete letter"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">delete</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </article>
               </div>
