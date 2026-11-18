@@ -105,6 +105,10 @@ export interface CoupleProfile {
   partner1Name: string; // JP
   partner2Name: string; // Zea
   relationshipStartDateISO: string;
+  // (2026-07-13) Add meeting, courting, & anniversary dates; was single start date
+  meetingDateISO?: string;
+  courtingDateISO?: string;
+  anniversaryDateISO?: string;
   chapterTitle: string;
   heroQuote: string;
   avatarUrl: string;

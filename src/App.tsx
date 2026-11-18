@@ -672,8 +672,11 @@ export const App: React.FC = () => {
               <span className="font-label-md text-label-md font-bold text-primary truncate">
                 {profile.partner1Name} &amp; {profile.partner2Name}
               </span>
+              {/* (2026-07-13) Show courting stage vs premature anniversary date */}
               <span className="text-[11px] text-on-surface-variant truncate">
-                Since {formatStandardDate(profile.relationshipStartDateISO)}
+                {profile.anniversaryDateISO
+                  ? `Since ${formatStandardDate(profile.anniversaryDateISO)}`
+                  : `Courting Since ${formatStandardDate(profile.courtingDateISO || '2025-11-07')}`}
               </span>
             </div>
           </div>

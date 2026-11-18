@@ -200,8 +200,11 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
               <h1 className="font-headline-sm text-sm sm:text-headline-sm text-primary font-serif leading-tight truncate">
                 {form.partner1Name} &amp; {form.partner2Name} • Keepsake Sanctuary
               </h1>
+              {/* (2026-07-13) Show courting stage in settings header; was hardcoded Sep 14 */}
               <span className="font-label-md text-[10px] uppercase tracking-wider text-secondary truncate block">
-                Since {formatStandardDate(form.relationshipStartDateISO)} • Settings &amp; Firestore Backups
+                {form.anniversaryDateISO
+                  ? `Since ${formatStandardDate(form.anniversaryDateISO)} • Settings & Firestore Backups`
+                  : `Courting Since Nov 7, 2025 • Settings & Firestore Backups`}
               </span>
             </div>
           </div>
@@ -400,39 +403,72 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* (2026-07-13) Separate meeting, courting, & anniversary; was single start date */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-1">
-                  Anniversary Start Date
+                  Meeting Date
                 </label>
                 <input
                   type="date"
-                  value={form.relationshipStartDateISO}
+                  value={form.meetingDateISO || '2025-09-14'}
                   onChange={(e) =>
-                    setForm({ ...form, relationshipStartDateISO: e.target.value })
+                    setForm({ ...form, meetingDateISO: e.target.value })
                   }
                   className="w-full px-3 py-2.5 rounded-lg bg-surface-container-low text-primary calendar-num-font text-body-sm border border-outline-variant/40 focus:outline-none"
                 />
               </div>
               <div>
                 <label className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-1">
-                  Stationery Theme
+                  Courting Date
                 </label>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setForm({ ...form, theme: form.theme === 'dark' ? 'light' : 'dark' })
+                <input
+                  type="date"
+                  value={form.courtingDateISO || '2025-11-07'}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      courtingDateISO: e.target.value,
+                      relationshipStartDateISO: e.target.value,
+                    })
                   }
-                  className="w-full px-3 py-2.5 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40 flex items-center justify-between"
-                >
-                  <span>
-                    {form.theme === 'dark' ? 'Midnight Espresso' : 'Warm Linen Paper'}
-                  </span>
-                  <span className="material-symbols-outlined text-[18px] text-secondary">
-                    {form.theme === 'dark' ? 'dark_mode' : 'light_mode'}
-                  </span>
-                </button>
+                  className="w-full px-3 py-2.5 rounded-lg bg-surface-container-low text-primary calendar-num-font text-body-sm border border-outline-variant/40 focus:outline-none"
+                />
               </div>
+              <div>
+                <label className="font-label-md text-label-md uppercase tracking-wider text-outline flex items-center justify-between mb-1">
+                  <span>Anniversary Date</span>
+                  <span className="text-[10px] text-secondary font-normal lowercase">optional (courting)</span>
+                </label>
+                <input
+                  type="date"
+                  value={form.anniversaryDateISO || ''}
+                  onChange={(e) =>
+                    setForm({ ...form, anniversaryDateISO: e.target.value })
+                  }
+                  className="w-full px-3 py-2.5 rounded-lg bg-surface-container-low text-primary calendar-num-font text-body-sm border border-outline-variant/40 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-1">
+                Stationery Theme
+              </label>
+              <button
+                type="button"
+                onClick={() =>
+                  setForm({ ...form, theme: form.theme === 'dark' ? 'light' : 'dark' })
+                }
+                className="w-full px-3 py-2.5 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40 flex items-center justify-between"
+              >
+                <span>
+                  {form.theme === 'dark' ? 'Midnight Espresso' : 'Warm Linen Paper'}
+                </span>
+                <span className="material-symbols-outlined text-[18px] text-secondary">
+                  {form.theme === 'dark' ? 'dark_mode' : 'light_mode'}
+                </span>
+              </button>
             </div>
 
             <div>

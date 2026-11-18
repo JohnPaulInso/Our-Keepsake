@@ -18,7 +18,11 @@ export const COUPLE_AVATAR_URL = couplePhotoUrl;
 export const DEFAULT_COUPLE_PROFILE: CoupleProfile = {
   partner1Name: 'JP',
   partner2Name: 'Zea',
-  relationshipStartDateISO: '2025-09-14',
+  // (2026-07-13) Set courting Nov 7, meeting Sep 14, anniversary blank; was Sep 14
+  relationshipStartDateISO: '2025-11-07',
+  meetingDateISO: '2025-09-14',
+  courtingDateISO: '2025-11-07',
+  anniversaryDateISO: '',
   chapterTitle: 'Chapter II • JP & Zea',
   // (2026-07-13) Update heroQuote to prayer quote; was world heart quote
   heroQuote: "You're an answered prayer, baby.",

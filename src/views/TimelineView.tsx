@@ -533,10 +533,21 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     })
   );
 
-  const daysTogether = useMemo(
-    () => calculateDaysTogether(profile.relationshipStartDateISO),
-    [profile.relationshipStartDateISO]
-  );
+  // (2026-07-13) Calculate courting vs anniversary days; was single start date
+  const daysCourting = useMemo(() => {
+    return calculateDaysTogether(profile.courtingDateISO || '2025-11-07');
+  }, [profile.courtingDateISO]);
+
+  const daysKnowing = useMemo(() => {
+    return calculateDaysTogether(profile.meetingDateISO || '2025-09-14');
+  }, [profile.meetingDateISO]);
+
+  const daysTogether = useMemo(() => {
+    if (profile.anniversaryDateISO) {
+      return calculateDaysTogether(profile.anniversaryDateISO);
+    }
+    return daysCourting;
+  }, [profile.anniversaryDateISO, daysCourting]);
 
   // (2026-07-13) Set only milestone to Nov 7, 2025 courted her; was Sept 14
   const pastMilestone = useMemo(() => {
@@ -766,9 +777,17 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             {profile.chapterTitle || 'Chapter II • Our Keepsake'}
           </span>
         </div>
+        {/* (2026-07-13) Display courting stage banner vs official anniversary */}
         <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight font-serif mb-1">
-          Together for {daysTogether} Days
+          {profile.anniversaryDateISO
+            ? `Together for ${daysTogether} Days`
+            : `Courting for ${daysCourting} Days`}
         </h1>
+        <div className="flex items-center gap-1.5 text-[11px] text-outline font-medium mb-1">
+          <span>Met Sept 14, 2025 ({daysKnowing} days)</span>
+          <span>•</span>
+          <span>Courting Since Nov 7, 2025</span>
+        </div>
         {/* (2026-07-13) Fallback to answered prayer quote; was unhandled heroQuote */}
         <p className="font-body-md text-body-md text-on-surface-variant max-w-[320px] italic font-serif">
           “{profile.heroQuote && !profile.heroQuote.includes('no heart for me like yours') ? profile.heroQuote : "You're an answered prayer, baby."}”

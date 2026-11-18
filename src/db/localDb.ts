@@ -278,6 +278,12 @@ class LocalDatabase {
         savedProfile.milestoneTag = 'Milestone';
         await idbSet('coupleProfile', savedProfile);
       }
+      // (2026-07-13) Set meeting Sep 14, courting Nov 7, blank anniversary; was Sep 14
+      savedProfile.meetingDateISO = '2025-09-14';
+      savedProfile.courtingDateISO = '2025-11-07';
+      savedProfile.anniversaryDateISO = '';
+      savedProfile.relationshipStartDateISO = '2025-11-07';
+      await idbSet('coupleProfile', savedProfile);
       memCache.coupleProfile = savedProfile;
     } else {
       await idbSet('coupleProfile', DEFAULT_COUPLE_PROFILE);
