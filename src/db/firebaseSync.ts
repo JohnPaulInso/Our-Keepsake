@@ -167,6 +167,10 @@ class FirebaseSyncManager {
 
       await DB.ready;
       await this.pullSnapshot();
+      // (2026-07-13) Auto-push local unpushed memories online on startup; was idle
+      if (this.db && this.status !== 'permission-denied' && this.status !== 'quota') {
+        this.schedulePush();
+      }
       // Sync local daily backups (including showcase archive) to Firestore daily_backups
       const localBackups = DB.getDailyBackups();
       for (const b of localBackups) {
@@ -257,6 +261,9 @@ class FirebaseSyncManager {
           await DB.restoreSnapshot(remote);
           this.isApplyingRemoteSnapshot = false;
         }
+      } else {
+        // (2026-07-13) Seed empty remote Firestore with local data; was no-op
+        await this.pushSnapshot();
       }
       this.status = 'cloud-live';
       this.notify();

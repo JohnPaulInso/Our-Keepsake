@@ -596,18 +596,33 @@ class LocalDatabase {
       memCache.coupleProfile = snapshot.coupleProfile;
       await idbSet('coupleProfile', snapshot.coupleProfile);
     }
+    // (2026-07-13) Merge remote with unpushed local memories vs hard overwrite
     if (Array.isArray(snapshot.memories)) {
-      memCache.memories = snapshot.memories;
-      await idbSet('memories', snapshot.memories);
-      saveLightweightMirror(snapshot.memories);
+      const existingLocal = memCache.memories || [];
+      const remoteIds = new Set(snapshot.memories.map((m) => m.id));
+      const localOnly = existingLocal.filter((m) => !remoteIds.has(m.id));
+      const merged = [...snapshot.memories, ...localOnly];
+      memCache.memories = merged;
+      await idbSet('memories', merged);
+      saveLightweightMirror(merged);
     }
+    // (2026-07-13) Merge remote with unpushed local notes vs hard overwrite
     if (Array.isArray(snapshot.secretYearNotes)) {
-      memCache.secretYearNotes = snapshot.secretYearNotes;
-      await idbSet('secretYearNotes', snapshot.secretYearNotes);
+      const existingLocalNotes = memCache.secretYearNotes || [];
+      const remoteNoteIds = new Set(snapshot.secretYearNotes.map((n) => n.id));
+      const localOnlyNotes = existingLocalNotes.filter((n) => !remoteNoteIds.has(n.id));
+      const mergedNotes = [...snapshot.secretYearNotes, ...localOnlyNotes];
+      memCache.secretYearNotes = mergedNotes;
+      await idbSet('secretYearNotes', mergedNotes);
     }
+    // (2026-07-13) Merge remote with unpushed local letters vs hard overwrite
     if (Array.isArray(snapshot.digitalLoveLetters)) {
-      memCache.digitalLoveLetters = snapshot.digitalLoveLetters;
-      await idbSet('digitalLoveLetters', snapshot.digitalLoveLetters);
+      const existingLocalLetters = memCache.digitalLoveLetters || [];
+      const remoteLetterIds = new Set(snapshot.digitalLoveLetters.map((l) => l.id));
+      const localOnlyLetters = existingLocalLetters.filter((l) => !remoteLetterIds.has(l.id));
+      const mergedLetters = [...snapshot.digitalLoveLetters, ...localOnlyLetters];
+      memCache.digitalLoveLetters = mergedLetters;
+      await idbSet('digitalLoveLetters', mergedLetters);
     }
     if (snapshot.timeCapsule) {
       memCache.timeCapsule = snapshot.timeCapsule;
