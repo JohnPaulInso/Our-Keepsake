@@ -40,6 +40,8 @@ export const App: React.FC = () => {
   const [editingMemory, setEditingMemory] = useState<KeepsakeMemory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [studioModalOpen, setStudioModalOpen] = useState(false);
+  // (2026-07-13) Track target year/month for Monthly Notepad; was always today
+  const [notepadTarget, setNotepadTarget] = useState<{ year: number; month: number } | null>(null);
   // (2026-07-13) Add startup PIN 7777 unlock state; was unguarded
   const [isPinUnlocked, setIsPinUnlocked] = useState<boolean>(() => {
     try {
@@ -1019,7 +1021,13 @@ export const App: React.FC = () => {
                 onReorderMemories={handleReorderMemories}
                 onOpenSecretNotesTab={() => switchTab('letters')}
                 onOpenProfileModal={() => navigate('/backup')}
-                onOpenMonthlyNotepad={() => switchTab('notepad')}
+                // (2026-07-13) Open notepad on active calendar month; was default month
+                onOpenMonthlyNotepad={(year?: number, month?: number) => {
+                  if (typeof year === 'number' && typeof month === 'number') {
+                    setNotepadTarget({ year, month });
+                  }
+                  switchTab('notepad');
+                }}
                 // (2026-07-13) Pass handleSaveMemory to TimelineView; was omitted
                 onSaveMemory={handleSaveMemory}
               />
@@ -1121,11 +1129,13 @@ export const App: React.FC = () => {
               />
             )}
 
-            {/* (2026-07-13) Pass live sync callback to MonthlyNotepadView; was omitted */}
+            {/* (2026-07-13) Pass initialYear & initialMonth to notepad; was omitted */}
             {activeTab === 'notepad' && (
               <MonthlyNotepadView
                 profile={profile}
                 memories={memories}
+                initialYear={notepadTarget?.year}
+                initialMonth={notepadTarget?.month}
                 onBackToTimeline={() => switchTab('timeline')}
                 onToast={addToast}
                 onUpdateMemoriesLive={handleUpdateMemoriesFromNotepad}

@@ -49,7 +49,8 @@ interface TimelineViewProps {
   onOpenProfileModal: () => void;
   // (2026-07-13) Add onSaveMemory prop for in-page date editing; was none
   onSaveMemory?: (memory: KeepsakeMemory, isDraft: boolean) => void;
-  onOpenMonthlyNotepad?: () => void;
+  // (2026-07-13) Pass active calendar year & month to notepad; was no args
+  onOpenMonthlyNotepad?: (year?: number, month?: number) => void;
 }
 
 // (2026-07-13) Format date with weekday for easy date identification; was plain
@@ -1201,8 +1202,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             >
               favorite
             </span>
-            {/* (2026-07-13) Plain clickable words without dropdown arrows; was with arrows */}
-            <div className="flex items-center gap-1">
+            {/* (2026-07-13) Tighten month-year gap; was gap-1 with px-1 padding */}
+            <div className="flex items-center gap-0">
               {/* Clickable Month Word */}
               <div className="relative inline-block">
                 <button
@@ -1211,7 +1212,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     setMonthPickerOpen((prev) => !prev);
                     setYearPickerOpen(false);
                   }}
-                  className="calendar-header-font text-base sm:text-[21px] font-semibold text-primary tracking-tight whitespace-nowrap hover:text-secondary transition-colors cursor-pointer rounded-lg px-1 py-0.5 hover:bg-surface-container-low active:scale-95"
+                  className="calendar-header-font text-base sm:text-[21px] font-semibold text-primary tracking-tight whitespace-nowrap hover:text-secondary transition-colors cursor-pointer rounded-lg px-0.5 py-0.5 hover:bg-surface-container-low active:scale-95"
                   title="Click to select month"
                 >
                   <span>{CALENDAR_MONTH_NAMES[calendarMonth]}</span>
@@ -1258,7 +1259,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     setYearPickerOpen((prev) => !prev);
                     setMonthPickerOpen(false);
                   }}
-                  className="calendar-header-font text-base sm:text-[21px] font-semibold text-primary tracking-tight whitespace-nowrap hover:text-secondary transition-colors cursor-pointer rounded-lg px-1 py-0.5 hover:bg-surface-container-low active:scale-95"
+                  // (2026-07-13) Tighten year button padding; was px-1
+                  className="calendar-header-font text-base sm:text-[21px] font-semibold text-primary tracking-tight whitespace-nowrap hover:text-secondary transition-colors cursor-pointer rounded-lg px-0.5 py-0.5 hover:bg-surface-container-low active:scale-95"
                   title="Click to select year"
                 >
                   <span>{calendarYear}</span>
@@ -1307,18 +1309,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             </button>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
-            <button
-              type="button"
-              onClick={() => setSelectedDay(null)}
-              className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container calendar-num-font text-[10px] font-semibold tracking-widest uppercase whitespace-nowrap"
-            >
-              <span>{selectedDay ? 'Show All' : 'Keepsake'}</span>
-            </button>
-            {/* (2026-07-13) Add notepad quick button in calendar header; was missing */}
+            {/* (2026-07-13) Remove Keepsake chip & open notepad on active month; was chip */}
             {onOpenMonthlyNotepad && (
               <button
                 type="button"
-                onClick={onOpenMonthlyNotepad}
+                onClick={() => onOpenMonthlyNotepad(calendarYear, calendarMonth)}
                 title="Open Monthly Notepad"
                 className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-low text-secondary hover:text-primary transition-colors active:scale-95"
               >
@@ -1448,7 +1443,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             {onOpenMonthlyNotepad && (
               <button
                 type="button"
-                onClick={onOpenMonthlyNotepad}
+                // (2026-07-13) Open Monthly Notepad on active calendar month; was default
+                onClick={() => onOpenMonthlyNotepad(calendarYear, calendarMonth)}
                 className="flex items-center gap-1 text-primary font-label-md text-label-md tracking-wider uppercase px-2.5 py-1 rounded-full bg-secondary-container/60 hover:bg-secondary-container transition-colors shadow-2xs active:scale-95"
                 title="Open Monthly Notepad"
               >
