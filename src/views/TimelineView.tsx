@@ -370,7 +370,8 @@ function getInitialCalendarState(): { year: number; month: number; selectedDay: 
   const defaultState = {
     year: now.getFullYear(),
     month: now.getMonth(),
-    selectedDay: now.getDate(),
+    // (2026-07-13) Default selectedDay to null; was now.getDate()
+    selectedDay: null,
   };
   try {
     const raw = localStorage.getItem('ok_calendar_view_state');
@@ -1087,7 +1088,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         if (dotFilter !== 'ALL' && !m.dotIndicators.includes(dotFilter)) {
           return false;
         }
-        if (selectedDay !== null) {
+        // (2026-07-13) Allow dotFilter and search across dates; was locked to day
+        if (selectedDay !== null && !q && dotFilter === 'ALL' && activeCategory === 'ALL') {
           const mStr = String(calendarMonth + 1).padStart(2, '0');
           const dStr = String(selectedDay).padStart(2, '0');
           const targetIso = `${calendarYear}-${mStr}-${dStr}`;
@@ -1406,17 +1408,23 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             value={sortBy}
             onChange={(val) => setSortBy(val as 'custom' | 'newest' | 'oldest')}
           />
-          {/* (2026-07-13) Add Rose Intimacy & Burgundy Milestone filter options; was 3 */}
+          {/* (2026-07-13) Support dotColor and clear selectedDay; was icon only */}
           <CustomDropdown
             options={[
               { value: 'ALL', label: 'All Dot Colors', icon: 'palette' },
-              { value: 'GOLD', label: 'Gold • Events', icon: 'event' },
-              { value: 'MOCHA', label: 'Mocha • Date', icon: 'calendar_month' },
-              { value: 'ROSE', label: 'Rose • Intimacy', icon: 'favorite' },
-              { value: 'BURGUNDY', label: 'Burgundy • Milestone', icon: 'stars' },
+              { value: 'GOLD', label: 'Gold • Events', dotColor: '#E5A93C' },
+              { value: 'MOCHA', label: 'Mocha • Date', dotColor: '#5C4033' },
+              { value: 'ROSE', label: 'Rose • Intimacy', dotColor: '#C96B78' },
+              { value: 'BURGUNDY', label: 'Burgundy • Milestone', dotColor: '#8B263E' },
             ]}
             value={dotFilter}
-            onChange={(val) => setDotFilter(val as 'ALL' | DotIndicator)}
+            onChange={(val) => {
+              const next = val as 'ALL' | DotIndicator;
+              setDotFilter(next);
+              if (next !== 'ALL') {
+                setSelectedDay(null);
+              }
+            }}
           />
         </div>
 
@@ -1425,6 +1433,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             <span>
               Showing {filteredMemories.length}{' '}
               {filteredMemories.length === 1 ? 'memory' : 'memories'}
+              {dotFilter !== 'ALL' && (
+                <span className="ml-1 text-primary font-semibold">
+                  • {dotFilter.toLowerCase()} dot
+                </span>
+              )}
               {matchingSecretNotes.length > 0
                 ? ` + ${matchingSecretNotes.length} secret year notes`
                 : ''}
@@ -1681,18 +1694,23 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             }
             const isSelected = selectedDay === cell.day;
             const hasDots = cell.dots.length > 0;
+            // (2026-07-13) Highlight filtered dot in cell and legend filter; was static
+            const matchesDotFilter = dotFilter === 'ALL' || cell.dots.includes(dotFilter);
             return (
               <button
                 key={idx}
                 type="button"
-                // (2026-07-13) Open date overlay on calendar click; was setSelectedDay
                 onClick={() => openDateOverlay(cell.day)}
                 className={`flex flex-col items-center justify-center h-12 sm:h-14 mx-auto w-10 sm:w-11 rounded-xl transition-all relative ${
                   isSelected
                     ? 'bg-primary text-on-primary font-bold shadow-sm active:scale-95'
-                    : hasDots
-                      ? 'bg-secondary-container/35 text-primary font-semibold hover:bg-secondary-container/60'
-                      : 'hover:bg-surface-container text-primary font-medium'
+                    : dotFilter !== 'ALL'
+                      ? matchesDotFilter && hasDots
+                        ? 'bg-secondary-container/70 text-primary font-bold ring-2 ring-primary/40 shadow-xs'
+                        : 'opacity-30 text-primary/60 font-normal hover:opacity-75'
+                      : hasDots
+                        ? 'bg-secondary-container/35 text-primary font-semibold hover:bg-secondary-container/60'
+                        : 'hover:bg-surface-container text-primary font-medium'
                 }`}
               >
                 <span className="leading-none text-[14px] sm:text-[15px]">{cell.day}</span>
@@ -1700,26 +1718,33 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   <div className="flex items-center gap-1 mt-1.5">
                     {cell.dots.includes('GOLD') && (
                       <span
-                        className="w-1.5 h-1.5 rounded-full"
+                        className={`rounded-full transition-all ${
+                          dotFilter === 'GOLD' ? 'w-2 h-2 ring-1 ring-primary/60 scale-125' : 'w-1.5 h-1.5'
+                        }`}
                         style={{ backgroundColor: '#E5A93C' }}
                       />
                     )}
                     {cell.dots.includes('MOCHA') && (
                       <span
-                        className="w-1.5 h-1.5 rounded-full"
+                        className={`rounded-full transition-all ${
+                          dotFilter === 'MOCHA' ? 'w-2 h-2 ring-1 ring-primary/60 scale-125' : 'w-1.5 h-1.5'
+                        }`}
                         style={{ backgroundColor: '#5C4033' }}
                       />
                     )}
                     {cell.dots.includes('ROSE') && (
                       <span
-                        className="w-1.5 h-1.5 rounded-full"
+                        className={`rounded-full transition-all ${
+                          dotFilter === 'ROSE' ? 'w-2 h-2 ring-1 ring-primary/60 scale-125' : 'w-1.5 h-1.5'
+                        }`}
                         style={{ backgroundColor: '#C96B78' }}
                       />
                     )}
-                    {/* (2026-07-13) Render BURGUNDY milestone dot in calendar cell; was none */}
                     {cell.dots.includes('BURGUNDY') && (
                       <span
-                        className="w-1.5 h-1.5 rounded-full"
+                        className={`rounded-full transition-all ${
+                          dotFilter === 'BURGUNDY' ? 'w-2 h-2 ring-1 ring-primary/60 scale-125' : 'w-1.5 h-1.5'
+                        }`}
                         style={{ backgroundColor: '#8B263E' }}
                       />
                     )}
@@ -1730,39 +1755,96 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           })}
         </div>
 
-        {/* (2026-07-13) Include Intimacy rose dot in calendar legend; was omitted */}
+        {/* Interactive Dot Filter Calendar Legend */}
         <div className="flex items-center justify-between pt-space-sm mt-space-sm border-t border-outline-variant/30">
-          <div className="flex flex-wrap items-center justify-between gap-y-1.5 gap-x-2.5 sm:gap-x-3 w-full pt-1">
-            <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-y-1.5 gap-x-2 w-full pt-1">
+            <button
+              type="button"
+              onClick={() => {
+                setDotFilter((p) => (p === 'GOLD' ? 'ALL' : 'GOLD'));
+                setSelectedDay(null);
+              }}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all active:scale-95 ${
+                dotFilter === 'GOLD'
+                  ? 'bg-[#E5A93C]/20 ring-1 ring-[#E5A93C] font-semibold'
+                  : 'hover:bg-surface-container-low'
+              }`}
+              title="Filter by Gold Events"
+            >
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#E5A93C' }} />
               <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
                 Events
               </span>
-            </div>
-            <div className="flex items-center gap-1.5">
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDotFilter((p) => (p === 'MOCHA' ? 'ALL' : 'MOCHA'));
+                setSelectedDay(null);
+              }}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all active:scale-95 ${
+                dotFilter === 'MOCHA'
+                  ? 'bg-[#5C4033]/20 ring-1 ring-[#5C4033] font-semibold'
+                  : 'hover:bg-surface-container-low'
+              }`}
+              title="Filter by Mocha Date"
+            >
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#5C4033' }} />
               <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
                 Date
               </span>
-            </div>
-            <div className="flex items-center gap-1.5">
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDotFilter((p) => (p === 'ROSE' ? 'ALL' : 'ROSE'));
+                setSelectedDay(null);
+              }}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all active:scale-95 ${
+                dotFilter === 'ROSE'
+                  ? 'bg-[#C96B78]/20 ring-1 ring-[#C96B78] font-semibold'
+                  : 'hover:bg-surface-container-low'
+              }`}
+              title="Filter by Rose Intimacy"
+            >
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#C96B78' }} />
               <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
                 Intimacy
               </span>
-            </div>
-            <div className="flex items-center gap-1.5">
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDotFilter((p) => (p === 'BURGUNDY' ? 'ALL' : 'BURGUNDY'));
+                setSelectedDay(null);
+              }}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all active:scale-95 ${
+                dotFilter === 'BURGUNDY'
+                  ? 'bg-[#8B263E]/20 ring-1 ring-[#8B263E] font-semibold'
+                  : 'hover:bg-surface-container-low'
+              }`}
+              title="Filter by Burgundy Milestone"
+            >
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#8B263E' }} />
               <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
                 Milestone
               </span>
-            </div>
-            <div className="flex items-center gap-1.5">
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedDay(null)}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all active:scale-95 ${
+                selectedDay !== null
+                  ? 'bg-primary/15 ring-1 ring-primary font-semibold'
+                  : 'hover:bg-surface-container-low'
+              }`}
+              title={selectedDay !== null ? 'Click to clear selected day' : 'Selected day indicator'}
+            >
               <span className="w-2 h-2 rounded-full bg-primary" />
               <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
                 Selected
               </span>
-            </div>
+            </button>
           </div>
         </div>
       </section>
@@ -1998,11 +2080,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         <button
           type="button"
           onClick={() => {
+            // (2026-07-13) Reset dotFilter on All Dates click; was category only
             setSelectedDay(null);
             setActiveCategory('ALL');
+            setDotFilter('ALL');
           }}
           className={`px-space-md py-1.5 rounded-full font-label-md text-label-md uppercase tracking-wider shadow-sm flex-shrink-0 flex items-center gap-1 transition-colors ${
-            selectedDay === null && activeCategory === 'ALL'
+            selectedDay === null && activeCategory === 'ALL' && dotFilter === 'ALL'
               ? 'bg-primary text-on-primary'
               : 'bg-surface-container-high text-on-surface hover:bg-surface-variant'
           }`}

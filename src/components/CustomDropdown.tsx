@@ -5,6 +5,8 @@ export interface DropdownOption {
   value: string;
   label: string;
   icon?: string;
+  // (2026-07-13) Add dotColor support in dropdown; was icon only
+  dotColor?: string;
 }
 
 interface CustomDropdownProps {
@@ -50,11 +52,16 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
         className="w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-surface-container-low text-primary border border-outline-variant/40 shadow-sm active:scale-[0.99] transition-all text-left"
       >
         <div className="flex items-center gap-2 min-w-0">
-          {selectedOption?.icon && (
+          {selectedOption?.dotColor ? (
+            <span
+              className="w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs"
+              style={{ backgroundColor: selectedOption.dotColor }}
+            />
+          ) : selectedOption?.icon ? (
             <span className="material-symbols-outlined text-[17px] text-secondary shrink-0">
               {selectedOption.icon}
             </span>
-          )}
+          ) : null}
           <span className="font-label-md text-label-md font-semibold text-primary truncate-single">
             {selectedOption?.label || 'Select'}
           </span>
@@ -83,11 +90,16 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  {opt.icon && (
+                  {opt.dotColor ? (
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs"
+                      style={{ backgroundColor: opt.dotColor }}
+                    />
+                  ) : opt.icon ? (
                     <span className="material-symbols-outlined text-[16px] text-secondary shrink-0">
                       {opt.icon}
                     </span>
-                  )}
+                  ) : null}
                   <span className="font-body-sm text-body-sm truncate-single">{opt.label}</span>
                 </div>
                 {isSelected && (
