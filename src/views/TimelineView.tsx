@@ -321,6 +321,13 @@ const SortableMemoryCard: React.FC<SortableMemoryCardProps> = ({
   );
 };
 
+// (2026-07-13) Month names and years for clickable calendar header; was none
+const CALENDAR_MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+const CALENDAR_YEARS = [2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030];
+
 export const TimelineView: React.FC<TimelineViewProps> = ({
   profile,
   memories,
@@ -342,6 +349,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   >('ALL');
   const [dotFilter, setDotFilter] = useState<'ALL' | DotIndicator>('ALL');
   const [sortBy, setSortBy] = useState<'custom' | 'newest' | 'oldest'>('custom');
+  // (2026-07-13) Add month and year popover picker states; was non-interactive text
+  const [monthPickerOpen, setMonthPickerOpen] = useState(false);
+  const [yearPickerOpen, setYearPickerOpen] = useState(false);
   // (2026-07-13) Default calendar to current month and date; was fixed Oct 2026
   const [calendarYear, setCalendarYear] = useState<number>(() => new Date().getFullYear());
   const [calendarMonth, setCalendarMonth] = useState<number>(() => new Date().getMonth());
@@ -1018,9 +1028,104 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             >
               favorite
             </span>
-            <span className="calendar-header-font text-base sm:text-[21px] font-semibold text-primary tracking-tight whitespace-nowrap">
-              {monthLabel}
-            </span>
+            {/* (2026-07-13) Clickable month & year words with popovers; was static text */}
+            <div className="flex items-center gap-1">
+              {/* Clickable Month Word */}
+              <div className="relative inline-block">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMonthPickerOpen((prev) => !prev);
+                    setYearPickerOpen(false);
+                  }}
+                  className="calendar-header-font text-base sm:text-[21px] font-semibold text-primary tracking-tight whitespace-nowrap hover:text-secondary transition-colors inline-flex items-center gap-0.5 cursor-pointer rounded-lg px-1 py-0.5 hover:bg-surface-container-low active:scale-95"
+                  title="Click to select month"
+                >
+                  <span>{CALENDAR_MONTH_NAMES[calendarMonth]}</span>
+                  <span className="material-symbols-outlined text-[13px] text-secondary/60">arrow_drop_down</span>
+                </button>
+
+                {monthPickerOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-30"
+                      onClick={() => setMonthPickerOpen(false)}
+                    />
+                    <div className="absolute top-full left-0 mt-1 z-40 bg-surface-container-lowest border border-outline-variant/40 rounded-2xl shadow-xl p-2.5 w-56 grid grid-cols-3 gap-1.5 animate-fadeIn">
+                      {CALENDAR_MONTH_NAMES.map((name, idx) => {
+                        const isCurr = idx === calendarMonth;
+                        return (
+                          <button
+                            key={name}
+                            type="button"
+                            onClick={() => {
+                              setCalendarMonth(idx);
+                              setSelectedDay(null);
+                              setMonthPickerOpen(false);
+                            }}
+                            className={`py-1.5 px-2 rounded-xl text-xs font-serif font-medium transition-all ${
+                              isCurr
+                                ? 'bg-primary text-on-primary font-bold shadow-xs'
+                                : 'hover:bg-surface-container text-primary'
+                            }`}
+                          >
+                            {name.slice(0, 3)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Clickable Year Word */}
+              <div className="relative inline-block">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setYearPickerOpen((prev) => !prev);
+                    setMonthPickerOpen(false);
+                  }}
+                  className="calendar-header-font text-base sm:text-[21px] font-semibold text-primary tracking-tight whitespace-nowrap hover:text-secondary transition-colors inline-flex items-center gap-0.5 cursor-pointer rounded-lg px-1 py-0.5 hover:bg-surface-container-low active:scale-95"
+                  title="Click to select year"
+                >
+                  <span>{calendarYear}</span>
+                  <span className="material-symbols-outlined text-[13px] text-secondary/60">arrow_drop_down</span>
+                </button>
+
+                {yearPickerOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-30"
+                      onClick={() => setYearPickerOpen(false)}
+                    />
+                    <div className="absolute top-full left-0 mt-1 z-40 bg-surface-container-lowest border border-outline-variant/40 rounded-2xl shadow-xl p-2.5 w-44 grid grid-cols-2 gap-1.5 animate-fadeIn">
+                      {CALENDAR_YEARS.map((y) => {
+                        const isCurr = y === calendarYear;
+                        return (
+                          <button
+                            key={y}
+                            type="button"
+                            onClick={() => {
+                              setCalendarYear(y);
+                              setSelectedDay(null);
+                              setYearPickerOpen(false);
+                            }}
+                            className={`py-1.5 px-2 rounded-xl text-xs font-serif font-medium transition-all ${
+                              isCurr
+                                ? 'bg-primary text-on-primary font-bold shadow-xs'
+                                : 'hover:bg-surface-container text-primary'
+                            }`}
+                          >
+                            {y}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
             <button
               type="button"
               onClick={handleNextMonth}
