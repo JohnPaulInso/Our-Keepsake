@@ -386,38 +386,33 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
         </button>
       </div>
 
-      {/* Main Editorial Letter Parchment Card */}
-      <article className="relative bg-surface-container-lowest rounded-xl shadow-md p-space-md sm:p-space-lg mb-space-lg overflow-hidden border border-outline-variant/25">
-        <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-tertiary-fixed-dim/20 to-transparent pointer-events-none" />
-        {/* (2026-07-13) Remove letter heading label; was A Letter Written For Zea */}
-        <header className="mb-space-md">
-          {/* (2026-07-13) Add big memory icon before story heading; was plain title */}
-          <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight leading-snug font-serif flex items-center gap-2.5">
+      {/* (2026-07-13) Refine parchment card typography & proportions; was oversized */}
+      <article className="relative bg-surface-container-lowest rounded-2xl shadow-sm p-5 sm:p-6 mb-space-lg overflow-hidden border border-outline-variant/30">
+        <header className="mb-4">
+          <h1 className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-semibold text-primary tracking-tight leading-snug flex items-start gap-2">
             <span
-              className="material-symbols-outlined text-[28px] text-secondary shrink-0"
+              className="material-symbols-outlined text-[20px] text-secondary shrink-0 mt-0.5"
               style={{ fontVariationSettings: "'FILL' 1" }}
               aria-hidden="true"
             >
               auto_awesome
             </span>
-            {/* (2026-07-13) Capitalize letterHeading/title; was raw letterHeading */}
             <span>{capitalizeFirstLetters(memory.letterHeading || memory.title)}</span>
           </h1>
-          <div className="w-12 h-0.5 bg-secondary-container mt-3 rounded-full" />
+          <div className="w-10 h-0.5 bg-secondary-container mt-2.5 rounded-full" />
         </header>
 
         <div className="relative z-10 text-on-surface-variant">
-          {/* (2026-07-13) Support whitespace-pre-line to preserve linebreaks; was collapse */}
-          <p className="font-body-lg text-body-lg text-primary leading-relaxed text-justify mb-space-md whitespace-pre-line">
-            <span className="float-left font-display-lg-mobile text-display-lg-mobile leading-none font-normal text-secondary pr-1.5 pt-1 font-serif">
+          <p className="font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[14px] sm:text-[15px] text-on-surface/95 leading-[1.7] text-left mb-4 whitespace-pre-line">
+            <span className="float-left font-['Playfair_Display',Georgia,serif] text-[30px] leading-[0.82] font-semibold text-secondary pr-1.5 pt-1">
               {dropCapChar}
             </span>
             {firstParaRest}
           </p>
 
           {memory.quoteHighlight && (
-            <div className="p-space-sm bg-surface-container-low/70 rounded-xl my-space-md border border-outline-variant/25">
-              <p className="font-italic-quote text-italic-quote text-secondary text-center italic px-2 font-serif">
+            <div className="px-4 py-3 bg-surface-container-low/65 rounded-xl my-4 border border-outline-variant/25">
+              <p className="font-['Cormorant_Garamond',Georgia,serif] text-[15px] sm:text-base text-secondary text-center italic leading-relaxed">
                 “{memory.quoteHighlight}”
               </p>
             </div>
@@ -426,45 +421,43 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
           {remainingParas.map((para, i) => (
             <p
               key={i}
-              className="font-body-md text-body-md text-on-surface-variant leading-relaxed mb-space-sm whitespace-pre-line"
+              className="font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[14px] sm:text-[15px] text-on-surface/90 leading-[1.7] text-left mb-3 whitespace-pre-line"
             >
               {para}
             </p>
           ))}
 
-          {/* Handwritten Sign-off */}
-          <div className="mt-space-md pt-space-sm flex flex-col items-end">
-            <span className="font-headline-sm text-headline-sm text-secondary italic font-serif">
+          {/* Handwritten Sign-off with nested sleeping capybara watermark */}
+          <div className="relative mt-5 pt-3 flex flex-col items-end">
+            <div className="absolute -bottom-2 -right-1 w-28 h-16 opacity-[0.06] pointer-events-none select-none flex items-center justify-center">
+              <svg className="w-full h-full fill-primary" viewBox="0 0 120 75">
+                <path d="M15,45 C20,38 32,32 50,33 C68,34 82,25 92,25 C102,25 106,30 110,38 C113,44 112,52 108,58 C102,65 92,68 78,68 C55,68 35,66 22,64 C14,62 10,54 15,45 Z" />
+                <ellipse cx="98" cy="24" rx="4" ry="7" transform="rotate(-15 98 24)" />
+                <path
+                  d="M102,34 C104,34 106,36 104,38"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M88,32 Q93,35 97,32"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeWidth="2"
+                />
+                <circle className="fill-tertiary-fixed-dim" cx="80" cy="22" r="5" />
+                <path d="M80,17 Q82,14 84,15" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              </svg>
+            </div>
+            <span className="relative z-10 font-['Playfair_Display',Georgia,serif] text-base text-secondary italic">
               Yours always,
             </span>
-            <span className="font-label-md text-label-md uppercase tracking-wider text-outline mt-0.5">
+            <span className="relative z-10 font-['Plus_Jakarta_Sans',sans-serif] text-[10px] font-semibold uppercase tracking-[0.14em] text-outline mt-0.5">
               {memory.signOffAuthor || `${profile.partner1Name} • St. 14`}
             </span>
           </div>
-        </div>
-
-        {/* Watermark: Sleeping Capybara Lithograph Illustration at Bottom Right */}
-        <div className="absolute bottom-1 right-2 w-32 h-20 opacity-[0.07] pointer-events-none select-none flex items-center justify-center">
-          <svg className="w-full h-full fill-primary" viewBox="0 0 120 75">
-            <path d="M15,45 C20,38 32,32 50,33 C68,34 82,25 92,25 C102,25 106,30 110,38 C113,44 112,52 108,58 C102,65 92,68 78,68 C55,68 35,66 22,64 C14,62 10,54 15,45 Z" />
-            <ellipse cx="98" cy="24" rx="4" ry="7" transform="rotate(-15 98 24)" />
-            <path
-              d="M102,34 C104,34 106,36 104,38"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeWidth="2"
-            />
-            <path
-              d="M88,32 Q93,35 97,32"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeWidth="2"
-            />
-            <circle className="fill-tertiary-fixed-dim" cx="80" cy="22" r="5" />
-            <path d="M80,17 Q82,14 84,15" fill="none" stroke="currentColor" strokeWidth="1.5" />
-          </svg>
         </div>
       </article>
 

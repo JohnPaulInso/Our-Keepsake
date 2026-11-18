@@ -2141,11 +2141,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             </div>
           </div>
 
-          {/* (2026-07-13) Render unified Story letter parchment card for saved dates; was plain form card */}
+          {/* (2026-07-13) Refine parchment letter card typography; was oversized */}
           <article
-            className={`w-full max-w-xl rounded-xl p-space-md sm:p-space-lg shadow-md relative overflow-hidden flex flex-col border mb-8 ${
+            className={`w-full max-w-xl rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden flex flex-col border mb-8 ${
               primaryDateMemory
-                ? 'bg-surface-container-lowest border-outline-variant/25'
+                ? 'bg-surface-container-lowest border-outline-variant/30'
                 : 'bg-surface-container-low/70 border-outline-variant/25 font-[\'Plus_Jakarta_Sans\',sans-serif]'
             }`}
           >
@@ -2161,11 +2161,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 const overlayRestParas = overlayParas.slice(1);
                 return (
                   <>
-                    <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-tertiary-fixed-dim/20 to-transparent pointer-events-none" />
-                    <header className="mb-space-md relative z-10">
-                      <h3 className="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight leading-snug font-serif flex items-center gap-2.5">
+                    <header className="mb-4 relative z-10">
+                      <h3 className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-semibold text-primary tracking-tight leading-snug flex items-start gap-2">
                         <span
-                          className="material-symbols-outlined text-[28px] text-secondary shrink-0"
+                          className="material-symbols-outlined text-[20px] text-secondary shrink-0 mt-0.5"
                           style={{ fontVariationSettings: "'FILL' 1" }}
                           aria-hidden="true"
                         >
@@ -2175,20 +2174,20 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                           {capitalizeFirstLetters(primaryDateMemory.letterHeading || primaryDateMemory.title)}
                         </span>
                       </h3>
-                      <div className="w-12 h-0.5 bg-secondary-container mt-3 rounded-full" />
+                      <div className="w-10 h-0.5 bg-secondary-container mt-2.5 rounded-full" />
                     </header>
 
                     <div id="heartfelt-note-view-container" className="relative z-10 text-on-surface-variant">
-                      <p className="font-body-lg text-body-lg text-primary leading-relaxed text-justify mb-space-md whitespace-pre-line">
-                        <span className="float-left font-display-lg-mobile text-display-lg-mobile leading-none font-normal text-secondary pr-1.5 pt-1 font-serif">
+                      <p className="font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[14px] sm:text-[15px] text-on-surface/95 leading-[1.7] text-left mb-4 whitespace-pre-line">
+                        <span className="float-left font-['Playfair_Display',Georgia,serif] text-[30px] leading-[0.82] font-semibold text-secondary pr-1.5 pt-1">
                           {overlayDropCap}
                         </span>
                         {overlayFirstRest}
                       </p>
 
                       {primaryDateMemory.quoteHighlight && (
-                        <div className="p-space-sm bg-surface-container-low/70 rounded-xl my-space-md border border-outline-variant/25">
-                          <p className="font-italic-quote text-italic-quote text-secondary text-center italic px-2 font-serif">
+                        <div className="px-4 py-3 bg-surface-container-low/65 rounded-xl my-4 border border-outline-variant/25">
+                          <p className="font-['Cormorant_Garamond',Georgia,serif] text-[15px] sm:text-base text-secondary text-center italic leading-relaxed">
                             “{primaryDateMemory.quoteHighlight}”
                           </p>
                         </div>
@@ -2197,44 +2196,42 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                       {overlayRestParas.map((para, i) => (
                         <p
                           key={i}
-                          className="font-body-md text-body-md text-on-surface-variant leading-relaxed mb-space-sm whitespace-pre-line"
+                          className="font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[14px] sm:text-[15px] text-on-surface/90 leading-[1.7] text-left mb-3 whitespace-pre-line"
                         >
                           {para}
                         </p>
                       ))}
 
-                      <div className="mt-space-md pt-space-sm flex flex-col items-end">
-                        <span className="font-headline-sm text-headline-sm text-secondary italic font-serif">
+                      <div className="relative mt-5 pt-3 flex flex-col items-end">
+                        <div className="absolute -bottom-2 -right-1 w-28 h-16 opacity-[0.06] pointer-events-none select-none flex items-center justify-center">
+                          <svg className="w-full h-full fill-primary" viewBox="0 0 120 75">
+                            <path d="M15,45 C20,38 32,32 50,33 C68,34 82,25 92,25 C102,25 106,30 110,38 C113,44 112,52 108,58 C102,65 92,68 78,68 C55,68 35,66 22,64 C14,62 10,54 15,45 Z" />
+                            <ellipse cx="98" cy="24" rx="4" ry="7" transform="rotate(-15 98 24)" />
+                            <path
+                              d="M102,34 C104,34 106,36 104,38"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeLinecap="round"
+                              strokeWidth="2"
+                            />
+                            <path
+                              d="M88,32 Q93,35 97,32"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeLinecap="round"
+                              strokeWidth="2"
+                            />
+                            <circle className="fill-tertiary-fixed-dim" cx="80" cy="22" r="5" />
+                            <path d="M80,17 Q82,14 84,15" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                          </svg>
+                        </div>
+                        <span className="relative z-10 font-['Playfair_Display',Georgia,serif] text-base text-secondary italic">
                           Yours always,
                         </span>
-                        <span className="font-label-md text-label-md uppercase tracking-wider text-outline mt-0.5">
+                        <span className="relative z-10 font-['Plus_Jakarta_Sans',sans-serif] text-[10px] font-semibold uppercase tracking-[0.14em] text-outline mt-0.5">
                           {primaryDateMemory.signOffAuthor || `${profile.partner1Name} • St. ${primaryDateMemory.volumeNumber || 1}`}
                         </span>
                       </div>
-                    </div>
-
-                    {/* Sleeping Capybara Lithograph Watermark */}
-                    <div className="absolute bottom-1 right-2 w-32 h-20 opacity-[0.07] pointer-events-none select-none flex items-center justify-center">
-                      <svg className="w-full h-full fill-primary" viewBox="0 0 120 75">
-                        <path d="M15,45 C20,38 32,32 50,33 C68,34 82,25 92,25 C102,25 106,30 110,38 C113,44 112,52 108,58 C102,65 92,68 78,68 C55,68 35,66 22,64 C14,62 10,54 15,45 Z" />
-                        <ellipse cx="98" cy="24" rx="4" ry="7" transform="rotate(-15 98 24)" />
-                        <path
-                          d="M102,34 C104,34 106,36 104,38"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeWidth="2"
-                        />
-                        <path
-                          d="M88,32 Q93,35 97,32"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeWidth="2"
-                        />
-                        <circle className="fill-tertiary-fixed-dim" cx="80" cy="22" r="5" />
-                        <path d="M80,17 Q82,14 84,15" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                      </svg>
                     </div>
                   </>
                 );
