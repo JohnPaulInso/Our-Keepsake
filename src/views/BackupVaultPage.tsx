@@ -982,7 +982,8 @@ export const BackupVaultPage: React.FC<BackupVaultPageProps> = ({
                     <p className="font-body-sm text-body-sm text-primary italic font-serif">
                       {letter.salutation}
                     </p>
-                    <p className="font-body-sm text-body-sm text-on-surface whitespace-pre-line font-serif">
+                    {/* (2026-07-13) Clamp backup preview body; was unclamped full text */}
+                    <p className="font-body-sm text-body-sm text-on-surface whitespace-pre-line font-serif line-clamp-3">
                       {letter.body}
                     </p>
                     <p className="font-body-sm text-body-sm text-secondary italic text-right font-serif">

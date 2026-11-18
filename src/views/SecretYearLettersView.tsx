@@ -443,11 +443,16 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                 <p className="font-headline-sm text-body-lg text-primary italic font-serif mb-2.5">
                   {letter.salutation}
                 </p>
-                <p className="font-body-md text-body-md text-on-surface leading-relaxed whitespace-pre-line font-serif">
+                {/* (2026-07-13) Clamp letter body preview to 4 lines; was unclamped */}
+                <p className="font-body-md text-body-md text-on-surface leading-relaxed whitespace-pre-line font-serif line-clamp-4">
                   {letter.body}
                 </p>
-                <div className="mt-4 pt-2 flex flex-col items-end text-right">
-                  <p className="font-headline-sm text-body-md text-secondary italic font-serif whitespace-pre-line">
+                <div className="mt-3 pt-2 flex items-center justify-between text-secondary border-t border-outline-variant/20">
+                  <span className="text-xs italic font-sans hover:text-primary transition-colors flex items-center gap-1">
+                    <span>Read full letter</span>
+                    <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                  </span>
+                  <p className="font-headline-sm text-body-md text-secondary italic font-serif">
                     {letter.signOff}
                   </p>
                 </div>
