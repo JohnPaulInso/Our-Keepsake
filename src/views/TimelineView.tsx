@@ -451,18 +451,25 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const [overlayEditMemory, setOverlayEditMemory] = useState<KeepsakeMemory | null>(null);
   const [overlayComposerDirty, setOverlayComposerDirty] = useState(false);
   const [overlayUnsavedConfirmOpen, setOverlayUnsavedConfirmOpen] = useState(false);
+  // (2026-07-13) Auto-open date gallery on photo edit intent; was manual only
+  const [stackedComposerAutoOpenGallery, setStackedComposerAutoOpenGallery] = useState(false);
   // (2026-07-13) Guard ghost-click close & expose header Save ref; was unguarded
   const stackedComposerOpenedAtRef = useRef<number>(0);
   const stackedComposerSubmitRef = useRef<(() => void) | null>(null);
 
-  const openStackedComposerForMemory = (mem: KeepsakeMemory) => {
+  const openStackedComposerForMemory = (mem: KeepsakeMemory, autoOpenGallery = false) => {
     stackedComposerOpenedAtRef.current = Date.now();
+    setStackedComposerAutoOpenGallery(autoOpenGallery);
     setOverlayComposerDirty(false);
     setOverlayUnsavedConfirmOpen(false);
     setOverlayEditMemory(mem);
   };
 
-  const openStackedComposerForCurrentDate = () => {
+  const openStackedComposerWithGallery = (mem: KeepsakeMemory) => {
+    openStackedComposerForMemory(mem, true);
+  };
+
+  const openStackedComposerForCurrentDate = (autoOpenGallery = false) => {
     const mStr = String(calendarMonth + 1).padStart(2, '0');
     const dStr = String(selectedDay || 1).padStart(2, '0');
     const targetIso = `${calendarYear}-${mStr}-${dStr}`;
@@ -493,7 +500,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       sortOrder: 0,
       updatedAt: Date.now(),
     };
-    openStackedComposerForMemory(memoryToEdit);
+    openStackedComposerForMemory(memoryToEdit, autoOpenGallery);
   };
 
   const requestCloseStackedComposer = () => {
@@ -2332,6 +2339,16 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   >
                     <span className="material-symbols-outlined text-[18px]">link</span>
                   </button>
+                  {/* (2026-07-13) Add Pictures button to open date gallery; was none */}
+                  <button
+                    type="button"
+                    onClick={() => openStackedComposerWithGallery(primaryDateMemory)}
+                    className="px-3 py-2 rounded-full bg-surface-container-low text-primary hover:bg-surface-container font-label-md text-xs uppercase tracking-wider flex items-center gap-1.5 border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
+                    title="Add pictures from gallery on this date"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">photo_library</span>
+                    <span className="hidden sm:inline">Add Pictures</span>
+                  </button>
                   <button
                     type="button"
                     // (2026-07-13) Open edit composer modal on top without closing overlay; was closeDateOverlay
@@ -2587,7 +2604,16 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   </div>
                 </div>
 
-                <div className="mt-7 pt-4 border-t border-outline-variant/20 flex items-center justify-end w-full">
+                <div className="mt-7 pt-4 border-t border-outline-variant/20 flex flex-wrap items-center justify-end gap-2 w-full">
+                  {/* (2026-07-13) Add Pictures button for empty date; was write button only */}
+                  <button
+                    type="button"
+                    onClick={() => openStackedComposerForCurrentDate(true)}
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-surface-container-high text-primary hover:bg-surface-variant font-['Plus_Jakarta_Sans',sans-serif] text-xs uppercase tracking-wider font-semibold border border-outline-variant/30 transition-all active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-[17px]">photo_library</span>
+                    <span>Add Pictures</span>
+                  </button>
                   <button
                     type="button"
                     // (2026-07-13) Open stacked composer modal on top of empty date; was closing overlay
@@ -2709,12 +2735,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             </div>
 
             <div className="pt-2">
+              {/* (2026-07-13) Pass initialOpenGallery to stacked composer; was absent */}
               <ComposerView
                 key={`stacked-${overlayEditMemory.id}-${overlayEditMemory.dateISO}`}
                 profile={profile}
                 editingMemory={overlayEditMemory}
                 existingMemories={memories}
                 totalMemoriesCount={memories.length}
+                initialOpenGallery={stackedComposerAutoOpenGallery}
                 submitRef={stackedComposerSubmitRef}
                 onSaveMemory={(savedMemory, isDraft) => {
                   onSaveMemory?.(savedMemory, isDraft, true);

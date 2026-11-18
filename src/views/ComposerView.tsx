@@ -14,6 +14,8 @@ import {
 import { capitalizeFirstLetters, detectAutoDotIndicators, formatDuration, formatStandardDate, getChapterNumber, getTodayISO } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 import { ImageCropperModal } from '../components/ImageCropperModal';
+// (2026-07-13) Add DateGalleryPickerModal for date-scoped photo picking; was none
+import { DateGalleryPickerModal } from '../components/DateGalleryPickerModal';
 
 interface ComposerViewProps {
   profile: CoupleProfile;
@@ -26,6 +28,7 @@ interface ComposerViewProps {
   onDirtyChange?: (isDirty: boolean) => void;
   existingMemories?: KeepsakeMemory[];
   submitRef?: React.MutableRefObject<(() => void) | null>;
+  initialOpenGallery?: boolean;
 }
 
 const DEFAULT_VIBE_TAGS = [
@@ -54,6 +57,43 @@ const DEFAULT_POLAROIDS: PolaroidPhoto[] = [
   },
 ];
 
+// (2026-07-13) Client-side 1600px canvas compression helper; was single file
+function compressImageFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_DIM = 1600;
+        let { width, height } = img;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(e.target?.result as string);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.88));
+      };
+      img.onerror = () => resolve(e.target?.result as string);
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export const ComposerView: React.FC<ComposerViewProps> = ({
   profile,
   editingMemory,
@@ -64,6 +104,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
   onDirtyChange,
   existingMemories,
   submitRef,
+  initialOpenGallery = false,
 }) => {
   // (2026-07-13) Default date to today & tags empty; was hardcoded date and tags
   const [dateISO, setDateISO] = useState(editingMemory?.dateISO || getTodayISO());
@@ -169,6 +210,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
   );
   const [pendingCropSrc, setPendingCropSrc] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
+  // (2026-07-13) Manage date gallery picker modal state; was unhandled
+  const [isDateGalleryOpen, setIsDateGalleryOpen] = useState<boolean>(Boolean(initialOpenGallery));
 
   // Video Capsule State
   const [hasVideo, setHasVideo] = useState<boolean>(Boolean(editingMemory?.videoCapsule));
@@ -367,17 +410,36 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     onToast(`Voice note captured (${formatDuration(res.durationSeconds)})!`, 'success');
   };
 
-  const handleSelectPhotoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  // (2026-07-13) Support batch multiple image upload & crop; was first file only
+  const handleSelectPhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
     e.target.value = '';
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setPendingCropSrc(reader.result);
+    if (!files || files.length === 0) return;
+
+    if (files.length === 1) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setPendingCropSrc(reader.result);
+        }
+      };
+      reader.readAsDataURL(files[0]);
+    } else {
+      const newPolaroids: PolaroidPhoto[] = [];
+      const now = Date.now();
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const compressedUrl = await compressImageFile(file);
+        newPolaroids.push({
+          id: `ph-${now}-${i}`,
+          url: compressedUrl,
+          caption: file.name.replace(/\.[^.]+$/, ''),
+          tag: 'POLAROID',
+        });
       }
-    };
-    reader.readAsDataURL(file);
+      setPhotos((prev) => [...prev, ...newPolaroids]);
+      onToast(`Attached ${newPolaroids.length} photos!`, 'success');
+    }
   };
 
   const handleSelectVideoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -936,19 +998,37 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
               </span>
             </div>
 
-            <div
-              onClick={() => photoInputRef.current?.click()}
-              className="border-2 border-dashed border-outline-variant/40 hover:border-primary/50 bg-surface-container-low/40 hover:bg-surface-container-low rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 group"
-            >
-              <div className="w-11 h-11 rounded-full bg-surface-container-high text-secondary group-hover:text-primary group-hover:scale-105 transition-all flex items-center justify-center mb-1">
-                <span className="material-symbols-outlined text-[24px]">add_photo_alternate</span>
+            {/* (2026-07-13) Add Date Gallery action card; was single upload box */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div
+                onClick={() => setIsDateGalleryOpen(true)}
+                className="border-2 border-dashed border-primary/45 hover:border-primary bg-primary/5 hover:bg-primary/10 rounded-xl p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1 group active:scale-[0.99]"
+              >
+                <div className="w-10 h-10 rounded-full bg-primary/15 text-primary group-hover:scale-105 transition-all flex items-center justify-center mb-0.5">
+                  <span className="material-symbols-outlined text-[22px]">photo_library</span>
+                </div>
+                <span className="text-xs sm:text-sm font-bold text-primary">
+                  Choose from Date Gallery
+                </span>
+                <span className="text-[11px] text-outline">
+                  Browse {formatStandardDate(dateISO).replace(/, \d{4}$/, '')} &amp; adjacent dates
+                </span>
               </div>
-              <span className="text-xs sm:text-sm font-semibold text-primary">
-                Upload Images to Turn into Polaroids
-              </span>
-              <span className="text-[11px] text-outline max-w-xs">
-                Tap to choose photos • 1600px high-resolution cropper
-              </span>
+
+              <div
+                onClick={() => photoInputRef.current?.click()}
+                className="border-2 border-dashed border-outline-variant/40 hover:border-primary/50 bg-surface-container-low/40 hover:bg-surface-container-low rounded-xl p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1 group active:scale-[0.99]"
+              >
+                <div className="w-10 h-10 rounded-full bg-surface-container-high text-secondary group-hover:text-primary group-hover:scale-105 transition-all flex items-center justify-center mb-0.5">
+                  <span className="material-symbols-outlined text-[22px]">upload_file</span>
+                </div>
+                <span className="text-xs sm:text-sm font-semibold text-primary">
+                  Upload Photos from Phone
+                </span>
+                <span className="text-[11px] text-outline">
+                  Multi-select images • Auto-compressed
+                </span>
+              </div>
             </div>
 
             {photos.length > 0 && (
@@ -1180,6 +1260,18 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       </div>
 
       {/* (2026-07-13) Render modals with createPortal to escape navbar z-index */}
+      {/* (2026-07-13) Render DateGalleryPickerModal for multi-select gallery; was none */}
+      <DateGalleryPickerModal
+        isOpen={isDateGalleryOpen}
+        onClose={() => setIsDateGalleryOpen(false)}
+        targetDateISO={dateISO}
+        allMemories={existingMemories || []}
+        onSelectPhotos={(selected) => {
+          setPhotos((prev) => [...prev, ...selected]);
+        }}
+        onToast={onToast}
+      />
+
       {pendingCropSrc &&
         createPortal(
           <ImageCropperModal
