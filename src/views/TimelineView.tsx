@@ -55,6 +55,7 @@ interface TimelineViewProps {
   // (2026-07-13) Add delete, partner note, toast & auto-open overlay props; was none
   onDeleteMemory?: (id: string) => void;
   onAddPartnerNote?: (memoryId: string, author: string, text: string) => void;
+  onUpdateMemoryDots?: (memoryId: string, dots: DotIndicator[]) => void;
   onToast?: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
   initialOpenDateISO?: string | null;
   onConsumedOpenDate?: () => void;
@@ -412,6 +413,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   onSaveMemory,
   onDeleteMemory,
   onAddPartnerNote,
+  onUpdateMemoryDots,
   onToast,
   initialOpenDateISO,
   onConsumedOpenDate,
@@ -2117,6 +2119,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 onAddPartnerNote={(memoryId, author, text) => {
                   onAddPartnerNote?.(memoryId, author, text);
                 }}
+                onUpdateMemoryDots={onUpdateMemoryDots}
                 onToast={(msg, type) => {
                   onToast?.(msg, type);
                 }}

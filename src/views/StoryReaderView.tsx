@@ -1,7 +1,7 @@
 // (2026-07-13) Import createPortal for overlay-safe modals; was inline divs
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { CoupleProfile, KeepsakeMemory, PolaroidPhoto } from '../types';
+import { CoupleProfile, DotIndicator, KeepsakeMemory, PolaroidPhoto } from '../types';
 // (2026-07-13) Import capitalizeFirstLetters to ensure proper case; was missing
 import { formatDuration, formatStandardDate, capitalizeFirstLetters } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
@@ -32,6 +32,7 @@ interface StoryReaderViewProps {
   onEditMemory: (memory: KeepsakeMemory) => void;
   onDeleteMemory: (id: string) => void;
   onAddPartnerNote: (memoryId: string, author: string, text: string) => void;
+  onUpdateMemoryDots?: (memoryId: string, dots: DotIndicator[]) => void;
   onToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
   // (2026-07-13) Allow embedding directly inside date overlay; was standalone only
   embeddedInOverlay?: boolean;
@@ -46,6 +47,7 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
   onEditMemory,
   onDeleteMemory,
   onAddPartnerNote,
+  onUpdateMemoryDots,
   onToast,
   embeddedInOverlay = false,
 }) => {
@@ -442,6 +444,50 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
             <span className="relative z-10 font-['Plus_Jakarta_Sans',sans-serif] text-xs font-semibold uppercase tracking-[0.14em] text-outline mt-0.5">
               {memory.signOffAuthor || `${profile.partner1Name} • St. 14`}
             </span>
+          </div>
+
+          {/* (2026-07-13) Add Calendar Ribbon Dots at bottom of note card; was composer only */}
+          <div className="mt-5 pt-4 border-t border-outline-variant/20 no-print">
+            <span className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-space-xs">
+              Calendar Ribbon Dots
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'GOLD' as DotIndicator, label: 'Events', color: '#E5A93C' },
+                { id: 'MOCHA' as DotIndicator, label: 'Date', color: '#5C4033' },
+                { id: 'ROSE' as DotIndicator, label: 'Intimacy', color: '#C96B78' },
+                { id: 'BURGUNDY' as DotIndicator, label: 'Milestone', color: '#8B263E' },
+              ].map((d) => {
+                const currentDots = memory.dotIndicators || ['MOCHA'];
+                const active = currentDots.includes(d.id);
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => {
+                      if (!onUpdateMemoryDots) return;
+                      const nextDots: DotIndicator[] = active
+                        ? currentDots.length > 1
+                          ? currentDots.filter((x) => x !== d.id)
+                          : currentDots
+                        : [...currentDots, d.id];
+                      onUpdateMemoryDots(memory.id, nextDots);
+                    }}
+                    className={`px-3 py-1 rounded-full font-label-md text-label-md flex items-center gap-1.5 transition-all active:scale-95 ${
+                      active
+                        ? 'bg-primary text-on-primary shadow-xs'
+                        : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-variant'
+                    }`}
+                  >
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: d.color }}
+                    />
+                    <span>{d.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </article>

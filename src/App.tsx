@@ -6,7 +6,9 @@ import {
   CoupleProfile,
   DailyBackupRecord,
   DigitalLoveLetter,
+  DotIndicator,
   KeepsakeMemory,
+  MemoryCategory,
   SecretYearNote,
   TimeCapsuleItem,
 } from './types';
@@ -440,6 +442,27 @@ export const App: React.FC = () => {
         updatedAt: Date.now(),
       };
     });
+    await DB.setMemories(nextList);
+    syncManager.schedulePush();
+  };
+
+  // (2026-07-13) Toggle calendar ribbon dots inline from opened memory; was edit only
+  const handleUpdateMemoryDots = async (memoryId: string, nextDots: DotIndicator[]) => {
+    const nextList = memories.map((m) => {
+      if (m.id !== memoryId) return m;
+      const baseCats: MemoryCategory[] = (m.categories || []).filter(
+        (c) => c !== 'EVENT' && c !== 'ANNIVERSARY'
+      );
+      if (nextDots.includes('GOLD')) baseCats.push('EVENT');
+      if (nextDots.includes('BURGUNDY')) baseCats.push('ANNIVERSARY');
+      return {
+        ...m,
+        dotIndicators: nextDots,
+        categories: baseCats,
+        updatedAt: Date.now(),
+      };
+    });
+    setMemories(nextList);
     await DB.setMemories(nextList);
     syncManager.schedulePush();
   };
@@ -1043,6 +1066,7 @@ export const App: React.FC = () => {
                 onSaveMemory={handleSaveMemory}
                 onDeleteMemory={handleDeleteMemory}
                 onAddPartnerNote={handleAddPartnerNote}
+                onUpdateMemoryDots={handleUpdateMemoryDots}
                 onToast={addToast}
                 initialOpenDateISO={pendingOverlayDateISO}
                 onConsumedOpenDate={() => setPendingOverlayDateISO(null)}
@@ -1067,6 +1091,7 @@ export const App: React.FC = () => {
                   onEditMemory={handleStartEditMemory}
                   onDeleteMemory={handleDeleteMemory}
                   onAddPartnerNote={handleAddPartnerNote}
+                  onUpdateMemoryDots={handleUpdateMemoryDots}
                   onToast={addToast}
                 />
               ) : (
