@@ -1706,8 +1706,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     ? 'bg-primary text-on-primary font-bold shadow-sm active:scale-95'
                     : dotFilter !== 'ALL'
                       ? matchesDotFilter && hasDots
-                        ? 'bg-secondary-container/70 text-primary font-bold ring-2 ring-primary/40 shadow-xs'
-                        : 'opacity-30 text-primary/60 font-normal hover:opacity-75'
+                        ? dotFilter === 'GOLD'
+                          ? 'bg-[#E5A93C]/15 border border-[#E5A93C]/50 text-[#543b12] font-bold shadow-2xs'
+                          : dotFilter === 'MOCHA'
+                            ? 'bg-[#5C4033]/15 border border-[#5C4033]/50 text-[#3b2416] font-bold shadow-2xs'
+                            : dotFilter === 'ROSE'
+                              ? 'bg-[#C96B78]/15 border border-[#C96B78]/50 text-[#571f28] font-bold shadow-2xs'
+                              : 'bg-[#8B263E]/15 border border-[#8B263E]/50 text-[#4c1220] font-bold shadow-2xs'
+                        : 'opacity-35 text-on-surface-variant font-normal hover:opacity-75'
                       : hasDots
                         ? 'bg-secondary-container/35 text-primary font-semibold hover:bg-secondary-container/60'
                         : 'hover:bg-surface-container text-primary font-medium'
@@ -1718,32 +1724,32 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   <div className="flex items-center gap-1 mt-1.5">
                     {cell.dots.includes('GOLD') && (
                       <span
-                        className={`rounded-full transition-all ${
-                          dotFilter === 'GOLD' ? 'w-2 h-2 ring-1 ring-primary/60 scale-125' : 'w-1.5 h-1.5'
+                        className={`rounded-full transition-transform ${
+                          dotFilter === 'GOLD' ? 'w-2 h-2 scale-125' : 'w-1.5 h-1.5'
                         }`}
                         style={{ backgroundColor: '#E5A93C' }}
                       />
                     )}
                     {cell.dots.includes('MOCHA') && (
                       <span
-                        className={`rounded-full transition-all ${
-                          dotFilter === 'MOCHA' ? 'w-2 h-2 ring-1 ring-primary/60 scale-125' : 'w-1.5 h-1.5'
+                        className={`rounded-full transition-transform ${
+                          dotFilter === 'MOCHA' ? 'w-2 h-2 scale-125' : 'w-1.5 h-1.5'
                         }`}
                         style={{ backgroundColor: '#5C4033' }}
                       />
                     )}
                     {cell.dots.includes('ROSE') && (
                       <span
-                        className={`rounded-full transition-all ${
-                          dotFilter === 'ROSE' ? 'w-2 h-2 ring-1 ring-primary/60 scale-125' : 'w-1.5 h-1.5'
+                        className={`rounded-full transition-transform ${
+                          dotFilter === 'ROSE' ? 'w-2 h-2 scale-125' : 'w-1.5 h-1.5'
                         }`}
                         style={{ backgroundColor: '#C96B78' }}
                       />
                     )}
                     {cell.dots.includes('BURGUNDY') && (
                       <span
-                        className={`rounded-full transition-all ${
-                          dotFilter === 'BURGUNDY' ? 'w-2 h-2 ring-1 ring-primary/60 scale-125' : 'w-1.5 h-1.5'
+                        className={`rounded-full transition-transform ${
+                          dotFilter === 'BURGUNDY' ? 'w-2 h-2 scale-125' : 'w-1.5 h-1.5'
                         }`}
                         style={{ backgroundColor: '#8B263E' }}
                       />
@@ -1833,9 +1839,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             <button
               type="button"
               onClick={() => setSelectedDay(null)}
+              // (2026-07-13) Replace ring-primary with border styling; was blue fallback
               className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all active:scale-95 ${
                 selectedDay !== null
-                  ? 'bg-primary/15 ring-1 ring-primary font-semibold'
+                  ? 'bg-secondary-container border border-outline-variant/60 font-semibold text-primary'
                   : 'hover:bg-surface-container-low'
               }`}
               title={selectedDay !== null ? 'Click to clear selected day' : 'Selected day indicator'}
