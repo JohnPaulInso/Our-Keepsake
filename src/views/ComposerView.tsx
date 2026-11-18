@@ -9,8 +9,8 @@ import {
   MemoryCategory,
   PolaroidPhoto,
 } from '../types';
-// (2026-07-13) Add getTodayISO & existingMemories to prevent duplicate same-day
-import { formatDuration, formatStandardDate, getChapterNumber, getTodayISO } from '../utils/dateFormat';
+// (2026-07-13) Import capitalizeFirstLetters & getTodayISO; was without capitalize
+import { capitalizeFirstLetters, formatDuration, formatStandardDate, getChapterNumber, getTodayISO } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 import { ImageCropperModal } from '../components/ImageCropperModal';
 
@@ -368,15 +368,17 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     onToast('Video Capsule attached & optimized for storage!', 'success');
   };
 
-  // (2026-07-13) Use suggested title if empty & optional quote; was required
+  // (2026-07-13) Capitalize first letters on title & story; was lowercase raw
   const buildMemoryPayload = (isDraft: boolean): KeepsakeMemory => {
-    const cleanTitle =
+    const rawTitle =
       title.trim() ||
       suggestedTitle ||
       `A Keepsake for ${formatStandardDate(dateISO)}`;
-    const cleanBody =
+    const cleanTitle = capitalizeFirstLetters(rawTitle);
+    const rawBody =
       storyBody.trim() ||
       `Another unforgettable day with ${profile.partner2Name} in ${location}. I wrote this down so we never forget how warm and peaceful this moment felt.`;
+    const cleanBody = capitalizeFirstLetters(rawBody);
     const categories: MemoryCategory[] = ['EVENT'];
     if (photos.length > 0) categories.push('PHOTO');
     if (voiceDataUrl) categories.push('VOICE_MEMO');

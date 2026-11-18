@@ -1,7 +1,8 @@
 // (2026-07-13) Build interactive Date Story Reader view per Stitch & PRD
 import React, { useState, useEffect } from 'react';
 import { CoupleProfile, KeepsakeMemory, PolaroidPhoto } from '../types';
-import { formatDuration, formatStandardDate } from '../utils/dateFormat';
+// (2026-07-13) Import capitalizeFirstLetters to ensure proper case; was missing
+import { formatDuration, formatStandardDate, capitalizeFirstLetters } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 
 // (2026-07-13) Format date with 3-letter weekday like THU; was standard date
@@ -89,11 +90,13 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
   const nextMemory =
     currentIdx >= 0 && currentIdx < allMemories.length - 1 ? allMemories[currentIdx + 1] : null;
 
-  const paragraphs = (memory.storyBody || memory.snippet || 'A cherished day together.')
-    .split(/\n\n+/)
-    .filter(Boolean);
+  // (2026-07-13) Auto-capitalize all first letters of lines & sentences; was raw text
+  const formattedBody = capitalizeFirstLetters(
+    memory.storyBody || memory.snippet || 'A cherished day together.'
+  );
+  const paragraphs = formattedBody.split(/\n\n+/).filter(Boolean);
   const firstPara = paragraphs[0] || '';
-  const dropCapChar = firstPara.charAt(0) || 'I';
+  const dropCapChar = firstPara.charAt(0).toUpperCase() || 'I';
   const firstParaRest = firstPara.slice(1);
   const remainingParas = paragraphs.slice(1);
 
@@ -362,14 +365,16 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
             >
               auto_awesome
             </span>
-            <span>{memory.letterHeading || memory.title}</span>
+            {/* (2026-07-13) Capitalize letterHeading/title; was raw letterHeading */}
+            <span>{capitalizeFirstLetters(memory.letterHeading || memory.title)}</span>
           </h1>
           <div className="w-12 h-0.5 bg-secondary-container mt-3 rounded-full" />
         </header>
 
         <div className="relative z-10 text-on-surface-variant">
-          <p className="font-body-lg text-body-lg text-primary leading-relaxed text-justify mb-space-md">
-            <span className="float-left font-display-lg-mobile text-display-lg-mobile leading-none font-normal text-secondary pr-2 pt-1 font-serif">
+          {/* (2026-07-13) Support whitespace-pre-line to preserve linebreaks; was collapse */}
+          <p className="font-body-lg text-body-lg text-primary leading-relaxed text-justify mb-space-md whitespace-pre-line">
+            <span className="float-left font-display-lg-mobile text-display-lg-mobile leading-none font-normal text-secondary pr-1.5 pt-1 font-serif">
               {dropCapChar}
             </span>
             {firstParaRest}
@@ -386,7 +391,7 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
           {remainingParas.map((para, i) => (
             <p
               key={i}
-              className="font-body-md text-body-md text-on-surface-variant leading-relaxed mb-space-sm"
+              className="font-body-md text-body-md text-on-surface-variant leading-relaxed mb-space-sm whitespace-pre-line"
             >
               {para}
             </p>

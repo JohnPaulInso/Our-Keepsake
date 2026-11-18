@@ -85,3 +85,12 @@ export function getChapterNumber(dateISO?: string, courtingDateISO: string = '20
     return 2;
   }
 }
+
+// (2026-07-13) Auto-capitalize text, lines, quotes & sentences; was raw text
+export function capitalizeFirstLetters(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/^(\s*["'“‘(]*)([a-z])/g, (_, s, c) => s + c.toUpperCase())
+    .replace(/(\r?\n\s*[-*•"“‘(]*\s*)([a-z])/g, (_, s, c) => s + c.toUpperCase())
+    .replace(/([.!?]["'”’)]*\s+["'“‘(]*)([a-z])/g, (_, s, c) => s + c.toUpperCase());
+}

@@ -25,8 +25,8 @@ import { ToastContainer, ToastItem } from './components/ToastContainer';
 import { CoupleStudioModal } from './components/CoupleStudioModal';
 // (2026-07-13) Import PinLockModal for startup passcode gate; was unimported
 import { PinLockModal } from './components/PinLockModal';
-// (2026-07-13) Import getTodayISO for today record defaults; was omitted
-import { formatStandardDate, getChapterNumber, getTodayISO } from './utils/dateFormat';
+// (2026-07-13) Import capitalizeFirstLetters & getTodayISO; was without capitalize
+import { capitalizeFirstLetters, formatStandardDate, getChapterNumber, getTodayISO } from './utils/dateFormat';
 
 export const App: React.FC = () => {
   const location = useLocation();
@@ -325,20 +325,28 @@ export const App: React.FC = () => {
     requestTabNavigation('new-date');
   };
 
-  // (2026-07-13) Save memory updating in-place by id or dateISO; was id only
+  // (2026-07-13) Save memory updating in-place with capitalized text; was raw
   const handleSaveMemory = async (memory: KeepsakeMemory, isDraft: boolean) => {
+    const formattedTitle = capitalizeFirstLetters(memory.title);
+    const formattedStory = capitalizeFirstLetters(memory.storyBody);
+    const formattedMemory: KeepsakeMemory = {
+      ...memory,
+      title: formattedTitle,
+      storyBody: formattedStory,
+      snippet: formattedStory.slice(0, 160) + (formattedStory.length > 160 ? '...' : ''),
+    };
     const existingIndex = memories.findIndex(
       (m) => m.id === memory.id || m.dateISO === memory.dateISO
     );
     let nextList: KeepsakeMemory[];
     if (existingIndex !== -1) {
       const targetId = memories[existingIndex].id;
-      const updatedMemory = { ...memory, id: targetId };
+      const updatedMemory = { ...formattedMemory, id: targetId };
       nextList = memories
         .filter((m) => m.id !== targetId && m.dateISO !== memory.dateISO)
         .concat(updatedMemory);
     } else {
-      nextList = [memory, ...memories];
+      nextList = [formattedMemory, ...memories];
     }
 
     // (2026-07-13) Synchronously update memories state; was async listener lag
@@ -434,13 +442,14 @@ export const App: React.FC = () => {
 
     for (const { dateISO, story } of entries) {
       if (!story) continue;
+      const cleanStory = capitalizeFirstLetters(story);
       const existingIdx = nextList.findIndex((m) => m.dateISO === dateISO);
       if (existingIdx !== -1) {
-        if (nextList[existingIdx].storyBody !== story) {
+        if (nextList[existingIdx].storyBody !== cleanStory) {
           nextList[existingIdx] = {
             ...nextList[existingIdx],
-            storyBody: story,
-            snippet: story.slice(0, 160),
+            storyBody: cleanStory,
+            snippet: cleanStory.slice(0, 160),
             updatedAt: Date.now(),
           };
           hasChanged = true;
@@ -448,15 +457,16 @@ export const App: React.FC = () => {
       } else {
         // (2026-07-13) Set dynamic chapter number from courting date; was fixed 15
         const calculatedChapter = getChapterNumber(dateISO, profile.courtingDateISO || '2025-11-07');
+        const rawFirstLine = cleanStory.split('\n')[0].slice(0, 36);
         const newMemory: KeepsakeMemory = {
           id: `mem-${dateISO}-${Date.now()}`,
           keepsakeNumber: memories.length + 1,
           volumeNumber: calculatedChapter,
           dateISO,
           timeFormatted: 'All Day',
-          title: story.split('\n')[0].slice(0, 36) || `Keepsake for ${dateISO}`,
-          snippet: story.slice(0, 160),
-          storyBody: story,
+          title: capitalizeFirstLetters(rawFirstLine) || `Keepsake for ${dateISO}`,
+          snippet: cleanStory.slice(0, 160),
+          storyBody: cleanStory,
           quoteHighlight: '',
           signOffAuthor: profile.partner1Name,
           location: 'Bogo City, Cebu',

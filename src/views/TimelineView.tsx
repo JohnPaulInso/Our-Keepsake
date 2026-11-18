@@ -27,8 +27,8 @@ import {
   SecretYearNote,
   VideoCapsule,
 } from '../types';
-// (2026-07-13) Import getChapterNumber for dynamic chapter calculation; was fixed II
-import { calculateDaysTogether, formatDuration, formatStandardDate, getChapterNumber } from '../utils/dateFormat';
+// (2026-07-13) Import capitalizeFirstLetters to ensure proper casing; was omitted
+import { calculateDaysTogether, formatDuration, formatStandardDate, getChapterNumber, capitalizeFirstLetters } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 import { CustomDropdown } from '../components/CustomDropdown';
 // (2026-07-13) Import DB in TimelineView for date queries; was unimported
@@ -151,10 +151,12 @@ const SortableMemoryCard: React.FC<SortableMemoryCardProps> = ({
           >
             auto_awesome
           </span>
-          <span>{memory.title || 'Untitled Memory'}</span>
+          {/* (2026-07-13) Capitalize memory title; was raw memory.title */}
+          <span>{capitalizeFirstLetters(memory.title) || 'Untitled Memory'}</span>
         </h2>
-        <p className="font-body-md text-body-md text-on-surface-variant mb-space-md font-serif italic leading-relaxed clamp-3">
-          “{memory.snippet || memory.storyBody}”
+        {/* (2026-07-13) Auto-capitalize snippet lines; was raw text */}
+        <p className="font-body-md text-body-md text-on-surface-variant mb-space-md font-serif italic leading-relaxed clamp-3 whitespace-pre-line">
+          “{capitalizeFirstLetters(memory.snippet || memory.storyBody)}”
         </p>
       </div>
 
@@ -1465,14 +1467,15 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   auto_awesome
                 </span>
               )}
-              <span>{primaryDateMemory ? primaryDateMemory.title : 'A Quiet Day in Our Story'}</span>
+              {/* (2026-07-13) Capitalize date peep title; was raw title */}
+              <span>{primaryDateMemory ? capitalizeFirstLetters(primaryDateMemory.title) : 'A Quiet Day in Our Story'}</span>
             </h3>
             <p
-              className={`font-['Cormorant_Garamond',serif] italic text-sm sm:text-base leading-relaxed mt-1 line-clamp-3 ${
+              className={`font-['Cormorant_Garamond',serif] italic text-sm sm:text-base leading-relaxed mt-1 line-clamp-3 whitespace-pre-line ${
                 primaryDateMemory ? 'text-on-surface-variant' : 'text-outline/60'
               }`}
             >
-              “{primaryDateMemory?.snippet || primaryDateMemory?.storyBody || `No memories recorded for this specific date yet. Every moment with ${profile.partner2Name} is a keepsake waiting to be written.`}”
+              “{capitalizeFirstLetters(primaryDateMemory?.snippet || primaryDateMemory?.storyBody || `No memories recorded for this specific date yet. Every moment with ${profile.partner2Name} is a keepsake waiting to be written.`)}”
             </p>
           </div>
 
@@ -1865,7 +1868,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   auto_awesome
                 </span>
               )}
-              <span>{primaryDateMemory ? primaryDateMemory.title || "Preserve Today's Chapter" : "Preserve Today's Chapter"}</span>
+              {/* (2026-07-13) Capitalize modal header title; was raw title */}
+              <span>{primaryDateMemory ? capitalizeFirstLetters(primaryDateMemory.title) || "Preserve Today's Chapter" : "Preserve Today's Chapter"}</span>
             </h2>
             <p className="text-secondary mt-1 max-w-xs leading-relaxed font-['Cormorant_Garamond',serif] italic text-base">
               Every little moment with {profile.partner2Name} is worth remembering forever.
@@ -1936,10 +1940,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     The Heartfelt Note
                   </span>
                   <div className="min-h-[160px] text-on-surface font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[15px] sm:text-base leading-relaxed">
+                    {/* (2026-07-13) Auto-capitalize heartfelt note lines; was raw text */}
                     <p className="whitespace-pre-wrap">
-                      {primaryDateMemory?.storyBody ||
+                      {capitalizeFirstLetters(
+                        primaryDateMemory?.storyBody ||
                         primaryDateMemory?.snippet ||
-                        `Write down how ${profile.partner2Name} smiled, what she said, the quiet moments you never want to forget...`}
+                        `Write down how ${profile.partner2Name} smiled, what she said, the quiet moments you never want to forget...`
+                      )}
                     </p>
                   </div>
                 </div>
