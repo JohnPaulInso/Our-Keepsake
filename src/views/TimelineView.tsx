@@ -52,10 +52,12 @@ interface TimelineViewProps {
   onSaveMemory?: (memory: KeepsakeMemory, isDraft: boolean) => void;
   // (2026-07-13) Pass active calendar year & month to notepad; was no args
   onOpenMonthlyNotepad?: (year?: number, month?: number) => void;
-  // (2026-07-13) Add delete, partner note & toast handlers for embedded StoryReader
+  // (2026-07-13) Add delete, partner note, toast & auto-open overlay props; was none
   onDeleteMemory?: (id: string) => void;
   onAddPartnerNote?: (memoryId: string, author: string, text: string) => void;
   onToast?: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
+  initialOpenDateISO?: string | null;
+  onConsumedOpenDate?: () => void;
 }
 
 // (2026-07-13) Format date with weekday for easy date identification; was plain
@@ -405,12 +407,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   onReorderMemories,
   onOpenSecretNotesTab,
   onOpenProfileModal,
-  // (2026-07-13) Destructure notepad, save, delete, note & toast props; was fewer
+  // (2026-07-13) Destructure notepad, save, delete, note, toast & auto-open props
   onOpenMonthlyNotepad,
   onSaveMemory,
   onDeleteMemory,
   onAddPartnerNote,
   onToast,
+  initialOpenDateISO,
+  onConsumedOpenDate,
 }) => {
   const [activeCategory, setActiveCategory] = useState<
     'ALL' | 'PHOTO' | 'VOICE_MEMO' | 'VIDEO' | 'ANNIVERSARY' | 'DRAFT'
@@ -445,6 +449,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const calSwipeStartYRef = useRef<number | null>(null);
   const calSwipeHorizontalRef = useRef<boolean | null>(null);
   const calSuppressClickRef = useRef(false);
+  // (2026-07-13) Confirm modal state for delete button in overlay header; was none
+  const [overlayDeleteConfirmOpen, setOverlayDeleteConfirmOpen] = useState(false);
 
   const openDateOverlay = (day: number) => {
     setSelectedDay(day);
@@ -456,6 +462,23 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       });
     });
   };
+
+  // (2026-07-13) Auto-reopen fullscreen overlay on saved date; was switching tab
+  useEffect(() => {
+    if (!initialOpenDateISO || !/^\d{4}-\d{2}-\d{2}$/.test(initialOpenDateISO)) return;
+    const [y, mm, dd] = initialOpenDateISO.split('-').map(Number);
+    setCalendarYear(y);
+    setCalendarMonth(mm - 1);
+    setSelectedDay(dd);
+    setIsFullscreenDateOpen(true);
+    setIsOverlayClosing(false);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsOverlayVisible(true);
+      });
+    });
+    onConsumedOpenDate?.();
+  }, [initialOpenDateISO, onConsumedOpenDate]);
 
   // (2026-07-13) Bypass overlay delay if closed; was unconditional timeout
   const closeDateOverlay = (callback?: () => void) => {
@@ -1946,35 +1969,45 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 <span className="material-symbols-outlined text-[18px]">arrow_back</span>
                 <span>Back to Timeline</span>
               </button>
-              <div className="flex items-center gap-1.5 min-w-0">
-                <button
-                  type="button"
-                  onClick={handlePrevOverlayDate}
-                  title="Previous Date"
-                  className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 shrink-0"
-                >
-                  <span className="material-symbols-outlined text-[18px]">chevron_left</span>
-                </button>
-                <span className="text-[11px] uppercase font-bold tracking-widest text-secondary bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant/30 truncate">
-                  {selectedDayFormatted}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleNextOverlayDate}
-                  title="Next Date"
-                  className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 shrink-0"
-                >
-                  <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => closeDateOverlay()}
-                  title="Close overlay"
-                  className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 ml-1 shrink-0"
-                >
-                  <span className="material-symbols-outlined text-[18px]">close</span>
-                </button>
-              </div>
+              {/* (2026-07-13) Replace date nav with copy link, edit & delete; was < date > X */}
+              {primaryDateMemory && (
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = `${window.location.origin}/date/${primaryDateMemory.dateISO}`;
+                      navigator.clipboard
+                        .writeText(url)
+                        .then(() => {
+                          onToast?.(`Link copied: /date/${primaryDateMemory.dateISO}`, 'info');
+                        })
+                        .catch(() => {
+                          onToast?.(`/date/${primaryDateMemory.dateISO}`, 'info');
+                        });
+                    }}
+                    title="Copy direct link for this date"
+                    className="w-9 h-9 rounded-full bg-surface-container-low text-secondary hover:text-primary flex items-center justify-center border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">link</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => closeDateOverlay(() => onEditMemory(primaryDateMemory))}
+                    className="px-3.5 py-2 rounded-full bg-surface-container-low text-primary hover:bg-surface-container font-label-md text-xs uppercase tracking-wider flex items-center gap-1.5 border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">edit</span>
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOverlayDeleteConfirmOpen(true)}
+                    title="Delete memory"
+                    className="w-9 h-9 rounded-full bg-surface-container-low text-error hover:bg-error/10 flex items-center justify-center border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -2202,6 +2235,52 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     </div>,
     document.body
   )}
+      {/* (2026-07-13) Portaled delete confirm modal for overlay header; was in body */}
+      {overlayDeleteConfirmOpen &&
+        primaryDateMemory &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[150] bg-black/65 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setOverlayDeleteConfirmOpen(false)}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm bg-surface-container-lowest rounded-2xl p-5 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col gap-4 text-center"
+            >
+              <div className="w-11 h-11 mx-auto rounded-full bg-error-container text-error flex items-center justify-center">
+                <span className="material-symbols-outlined text-[22px]">delete_forever</span>
+              </div>
+              <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                Remove This Keepsake?
+              </h3>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">
+                Are you sure you want to remove &ldquo;{primaryDateMemory.title}&rdquo; from your shared archive?
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setOverlayDeleteConfirmOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-surface-container-low text-secondary font-label-md text-label-md uppercase"
+                >
+                  Keep Memory
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const idToDelete = primaryDateMemory.id;
+                    setOverlayDeleteConfirmOpen(false);
+                    closeDateOverlay();
+                    onDeleteMemory?.(idToDelete);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-error text-on-error font-label-md text-label-md uppercase shadow-md"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

@@ -267,35 +267,41 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
               <span>Back to Timeline</span>
             </button>
 
-            <div className="flex items-center gap-1.5 min-w-0">
+            {/* (2026-07-13) Move copy link, edit & delete into header; was date nav */}
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
-                disabled={!prevMemory}
-                onClick={() => prevMemory && onSelectMemory(prevMemory.id)}
-                title={prevMemory ? `Previous: ${prevMemory.title}` : 'No previous date'}
-                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 disabled:opacity-35 shrink-0"
+                onClick={() => {
+                  const url = `${window.location.origin}/date/${memory.dateISO}`;
+                  navigator.clipboard
+                    .writeText(url)
+                    .then(() => {
+                      onToast(`Link copied: /date/${memory.dateISO}`, 'info');
+                    })
+                    .catch(() => {
+                      onToast(`/date/${memory.dateISO}`, 'info');
+                    });
+                }}
+                title="Copy direct link for this date"
+                className="w-9 h-9 rounded-full bg-surface-container-low text-secondary hover:text-primary flex items-center justify-center border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
               >
-                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
-              </button>
-              <span className="text-[11px] uppercase font-bold tracking-widest text-secondary bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant/30 truncate">
-                {longFormattedDate}
-              </span>
-              <button
-                type="button"
-                disabled={!nextMemory}
-                onClick={() => nextMemory && onSelectMemory(nextMemory.id)}
-                title={nextMemory ? `Next: ${nextMemory.title}` : 'No next date'}
-                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 disabled:opacity-35 shrink-0"
-              >
-                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                <span className="material-symbols-outlined text-[18px]">link</span>
               </button>
               <button
                 type="button"
-                onClick={handleCloseWithAnimation}
-                title="Close story"
-                className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 ml-0.5 shrink-0"
+                onClick={() => onEditMemory(memory)}
+                className="px-3.5 py-2 rounded-full bg-surface-container-low text-primary hover:bg-surface-container font-label-md text-xs uppercase tracking-wider flex items-center gap-1.5 border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span className="material-symbols-outlined text-[16px]">edit</span>
+                <span>Edit</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmOpen(true)}
+                title="Delete memory"
+                className="w-9 h-9 rounded-full bg-surface-container-low text-error hover:bg-error/10 flex items-center justify-center border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
+              >
+                <span className="material-symbols-outlined text-[18px]">delete</span>
               </button>
             </div>
           </div>
@@ -367,46 +373,7 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
         </div>
       </div>
 
-      {/* Compact Actions Bar (Link, Edit, Delete) */}
-      <div
-        id="editorial-reader-actions-toolbar" // Reader actions toolbar for editing and links
-        className="flex items-center justify-end gap-1.5 mb-space-md no-print"
-      >
-        <button
-          type="button"
-          onClick={() => {
-            const url = `${window.location.origin}/date/${memory.dateISO}`;
-            navigator.clipboard
-              .writeText(url)
-              .then(() => {
-                onToast(`Link copied: /date/${memory.dateISO}`, 'info');
-              })
-              .catch(() => {
-                onToast(`/date/${memory.dateISO}`, 'info');
-              });
-          }}
-          title="Copy direct link for this date"
-          className="w-8 h-8 rounded-lg bg-surface-container-low text-secondary hover:text-primary flex items-center justify-center border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
-        >
-          <span className="material-symbols-outlined text-[18px]">link</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => onEditMemory(memory)}
-          className="px-3.5 py-1.5 rounded-lg bg-surface-container-low text-primary hover:bg-surface-container font-label-md text-xs uppercase tracking-wider flex items-center gap-1.5 border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
-        >
-          <span className="material-symbols-outlined text-[16px]">edit</span>
-          <span>Edit</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setDeleteConfirmOpen(true)}
-          title="Delete memory"
-          className="w-8 h-8 rounded-lg bg-surface-container-low text-error hover:bg-error/10 flex items-center justify-center border border-outline-variant/35 shadow-xs active:scale-95 transition-transform"
-        >
-          <span className="material-symbols-outlined text-[18px]">delete</span>
-        </button>
-      </div>
+      {/* (2026-07-13) Actions moved up to top header; was below Location pill */}
 
       {/* (2026-07-13) Refine parchment card typography & proportions; was oversized */}
       <article className="relative bg-surface-container-lowest rounded-2xl shadow-sm p-5 sm:p-6 mb-space-lg overflow-hidden border border-outline-variant/30">
@@ -479,7 +446,7 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
         </div>
       </article>
 
-      {/* Interactive Media Section Header */}
+      {/* (2026-07-13) Hide Edit Elements & +media buttons; show empty card only when empty */}
       <div className="flex items-center justify-between mb-space-sm px-1 flex-wrap gap-2">
         <div className="flex items-center gap-space-xs">
           <span className="material-symbols-outlined text-[18px] text-secondary">attachment</span>
@@ -487,42 +454,6 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
             Keepsake Vault Elements
           </h2>
         </div>
-        <button
-          type="button"
-          onClick={() => onEditMemory(memory)}
-          className="flex items-center gap-1 text-[11px] font-semibold text-primary uppercase tracking-wider bg-secondary-container/60 hover:bg-secondary-container px-2.5 py-1 rounded-full transition-colors"
-        >
-          <span className="material-symbols-outlined text-[14px]">edit</span>
-          <span>Edit Elements</span>
-        </button>
-      </div>
-
-      {/* (2026-07-13) Add quick media add buttons & only render audio if URL exists */}
-      <div className="flex flex-wrap items-center gap-2 mb-space-md">
-        <button
-          type="button"
-          onClick={() => onEditMemory(memory)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-primary font-label-md text-label-md uppercase tracking-wider transition-colors shadow-xs"
-        >
-          <span className="material-symbols-outlined text-[16px]">add_photo_alternate</span>
-          <span>+ Photos</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => onEditMemory(memory)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-primary font-label-md text-label-md uppercase tracking-wider transition-colors shadow-xs"
-        >
-          <span className="material-symbols-outlined text-[16px]">mic</span>
-          <span>+ Voice Memo</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => onEditMemory(memory)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-variant text-primary font-label-md text-label-md uppercase tracking-wider transition-colors shadow-xs"
-        >
-          <span className="material-symbols-outlined text-[16px]">videocam</span>
-          <span>+ Video</span>
-        </button>
       </div>
 
       {/* (2026-07-13) Filter mock audio URL in story reader; was showing fake VM */}

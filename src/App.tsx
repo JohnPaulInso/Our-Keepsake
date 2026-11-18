@@ -42,6 +42,8 @@ export const App: React.FC = () => {
   const [studioModalOpen, setStudioModalOpen] = useState(false);
   // (2026-07-13) Track target year/month for Monthly Notepad; was always today
   const [notepadTarget, setNotepadTarget] = useState<{ year: number; month: number } | null>(null);
+  // (2026-07-13) Track saved dateISO to reopen fullscreen overlay; was Story tab
+  const [pendingOverlayDateISO, setPendingOverlayDateISO] = useState<string | null>(null);
   // (2026-07-13) Add startup PIN 7777 unlock state; was unguarded
   const [isPinUnlocked, setIsPinUnlocked] = useState<boolean>(() => {
     try {
@@ -397,9 +399,10 @@ export const App: React.FC = () => {
       addToast(`Draft "${memory.title}" saved to your desk.`, 'info');
       switchTab('timeline');
     } else {
-      // (2026-07-13) Remove duplicate sealed toast on save; was firing two toasts
-      addToast(`"${memory.title}" saved to your Memory Box!`, 'success');
-      switchTab('story');
+      // (2026-07-13) Reopen fullscreen date overlay on save; was switchTab('story')
+      addToast(`"${formattedMemory.title}" saved to your Memory Box!`, 'success');
+      setPendingOverlayDateISO(formattedMemory.dateISO);
+      switchTab('timeline');
     }
   };
 
@@ -1036,11 +1039,13 @@ export const App: React.FC = () => {
                   switchTab('notepad');
                 }}
                 // (2026-07-13) Pass handleSaveMemory to TimelineView; was omitted
-                // (2026-07-13) Pass delete, note & toast handlers for overlay StoryReader
+                // (2026-07-13) Pass delete, note, toast & overlay reopen props to TimelineView
                 onSaveMemory={handleSaveMemory}
                 onDeleteMemory={handleDeleteMemory}
                 onAddPartnerNote={handleAddPartnerNote}
                 onToast={addToast}
+                initialOpenDateISO={pendingOverlayDateISO}
+                onConsumedOpenDate={() => setPendingOverlayDateISO(null)}
               />
             )}
 
