@@ -148,7 +148,11 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
       isFavorite: editingLetter?.isFavorite ?? true,
       updatedAt: Date.now(),
     };
+    // (2026-07-13) Update active letter reader state on save; was stale reader
     onSaveDigitalLetter(payload);
+    if (readingLetter?.id === payload.id) {
+      setReadingLetter(payload);
+    }
     setLetterComposerOpen(false);
     onToast(`Digital love letter saved to ${profile.partner2Name}'s archive!`, 'success');
   };

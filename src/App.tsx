@@ -398,23 +398,20 @@ export const App: React.FC = () => {
       const targetId = memories[existingIndex].id;
       finalId = targetId;
       const updatedMemory = { ...formattedMemory, id: targetId };
-      nextList = memories
-        .filter((m) => m.id !== targetId && m.dateISO !== memory.dateISO)
-        .concat(updatedMemory);
+      nextList = [...memories];
+      nextList[existingIndex] = updatedMemory;
     } else {
       nextList = [formattedMemory, ...memories];
     }
 
-    // (2026-07-13) Synchronously update memories state; was async listener lag
+    // (2026-07-13) In-place optimistic memory update & non-blocking DB; was delay
     setMemories(nextList);
     setSelectedMemoryId(finalId);
     DB.setSelectedMemoryId(finalId);
-    await DB.setMemories(nextList);
-    syncManager.schedulePush();
-    // (2026-07-13) Clear unsaved changes flag on successful save; was untouched
     setHasUnsavedChanges(false);
     setShowUnsavedModal(false);
     setEditingMemory(null);
+    DB.setMemories(nextList).then(() => syncManager.schedulePush());
 
     if (isDraft) {
       addToast(`Draft "${formattedMemory.title}" saved to your desk.`, 'info');
@@ -504,13 +501,14 @@ export const App: React.FC = () => {
     addToast('Voice Vault favorite updated.', 'success');
   };
 
-  const handleSaveSecretNote = async (note: SecretYearNote) => {
+  // (2026-07-13) Immediate optimistic state update for notes & letters; was lag
+  const handleSaveSecretNote = (note: SecretYearNote) => {
     const exists = secretNotes.some((n) => n.id === note.id);
     const nextList = exists
       ? secretNotes.map((n) => (n.id === note.id ? note : n))
       : [note, ...secretNotes];
-    await DB.setSecretYearNotes(nextList);
-    syncManager.schedulePush();
+    setSecretNotes(nextList);
+    DB.setSecretYearNotes(nextList).then(() => syncManager.schedulePush());
   };
 
   // (2026-07-13) Live sync date entries from notepad to memory ledger; was none
@@ -576,34 +574,34 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleDeleteSecretNote = async (id: string) => {
+  const handleDeleteSecretNote = (id: string) => {
     const nextList = secretNotes.filter((n) => n.id !== id);
-    await DB.setSecretYearNotes(nextList);
-    syncManager.schedulePush();
+    setSecretNotes(nextList);
+    DB.setSecretYearNotes(nextList).then(() => syncManager.schedulePush());
   };
 
-  const handleToggleFavoriteSecretNote = async (id: string) => {
+  const handleToggleFavoriteSecretNote = (id: string) => {
     const nextList = secretNotes.map((n) =>
       n.id === id ? { ...n, isFavorite: !n.isFavorite, updatedAt: Date.now() } : n
     );
-    await DB.setSecretYearNotes(nextList);
-    syncManager.schedulePush();
+    setSecretNotes(nextList);
+    DB.setSecretYearNotes(nextList).then(() => syncManager.schedulePush());
   };
 
-  // (2026-07-13) Add handlers for digital love letters vs missing handlers
-  const handleSaveDigitalLetter = async (letter: DigitalLoveLetter) => {
+  // (2026-07-13) Immediate optimistic state update for digital love letters
+  const handleSaveDigitalLetter = (letter: DigitalLoveLetter) => {
     const exists = digitalLoveLetters.some((l) => l.id === letter.id);
     const nextList = exists
       ? digitalLoveLetters.map((l) => (l.id === letter.id ? letter : l))
       : [letter, ...digitalLoveLetters];
-    await DB.setDigitalLoveLetters(nextList);
-    syncManager.schedulePush();
+    setDigitalLoveLetters(nextList);
+    DB.setDigitalLoveLetters(nextList).then(() => syncManager.schedulePush());
   };
 
-  const handleDeleteDigitalLetter = async (id: string) => {
+  const handleDeleteDigitalLetter = (id: string) => {
     const nextList = digitalLoveLetters.filter((l) => l.id !== id);
-    await DB.setDigitalLoveLetters(nextList);
-    syncManager.schedulePush();
+    setDigitalLoveLetters(nextList);
+    DB.setDigitalLoveLetters(nextList).then(() => syncManager.schedulePush());
   };
 
   const handleUpdateProfile = async (nextProfile: CoupleProfile) => {
@@ -1149,7 +1147,9 @@ export const App: React.FC = () => {
 
             {activeTab === 'story' &&
               (activeMemory ? (
+                // (2026-07-13) Dynamic key for instant updates on memory edit; was stale state
                 <StoryReaderView
+                  key={`${activeMemory.id}-${activeMemory.updatedAt}`}
                   profile={profile}
                   memory={activeMemory}
                   allMemories={memories}

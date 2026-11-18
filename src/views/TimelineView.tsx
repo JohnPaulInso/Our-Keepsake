@@ -431,8 +431,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const [calendarYear, setCalendarYear] = useState<number>(() => getInitialCalendarState().year);
   const [calendarMonth, setCalendarMonth] = useState<number>(() => getInitialCalendarState().month);
   const [selectedDay, setSelectedDay] = useState<number | null>(() => getInitialCalendarState().selectedDay);
-  // (2026-07-13) Paginated scrolling for older memories; was unpaginated list
-  const [visibleMemoriesCount, setVisibleMemoriesCount] = useState<number>(10);
+  // (2026-07-13) Batch 6 memories for snappy initial load; was heavy 10-card lag
+  const [visibleMemoriesCount, setVisibleMemoriesCount] = useState<number>(6);
   // (2026-07-13) Slide animation and vertical scroll support; was instant fade
   const [isFullscreenDateOpen, setIsFullscreenDateOpen] = useState<boolean>(false);
   const [isOverlayVisible, setIsOverlayVisible] = useState<boolean>(false);
@@ -964,11 +964,24 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     };
   }, [memories, profile]);
 
-  // Build calendar days for calendarYear & calendarMonth
+  // (2026-07-13) Pre-index dots map for O(1) day lookups; was O(31 * N) filter
   const calendarDays = useMemo(() => {
     const firstDayOfWeek = new Date(calendarYear, calendarMonth, 1).getDay();
     const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
     const daysInPrevMonth = new Date(calendarYear, calendarMonth, 0).getDate();
+
+    const dotMap = new Map<string, Set<DotIndicator>>();
+    for (let i = 0; i < memories.length; i++) {
+      const m = memories[i];
+      let set = dotMap.get(m.dateISO);
+      if (!set) {
+        set = new Set<DotIndicator>();
+        dotMap.set(m.dateISO, set);
+      }
+      for (let j = 0; j < m.dotIndicators.length; j++) {
+        set.add(m.dotIndicators[j]);
+      }
+    }
 
     const cells: {
       day: number;
@@ -986,14 +999,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       const mStr = String(calendarMonth + 1).padStart(2, '0');
       const dStr = String(d).padStart(2, '0');
       const iso = `${calendarYear}-${mStr}-${dStr}`;
-      const matching = memories.filter((m) => m.dateISO === iso);
-      const dotSet = new Set<DotIndicator>();
-      matching.forEach((m) => m.dotIndicators.forEach((dot) => dotSet.add(dot)));
+      const set = dotMap.get(iso);
       cells.push({
         day: d,
         inCurrentMonth: true,
         dateISO: iso,
-        dots: Array.from(dotSet),
+        dots: set ? Array.from(set) : [],
       });
     }
 
@@ -1088,9 +1099,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     sortBy,
   ]);
 
-  // (2026-07-13) Auto-load more older memories on scroll; was unpaginated feed
+  // (2026-07-13) Auto-load 6 more memories on scroll; was heavy 10-batch
   useEffect(() => {
-    setVisibleMemoriesCount(10);
+    setVisibleMemoriesCount(6);
   }, [searchQuery, selectedDay, activeCategory, dotFilter]);
 
   useEffect(() => {
@@ -1099,7 +1110,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         window.innerHeight + window.scrollY >=
         document.documentElement.scrollHeight - 380
       ) {
-        setVisibleMemoriesCount((prev) => Math.min(filteredMemories.length, prev + 10));
+        setVisibleMemoriesCount((prev) => Math.min(filteredMemories.length, prev + 6));
       }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -2086,7 +2097,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   type="button"
                   onClick={() =>
                     setVisibleMemoriesCount((prev) =>
-                      Math.min(filteredMemories.length, prev + 10)
+                      Math.min(filteredMemories.length, prev + 6)
                     )
                   }
                   className="px-5 py-2.5 rounded-xl bg-surface-container-low text-primary font-label-md text-xs uppercase tracking-wider border border-outline-variant/40 flex items-center gap-2 hover:bg-surface-container shadow-xs active:scale-95 transition-transform"
@@ -2330,10 +2341,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             </button>
           </div>
 
-          {/* (2026-07-13) Render exact StoryReaderView inside overlay for saved dates; was separate copy */}
+          {/* (2026-07-13) Dynamic key for instant overlay update on save; was stale reader */}
           {primaryDateMemory ? (
             <div className="w-full max-w-xl">
               <StoryReaderView
+                key={`${primaryDateMemory.id}-${primaryDateMemory.updatedAt}`}
                 embeddedInOverlay
                 profile={profile}
                 memory={primaryDateMemory}
