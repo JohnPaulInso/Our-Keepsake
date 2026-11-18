@@ -444,12 +444,14 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                 <path d="M80,17 Q82,14 84,15" fill="none" stroke="currentColor" strokeWidth="1.5" />
               </svg>
             </div>
-            {/* (2026-07-13) Increase sign-off font sizes; was text-base & 10px */}
             <span className="relative z-10 font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl text-secondary italic">
               Yours always,
             </span>
+            {/* (2026-07-13) Set author sign-off to John Paul . Your baby; was JP • St. 1 */}
             <span className="relative z-10 font-['Plus_Jakarta_Sans',sans-serif] text-xs font-semibold uppercase tracking-[0.14em] text-outline mt-0.5">
-              {memory.signOffAuthor || `${profile.partner1Name} • St. 14`}
+              {!memory.signOffAuthor || memory.signOffAuthor.includes('St.') || memory.signOffAuthor === 'JP'
+                ? 'John Paul . Your baby'
+                : memory.signOffAuthor}
             </span>
           </div>
 

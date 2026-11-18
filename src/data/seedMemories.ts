@@ -57,7 +57,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'May 9 - Nagaway ta tungod dika pakuhas db nastress ko seg hunahuna nya afters 6am mass, huwam kas wedding dress ni ante sonya nya nangadto tag db, eat ta jolibee nya himo props costume ni penelope gamit katol sunog² sa tela nya lunch ta gireflex nako imo tiil nya pakaon ganay para muinom gaviscon, nya lunch gamay makeout dako, nya tanaw kos rehearsal, mas intimate feeling pjd nakita nako ang imperfections and to be part of your own private world na nagpasulod jd tag sakyanan sa gym ctu db campus, nya nguli ta sayo pa nails ka anne, even tho mothers day, mubawi rkos ako mama puhon, it was well spent w u man sad bb, thanks for the new core memory, idk if makakita bakos theater najd but know that being able to be part of the rehearsal and saw everything meant a lot more than the actual play jd, thank you',
     quoteHighlight:
       'Being able to be part of the rehearsal and saw everything meant a lot more than the actual play jd, thank you.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'CTU DB Campus & Jollibee',
     weatherTemp: '31°C',
     weatherConditions: 'Warm Rehearsal Day',
@@ -86,7 +86,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     storyBody: `June 22-23 - Around 9 am gikuha tika nya napaman tay time, didto ta luyos iglesia dapit sa cogon nya park tas kalibunan, nagpatay jd tag maayu bahalag huot, kurog² jd ta and eyecontact while fingering and lulu²ing, top tier.. Nindot kaayo ang kulba kay it made me felt closer to you.. We fucked.. As in fucked.. Hard.. Uyog jung sakyanan... Nya kuha nato silang franz ug julius, ngadto ta db  nagouting sa cliff resort ngandam tas ato mga gamit and naa tas igbaw sa bunk bed nya sge tag kapakong kay ubos kayg ceiling nya nangadto tag the ruins mga 4-5pm nagpics ta, nya uli ta, grabe kaytag pag pangandam kay nagluto tag sinugbang baboy nya lami kaytag setup ana pakag "fine dining" nya sge rmn tag kiss ato atubangans ilaha, nya ngandam ta, nya nangaon, nya tago kos pics hahaha, nagtabi ta about psych² and mga stories ug symptoms ngano ingnana ang nafeels usa ka tao, nya nagduwa tag uno paghuman lingaw kaayo kay pirme ma +4 si franz nya unayon tikag +2 HAHAHHA\n\nMya nangatug nata habol rjd atong pangtago, mga 1am dugay kayta nakatug kay sge tag luhag, hilom kayng palibot nag finingeray na diay nya eye contact ray gamit pangcommunicate, ngitngit kaayu and gamayng lihok musaba, mutingog pajd usahay imo chechay kay nagbasa sge lng jd tag tinutukay, kay akong gi finger ilawms habol, lami kaayo matug basta katapad ka... Basta magbasa si chechay nya murag mubuwa na tubig tingog, hunong ta kay basin mabatian nila, eyecontact pag communicate sa ngitngit, piyong kadiyot finger dako, tando gamay, kuot dako, nya u slept on my chest jd nagbuntag for the first time and lami kaayung tug tapad ka,\n\nPagmata nagdungag tingog ang alarm alas 4 bisag unsay ringtone and hapit japun tag fingeray ginagmay kay imo mn jd birahon ako kamot WHAHAHAH, nya bangon ta para magpictorial unta pero bati kay way sand, una kog tug balik nya while nangandam silag breakfast, nagshower together ta for the first time, lami kaykag reaction basta malamian kay tibook lawas nimo malanay ka while the droplets are pouring against our skin as i gave you a back hug.. Naked.., while gashower ta i pressed you hard on the wall whilst the cold droplets of the shower were being spat against us, tugnaw pajd pero luhag kaytas cr bisag unsang position, bwesit pajd angcr kay way lock and glass ang shower room tuwalya ra ato giali, bahala na, lami man,\n\nGrabeg chula nato pagkaligo kuot japun, nya after ligo skincare gamay, higda balik kuot nasd gamay sa kama kay gisolo natong room, nya nakatug man ka then nangaon ta pagmata nimo nya nag horse riding ta paghuman saka tas the ruins then ngadto tag bakhawan kay nag pool ta, enjoy gamay ligo and labay² sa beach ball and nangluod paka kay giluwaan nakog fountain2 imo baba sakong gilimogmog hahahahhahah, kaon gamay, then adto ila anne natug ko para diko questionon nila nya kapoy sd ko ato, then uli ta`,
     quoteHighlight:
       'You slept on my chest for the first time and lami kaayo matug basta katapad ka.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Cliff Resort, The Ruins & Bakhawan',
     weatherTemp: '30°C',
     weatherConditions: 'Warm & Sunny Vacation',
@@ -113,7 +113,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Movie date, binge watched descendants together.',
     storyBody: 'Movie date, binge watched descendants together.',
     quoteHighlight: 'Binge watched descendants together',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '28°C',
     weatherConditions: 'Cozy & Gentle',
@@ -140,7 +140,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Adto ila nanay ngaon ta ug practice sayaw ug paprint.',
     storyBody: 'Adto ila nanay ngaon ta ug practice sayaw ug paprint.',
     quoteHighlight: 'Adto ila nanay ngaon ta ug practice sayaw',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Ila Nanay, Bogo City',
     weatherTemp: '29°C',
     weatherConditions: 'Warm Day',
@@ -167,7 +167,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Ngadto tag kawit help tag seminar ni nay ofelia nya nagoperate kos ppt ikaw kay nisayaw2 nya minaw ratas mga lessons nya practice tag fig after nihilak ka kay away kang saysay.',
     storyBody: 'Ngadto tag kawit help tag seminar ni nay ofelia nya nagoperate kos ppt ikaw kay nisayaw2 nya minaw ratas mga lessons nya practice tag fig after nihilak ka kay away kang saysay.',
     quoteHighlight: 'Practice tag fig after nihilak ka kay away kang saysay',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Kawit, Medellin',
     weatherTemp: '28°C',
     weatherConditions: 'Gentle Breeze',
@@ -194,7 +194,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Ngadto ta ila uncle nilo practice kanta and hapit 7 11 ngaon ta nya uli.',
     storyBody: 'Ngadto ta ila uncle nilo practice kanta and hapit 7 11 ngaon ta nya uli.',
     quoteHighlight: 'Practice kanta and hapit 7 11 ngaon ta',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Ila Uncle Nilo & 7-Eleven, Bogo City',
     weatherTemp: '27°C',
     weatherConditions: 'Calm Evening',
@@ -221,7 +221,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Nanuroy ta adto ta gaisano after mass nya naligo kag uwan adto tag minute burger, malas mn kay uli mo sayo pero naka kanta tag hbd ni paeng, lingaw kayka bb kay ikaw jd nilead sa kanta hahahhaa.',
     storyBody: 'Nanuroy ta adto ta gaisano after mass nya naligo kag uwan adto tag minute burger, malas mn kay uli mo sayo pero naka kanta tag hbd ni paeng, lingaw kayka bb kay ikaw jd nilead sa kanta hahahhaa.',
     quoteHighlight: 'Lingaw kayka bb kay ikaw jd nilead sa kanta',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Gaisano & Minute Burger, Bogo City',
     weatherTemp: '26°C',
     weatherConditions: 'Rainy Day',
@@ -248,7 +248,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Didto ta seminar sa nailon, lingaw kaayo kay ikaw nag emcee and nisayaw sd ka lipay kaayo ang mga gors, nya gitagaan tang nanay ug pampalit watergun sa jnl wahahhaha...',
     storyBody: 'Didto ta seminar sa nailon, lingaw kaayo kay ikaw nag emcee and nisayaw sd ka lipay kaayo ang mga gors, nya gitagaan tang nanay ug pampalit watergun sa jnl wahahhaha nya nag english2 ta kay ana ka sige rakog "sunod" sa jollibee fries hwahahhaha super cute, ill get you next time bb, wala pa money imong daddy then you were crying the entire night, natrigger kas pagkaleader, pero you assured me naman na lifes worth living, so thank you bb.',
     quoteHighlight: 'You assured me naman na lifes worth living, so thank you bb',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Nailon & JNL, Bogo City',
     weatherTemp: '29°C',
     weatherConditions: 'Sunny with Warm Rain',
@@ -275,7 +275,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Barili ngadlawn ta adto bagats inyo dalas mga gamit padung church, nya nagilog tag van nagpundok ta, while padung barili lipong kaayo pero gamit mn atong window cover kay kibaw ko silawan ka...',
     storyBody: 'Barili ngadlawn ta adto bagats inyo dalas mga gamit padung church, nya nagilog tag van nagpundok ta, while padung barili lipong kaayo pero gamit mn atong window cover kay kibaw ko silawan ka, nya gamit dayun jacket as a habol, nya nagkinumotay na diayg totoy, nihapit tas aloginsan kay nangihi then padayun kinumotayg totoy lanses lag higda nakatug ko namugtaw imo abaga pero wajd ka mulihok para lng diko kamata, aweee thank u, nya si rice wrajuy paki sa ato kabigaon hahah, nya nagkaraoke² ta sa kwartong father nya nangaligo ta barili nya nagwatergun ta suya ang pikas partylist nagpic2 nlng sila hahahah, ligaw kayta nagduwa, while nas dagat gakos gihapon kiyod2 gamay kuot² dako pero "ayaw by kay naas mama" sakpan nya hahaha.. muto hang namans mata ang dagat, balik nata church, practice tas mga set of songs nya pagmisa luya kog setups ppt nya paghuman nimog salmo, nindot kaayo gibagat tikas gawas para di uwaw musulod, nya wow performance ta ato nya nihilak diays sadness ato whaha saban te cyra, nalain rato kay naleftout ila circle nya ngaon ta then rant gamay, nya ngitngit naman habol timensds jacket, fingeray na, kuot gihapon way pananghiray, wa niagis igbaw sa garter, adto lahos sa ilalom gipadaplin ang panty nya gipaslak ang tudlo kutobs makaya bahalag lisud, nya nakatug ko, ikaw kuwang kayg tug pero lingaw mn ta.',
     quoteHighlight: 'Gakos gihapon, watergun lingaw kayta nagduwa and sweet intimacy',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Barili, Aloguinsan & Church',
     weatherTemp: '30°C',
     weatherConditions: 'Sunny Coast & Sea Breeze',
@@ -302,7 +302,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'After serve didto tag diy, nakabangga kog motor, nalain ko nimo kay pirme jd ka mukuyog sa choir pero thankful rsd ko kay wko nimo byae pagkasala nako nya nagworthy then nag plaza grass gutom nakyka.',
     storyBody: 'After serve didto tag diy, nakabangga kog motor, nalain ko nimo kay pirme jd ka mukuyog sa choir pero thankful rsd ko kay wko nimo byae pagkasala nako nya nagworthy then nag plaza grass gutom nakyka.',
     quoteHighlight: 'Thankful rsd ko kay wko nimo byae pagkasala nako',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DIY & Plaza Grass, Bogo City',
     weatherTemp: '28°C',
     weatherConditions: 'Evening Breeze',
@@ -329,7 +329,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Catching up date didto tag db gihatud tika hadlok ta di madayun kay uwan 6 am pero naabot mn tag db, nya round 1 tas dockside early morning lami kays feeling, then naglunch ta plaza db nagbuy kog cafetana para nato nya nag photobooth ta...',
     storyBody: 'Catching up date didto tag db gihatud tika hadlok ta di madayun kay uwan 6 am pero naabot mn tag db, nya round 1 tas dockside early morning lami kays feeling, then naglunch ta plaza db nagbuy kog cafetana para nato nya nag photobooth ta, nianang photographer "stay strong" wahahahha kato pako nakabati jd personal nya nabagohan ko kay ako nay giingnan ug ingnato, nya round 2 tas dockside nsd, sge ratag kinanay nya tug ka gamay pahuway, round 3 nasad rakrakan, dayun eat ug fries, then serve tas church suko kays te cyra ka bertz kay gidisco ang communion, nya ikaw naglain imo tiyan pero nagplan ta mag jabee, dugay kaayo muto nangaon tas plaza nya practice gamay and badminton ta city hall, then hatud tamo uli, drained nakayka ba hahahah, so proud of you bb.',
     quoteHighlight: 'Photographer said "stay strong", round 3 dockside and so proud of you bb',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Dockside, Cafetana & City Hall, Bogo City',
     weatherTemp: '28°C',
     weatherConditions: 'Morning Rain & Warm Sun',
@@ -356,7 +356,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Kuha sanrem nya adtog diy ug 7 11, makeout gamay centrum, practice choir, mejo badlood sa isaw.',
     storyBody: 'Kuha sanrem nya adtog diy ug 7 11, makeout gamay centrum, practice choir, mejo badlood sa isaw.',
     quoteHighlight: 'Makeout gamay centrum, practice choir',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'San Remigio, Centrum & DIY, Bogo City',
     weatherTemp: '29°C',
     weatherConditions: 'Clear Skies',
@@ -383,7 +383,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Isaw date after serve nya ngukay wahahaha.',
     storyBody: 'Isaw date after serve nya ngukay wahahaha.',
     quoteHighlight: 'Isaw date after serve nya ngukay',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Isaw Stand & Ukay-ukay, Bogo City',
     weatherTemp: '28°C',
     weatherConditions: 'Gentle Evening',
@@ -410,7 +410,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Panta date car then practice then jnl.',
     storyBody: 'Panta date car then practice then jnl.',
     quoteHighlight: 'Panta date car then practice then jnl',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Pantalan & JNL, Bogo City',
     weatherTemp: '28°C',
     weatherConditions: 'Seaside Breeze',
@@ -437,7 +437,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Serve nailon, gave me a letter and a gift then 7 11 after, then serve balik paghapon kantahan ko uncle uwaw kaayo, nya ngadto ta watsons then palitan. kag crispy king wahahah, then uli na adto mi sako fam ug dayon sa sanrem nya hatud lola sa bukid, idk just felt so grateful for the ppl around me.',
     storyBody: 'Serve nailon, gave me a letter and a gift then 7 11 after, then serve balik paghapon kantahan ko uncle uwaw kaayo, nya ngadto ta watsons then palitan. kag crispy king wahahah, then uli na adto mi sako fam ug dayon sa sanrem nya hatud lola sa bukid, idk just felt so grateful for the ppl around me.',
     quoteHighlight: 'Gave me a letter and a gift... felt so grateful for the ppl around me',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Nailon, Watsons & San Remigio, Bogo City',
     weatherTemp: '29°C',
     weatherConditions: 'Gentle Sunshine',
@@ -464,7 +464,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Date adto dockside whole morning nya it was so intimate nag drainay ta, nya thoughtful kayka kay gikuha nimos gelly kay nagmaoy siya allan, ngadto tag kawit sa chuy cafe nya nagduwa ta uno, snake and ladders ug dama nya nangadtog watsons db palit razon...',
     storyBody: 'Date adto dockside whole morning nya it was so intimate nag drainay ta, nya thoughtful kayka kay gikuha nimos gelly kay nagmaoy siya allan, ngadto tag kawit sa chuy cafe nya nagduwa ta uno, snake and ladders ug dama nya nangadtog watsons db palit razon, nya nanguli ta gipug an ko nimo round 3 sa dockside we were like little kids talking in a baby voice nya u said "i feel so loved" whenever i kiss you.. then late ta naabot simbahan nya ngaon ta prince bbqhan nya badmintons pantalan watam lingaw kay daghan mangagi motor hahaha, fun dayy.',
     quoteHighlight: 'U said "i feel so loved" whenever i kiss you..',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Dockside, Chuy Cafe Kawit & Pantalan, Bogo City',
     weatherTemp: '30°C',
     weatherConditions: 'Warm & Sunny',
@@ -491,7 +491,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Murder mystery sheep detectives kaayo ta nag lista² pata kinsay murderer, plot twist kayta kay puro ta wa katag an whaahhaah.',
     storyBody: 'Murder mystery sheep detectives kaayo ta nag lista² pata kinsay murderer, plot twist kayta kay puro ta wa katag an whaahhaah.',
     quoteHighlight: 'Plot twist kayta kay puro ta wa katag an whaahhaah',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '27°C',
     weatherConditions: 'Pleasant Night',
@@ -518,7 +518,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Prac then serve nya nangadto ta dakit 1st time nisupport kas ako pagduyog nya nag cogon night market nya nag 7 11 paghuman itik = quack kwek.',
     storyBody: 'Prac then serve nya nangadto ta dakit 1st time nisupport kas ako pagduyog nya nag cogon night market nya nag 7 11 paghuman itik = quack kwek.',
     quoteHighlight: '1st time nisupport kas ako pagduyog nya nag cogon night market',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Dakit & Cogon, Bogo City',
     weatherTemp: '28°C',
     weatherConditions: 'Gentle Breeze',
@@ -545,7 +545,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Kuha db kuyog mon, nagjabee ta and just like the fries i promised you, successful inyo booth sa db, nya pag uli nihapit tag panta nag double date bbtime sa panta, kuot2 basa kaayo ako fingers and we kissed a lot, labad lang imo ulo so saddd, but id still kiss you and kuot you, muto nangadto tag patio nakuyawan ka, sorry wato natuyo kay nikalit lng kog bira open ang bintana, nya after prac adto ta city hall badminton, linuwaay ming kim.',
     storyBody: 'Kuha db kuyog mon, nagjabee ta and just like the fries i promised you, successful inyo booth sa db, nya pag uli nihapit tag panta nag double date bbtime sa panta, kuot2 basa kaayo ako fingers and we kissed a lot, labad lang imo ulo so saddd, but id still kiss you and kuot you, muto nangadto tag patio nakuyawan ka, sorry wato natuyo kay nikalit lng kog bira open ang bintana, nya after prac adto ta city hall badminton, linuwaay ming kim.',
     quoteHighlight: 'And just like the fries I promised you, successful inyo booth sa DB',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Panta & City Hall, Bogo City',
     weatherTemp: '29°C',
     weatherConditions: 'Warm Evening',
@@ -572,7 +572,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Seminar ni fr mon sa mga choir, nag 7 11 dakit ta nya nag osave nagduwa tag poison² nya ulii.',
     storyBody: 'Seminar ni fr mon sa mga choir, nag 7 11 dakit ta nya nag osave nagduwa tag poison² nya ulii.',
     quoteHighlight: 'Nag 7 11 dakit ta nya nag osave nagduwa tag poison² nya ulii',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: '7-Eleven Dakit & Osave, Bogo City',
     weatherTemp: '27°C',
     weatherConditions: 'Peaceful Night',
@@ -599,7 +599,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     snippet: 'Whole day seminar sa slmcb, nya dockside paghuman, nya serve bungtod chapel.',
     storyBody: 'Whole day seminar sa slmcb, nya dockside paghuman, nya serve bungtod chapel.',
     quoteHighlight: 'Whole day seminar sa slmcb, nya dockside paghuman, nya serve bungtod chapel',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'SLMCB, Dockside & Bungtod Chapel',
     weatherTemp: '30°C',
     weatherConditions: 'Sunny & Vibrant',
@@ -630,7 +630,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Db date fetched, citihardware, panta sa db, then ilang lexa, made an arduino trashcan, nagkalibanga ko way sabon hahaha, lingaw kaayo nasuccess kay nigana nang code sa arduino, ang step motor nlng problema, had lunch at plaza db, first time i put 2 fingers inside of you, you loved it, you kinda said ily but didnt mean it, apas ta padung plaza ngaon ta ice cream and empanada and we made a little cute cone cover boquet, then himo tag keychain sa business nila kiara and kim',
     quoteHighlight:
       'First time I put 2 fingers inside of you, you loved it, and we made a little cute cone cover bouquet',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB, CitiHardware, Panta & Plaza',
     weatherTemp: '31°C',
     weatherConditions: 'Sunny & Creative',
@@ -660,7 +660,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Fetched at db, arduino code ta sa segregation bin, and u finally read the letter of me in pain, then we got intimate fingering you hard sa dockside, then nanguli ta nya nagwatch ta concert sa complex',
     quoteHighlight:
       'U finally read the letter of me in pain, then we got intimate at dockside and watched concert',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB, Dockside & Complex',
     weatherTemp: '29°C',
     weatherConditions: 'Warm & Emotional',
@@ -690,7 +690,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'After not seeing each other for 4 days, we missed each other so hard, i fetched u and ur classmates kay namalit kag extension wire ug cord para ugma, suroy sd tas nightmarket sa plaza, hahaha palit kag empanada ug sushi, then ngadto tag panta, gatiktok mo and nakoy vid sd ato nakareunite njd ta, lakaw ta padung cebeco kay nagpark mn adto luya kayka, adto tag peryahan, pusil² ta kay di silam rides nya nakadaog ta ni peckyy, nya adto ta city hall kita rang duha ngitag safe spot, then we kissed so long cuz of how much we missed each other, i got to taste every part of you that i missed, and fingered you with 3 fingers for the first time, you screamed like hell which was music to my ears bisag tabunan ang baba, and we fcked hard, after a moment of silence..you cried on my chest kay nahadlok ka para sa leadership summit and I kept saying na ma kaya rajd ni nimo, u wept so hard kahilakon sd ko, we hugged so tight and hard, thank you for the healing hugs, kahibaw ko dala tog kamingaw sa akoa imo pagtyabaw, its okay, i love you, i got you presnts too!!! si peckyy, a boquet lego na well build soon, epic album pins, a zenithsu figure, and a necklace.. then u went home and nibalik ko naghatud ug dishwashing whahaha',
     quoteHighlight:
       'U cried on my chest kay nahadlok ka para sa leadership summit and I kept saying na ma kaya rajd ni nimo. Thank you for the healing hugs.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Plaza Night Market, Panta, Peryahan & City Hall',
     weatherTemp: '28°C',
     weatherConditions: 'Breezy & Healing',
@@ -720,7 +720,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Hatud tika padung db cuz u were crying last night, nabaw patag tago² sa imo papa gipasakay kag bus hahaha, chika ta gamay and abot ta db, later that night i was so sad, wanako nafeel ang pistas bogo kay wa ka, pero you said i love you through chats jd, idk pero kaduha raguro ka niingon ani sakoa sa chat and u actually mean it, or basin katugon nsd ka mao nkaingon ka pero its okay, u dont need to say that back, atleast u know i love you',
     quoteHighlight:
       'You said I love you through chats jd, and u actually mean it. At least u know I love you.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo to DB Bus & Chat',
     weatherTemp: '30°C',
     weatherConditions: 'Fiesta & Nostalgic',
@@ -750,7 +750,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Fetched u at db, lubong sa imo lola kita nanganta sa medellin, nag 711 ta before nag palit tag ice cup nya natagak ang ice hahaha, cute kaayu ato gisagolag icecream ug milk, nya nanganta ta gwapa kaykaa bisag stressed na, got you a salonpas paras imong pamaol, nihatud tas lubong bisag gisubawan naka nya gihatud taka pauli, it was a great feeling supporting your family sa presence and transpo, nanglaag tag medellin shrine kadiyot with turble, huggiess then uli ta hatud everyone dalas upat ka maleta nimo after summit, nya adto ka balik panugnawan, luoy kayka kay gikasaban kas nayabo',
     quoteHighlight:
       'It was a great feeling supporting your family sa presence and transpo. Huggiess at Medellin shrine with Turble.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB, Medellin Shrine & Panugnawan',
     weatherTemp: '29°C',
     weatherConditions: 'Gentle & Solemn',
@@ -780,7 +780,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Secret beach siocon after sa inyo video with faiora, lingaw kayto kay daghan tag inside jokes and nahadlok paka maslide ang sakyanan tungod anang bato2 na dulhugon, then nag poison game ta lingaw kaayo kay nagkalisud², then nag karaoke ta lingaw kayka nagkanta2',
     quoteHighlight:
       'Secret beach Siocon, lots of inside jokes, poison game, and singing karaoke together',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Secret Beach Siocon',
     weatherTemp: '31°C',
     weatherConditions: 'Coastal Breeze & Sunny',
@@ -810,7 +810,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Laag ta with mama nipalit kag shoes, kaon tag lugaw ni bossing kuyog casper, then nagpatupi ko nya ngadto tas diy nya nawad-an kog 700 nya naluoy ka kay sge kog pamalikas ato ug ngano nawala hahahah',
     quoteHighlight:
       'Kaon tag lugaw ni bossing kuyog casper, and buying shoes together with mama',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Lugaw ni Bossing & DIY Bogo',
     weatherTemp: '30°C',
     weatherConditions: 'Warm & Casual',
@@ -840,7 +840,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Planned date after 2 weeks of not being together, palit tag novo paras inyong retreat ni franz and naluoy paka sa tindero kay sayop ang resibo then ako gi trash talk silang vichy and franzene naglagot ka gamay hahahha, then adto tas dockside we unboxed our matching aquaflasks and kei keychain, then intimate kayto kay we made out naked for almost 2 hours, we fucked so hard with that love condom, grabeng init and sweat bisag gaircon ta, nya first time ever that i got to taste and lick you deep inside, and u held and stroked me for the first time while getting each other off.. unforgettable',
     quoteHighlight:
       'We unboxed our matching Aquaflasks and Kei keychain. First time ever that I got to taste and lick you deep inside.. unforgettable.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Novo & Dockside',
     weatherTemp: '28°C',
     weatherConditions: 'Cozy Aircon & Blazing Passion',
@@ -870,7 +870,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Served fig mass, then gipahatag tikag erasable pen para gamit nimo pang take notes, then attended lpc meeting staring at each other sa church, gihatagan paka claire atong haikyuu keychain, then tabi² tas church, lunch tas uncle\'s, got jealous kay cgeg storya about sa church boys and pastor, told u about the 6.9 earthquake that hit bogo years ago',
     quoteHighlight:
       'Staring at each other during the LPC meeting in church, lunch at Uncle\'s, and reminiscing together',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Church, LPC Meeting & Uncle\'s',
     weatherTemp: '30°C',
     weatherConditions: 'Serene Church Bells',
@@ -900,7 +900,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       '5:30 am wake up late for service, running into illah, then we went to javapitz, planned for the city hall',
     quoteHighlight:
       '5:30 AM service rush, running into Illah, coffee at Javapitz, and City Hall plans',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Javapitz & City Hall',
     weatherTemp: '27°C',
     weatherConditions: 'Cool Dawn & Awakening',
@@ -930,7 +930,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Morning peek sa luyo bintana while gahulat nimo, laag with illah artea kawit, kaon tag makoy\'s lechon, then adto tas cemetery, uncle brew tambay, choir practice, gikasaban kas diy kay nagduwa kag megaphone hahahaha, tambay plaza, terminal sendoff, then attended alpine service for the priest\'s mother',
     quoteHighlight:
       'Morning peek sa luyo bintana while gahulat nimo, Makoy\'s lechon, laughter at DIY with the megaphone',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Artea Kawit, Makoy\'s Lechon, Uncle Brew & Alpine',
     weatherTemp: '31°C',
     weatherConditions: 'Sunny Roadtrip',
@@ -960,7 +960,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Nailon service, lunch and intimate fingering at panta, jnl, talked about summer outing, intimate fingering daplins dalan while nag motor, then chula hard inside car, touched and explored each other, licked and ate you until you moaned so loud, you stroked me to finish, sticky and loving afterglow',
     quoteHighlight:
       'Touched and explored each other, licked and ate you until you moaned so loud, you stroked me to finish.. loving afterglow',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Nailon, Panta & JNL',
     weatherTemp: '29°C',
     weatherConditions: 'Warm Breeze & Passion',
@@ -990,7 +990,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Casper died, painful day, stopped attending choir mass for a while to grieve',
     quoteHighlight:
       'Casper died, painful day, stopped attending choir mass for a while to grieve',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '28°C',
     weatherConditions: 'Gentle Rain & Solemn',
@@ -1021,7 +1021,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'You were so tired ikaw gisugo sa imo mga classmates, para dika kapoyon mag atang, fetched at db gikan ko cebu kuyog mga classmates hatud sa bagay,gibyaan natos angel paghatud ni monick hahaha, nya while nagdrive ko nagtiwas ta tanaw sa epic the musical, nya jnl palit book',
     quoteHighlight:
       'While nagdrive ko nagtiwas ta tanaw sa Epic The Musical, nya JNL palit book',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB, Bagay & JNL',
     weatherTemp: '30°C',
     weatherConditions: 'Warm Afternoon',
@@ -1051,7 +1051,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Practice choir didto ta potato cornerr yeyyy, then nangadto tag plaza duwa stickman sa tab dayun namalit tag couple headphones sa diy eyy nya naghinapakay tas helmet kay di ka muhug nakos motor HAHAHAH',
     quoteHighlight:
       'Namalit tag couple headphones sa DIY, nya naghinapakay tas helmet kay di ka muhug nakos motor',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Potato Corner, Plaza & DIY Bogo',
     weatherTemp: '31°C',
     weatherConditions: 'Sunny & Playful',
@@ -1081,7 +1081,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Sayo ta niadto sa simbahan, adto sa right side sa church kay naa paman didto ang pamisahay.. nagtabi ta about asa ta magpakasal ug mga future plans, and nag story kas imo first experiences as a reader then magduet² mo ni illah sa salmo and kato nagduet mo ni bryce na sge pag pugong² sa temptasyon, we reslly had fun and i was so in love by just listening to your fun storiess',
     quoteHighlight:
       'Nagtabi ta about asa ta magpakasal ug mga future plans... I was so in love by just listening to your fun stories',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo Church',
     weatherTemp: '28°C',
     weatherConditions: 'Peaceful Morning Light',
@@ -1111,7 +1111,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Fetched db, cafetana fries, story about justine and illah, and odysseus real story',
     quoteHighlight:
       'Cafetana fries, stories about Justine and Illah, and sharing the real story of Odysseus',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB & Cafetana',
     weatherTemp: '29°C',
     weatherConditions: 'Warm Afternoon Snack',
@@ -1141,7 +1141,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Fetched u at dbsupreme burger steak!! made flower legosss and went to curva bbtime, ana paka na putlon ko na imong kamot ron ibilin na dira, nya deeper, i love your moans, i was so fckinng in love',
     quoteHighlight:
       'Made flower Legos and went to Curva bbtime... Deeper, I love your moans, I was so in love',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB & Curva',
     weatherTemp: '30°C',
     weatherConditions: 'Tropical & Passionate',
@@ -1171,7 +1171,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Medellin serve 7 11 ta nya uli raman ta dayon',
     quoteHighlight:
       'Medellin serve, 7-Eleven run, and heading home together',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Medellin & 7-Eleven',
     weatherTemp: '28°C',
     weatherConditions: 'Breezy Evening',
@@ -1201,7 +1201,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Tapilon serve and nagicecream ta paghuman and chika in the car and i kept hugging youu',
     quoteHighlight:
       'Tapilon serve, ice cream paghuman, chika in the car and I kept hugging you',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Tapilon & Car',
     weatherTemp: '29°C',
     weatherConditions: 'Warm Sunset Glow',
@@ -1232,7 +1232,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Fetched at db kuyog cm ni saysay kay sakay hapon dako niagi tag bagay',
     quoteHighlight:
       'Fetched at DB kuyog classmate ni Saysay, hapon dako niagi tag Bagay',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB, Bagay & Bogo',
     weatherTemp: '31°C',
     weatherConditions: 'Warm Afternoon',
@@ -1262,7 +1262,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'For some nights, nagsge kag edit despite being so tired, you couldnt help it and kept calling me "bb" i was melting when i was the one you\'d run to when youre tired, napatoy one time na ang plushie na shark imo gihatag ka mama, ana ka "isda ma oh para luto" HAHAHAHl',
     quoteHighlight:
       'I was melting when I was the one you\'d run to when you\'re tired... "Isda ma oh para luto"',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '28°C',
     weatherConditions: 'Cozy Evening Breeze',
@@ -1292,7 +1292,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Didto ra sanrem ni uncle, nastuck ang sakyanan, nagpic kas dagat gwapa kaykag samot sa imo outfit, bday danilo ngadto ta nagduwag murder² sa ground nya ikaw narrator, ibog kayko while ganarrate ka lingaw kaayo mudalag narration, and everytime u slept at my lap, it felt like time stopped,gwapa kayka jd i was fking obssessedthe entire day, even tho natay little fights ani i still choose you',
     quoteHighlight:
       'Everytime you slept at my lap, it felt like time stopped. Even though we have little fights, I still choose you.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'San Remigio & Uncle\'s',
     weatherTemp: '30°C',
     weatherConditions: 'Sea Breeze & Golden Sunshine',
@@ -1323,7 +1323,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Duaw ta ni ya inting, kibaw ko wala kas mood ato gibagat tikas eskina, gigakos dayun tika wlaay duhaduha nya cute kaayo ka kay first time nimo nigamit ug para patays lamok na murag tennis, giatay nalanay jd ko ato the entire time ibog kaykos imooo, nya nangadto ta nailon kadiyot nagmotor and nag vocal warmups ta while gamotor cute kaayooo',
     quoteHighlight:
       'Gigakos dayun tika walay duhaduha, and nag vocal warmups ta while nagmotor... cute kaayo',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Ya Inting\'s & Nailon',
     weatherTemp: '29°C',
     weatherConditions: 'Gentle Dusk & Warm Breeze',
@@ -1353,7 +1353,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Naglamaw ta ila ya inting nya naghimo tas gamay kaayo na duwaan na guess the character and painting date afterwards, sunset ato gipaint and sge tag lalis sa colors hahahaha',
     quoteHighlight:
       'Lamaw ila Ya Inting, guess the character game, and sunset painting date arguing playfully over colors',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Ya Inting\'s',
     weatherTemp: '30°C',
     weatherConditions: 'Sunset Warmth & Colors',
@@ -1383,7 +1383,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Serve 6am nailon, plaza date ta nangaon sa mga gipalit sa 7 11 nya nag watsons nya pag ka gabie gacall ta lagot kaykang monmon di mutubag ug tarong sa uniform nya nagcall tag kita ra gahimo ko keychain while ikaw gasuwat',
     quoteHighlight:
       '6AM Nailon service, Plaza 7-Eleven date, and sweet late night call crafting keychains while you wrote',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Nailon, Plaza, 7-Eleven & Watsons',
     weatherTemp: '28°C',
     weatherConditions: 'Morning Dew to Starry Night',
@@ -1413,7 +1413,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Serve nailon,taytayan bbq, cityhall badminton puros trashtalk sayawsayaw nagbadminton kuyog sila anne ug justine',
     quoteHighlight:
       'Serve Nailon, Taytayan BBQ, and City Hall badminton with Anne and Justine',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Nailon, Taytayan & City Hall',
     weatherTemp: '29°C',
     weatherConditions: 'Active Evening Breeze',
@@ -1444,7 +1444,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Nailon date serve',
     quoteHighlight:
       'Nailon date serve and quiet time spent together',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Nailon',
     weatherTemp: '28°C',
     weatherConditions: 'Serene Sunday Morning',
@@ -1474,7 +1474,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Db date hatud jollibee, ako unta iadtos cashier ang bukogs manok basin naay refund nya kiat kayta , caution wet floor sign gisuno ang sign pina slide hahaha, naghuwat kos db makadefend mos title hearing, and im so proud of youuuu! approved title 2 ug 3 , deserve magbaconw friess!! nya practice tas fig, horror movies padung uli.',
     quoteHighlight:
       'Naghuwat kos DB makadefend mos title hearing, and I\'m so proud of you! Approved titles 2 & 3!',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB & Jollibee',
     weatherTemp: '31°C',
     weatherConditions: 'Warm & High Energy',
@@ -1504,7 +1504,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Lapaz practice cbsaa practice nya kaons inyo balay',
     quoteHighlight:
       'La Paz CBSAA practice and eating together at your home',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'La Paz & Home',
     weatherTemp: '29°C',
     weatherConditions: 'Sunny Afternoon',
@@ -1534,7 +1534,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Practices salmo before serve and nakaregister kag atome card, lakaw padung panta',
     quoteHighlight:
       'Practice salmo before serve, registering your Atome card, and walking to Panta',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Church & Panta',
     weatherTemp: '30°C',
     weatherConditions: 'Coastal Morning Breeze',
@@ -1564,7 +1564,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'First pregnancy scare, i got scared to lose you, pregnancy scare bisag gifinger ra maygae gidugo karon, talked a little sa city hall and chula gamay nya chuckie for reassurance nya we had talks about barbie na mcdo nya "kimii gaaa" genggengg na anime, kanang dinalang kakatarong ug type sa imong goodnights tungods kahagoo',
     quoteHighlight:
       'Talked a little sa City Hall, chula gamay nya Chuckie for reassurance... I got scared to lose you',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'City Hall & Bogo',
     weatherTemp: '28°C',
     weatherConditions: 'Gentle Dusk & Emotional Relief',
@@ -1594,7 +1594,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Fetched at db and gihilot sa sakyanan kay labad kaayong ulo then stopped at the side of the road para mag makeout, nawagtang ang labad pag human, lami kaykog lips, lasang bambam, then niadto ta eugenio serve mwehehhe',
     quoteHighlight:
       'Gihilot sa sakyanan kay labad ang ulo, stopped roadside to makeout, then served at Eugenio',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB, Roadside & Eugenio',
     weatherTemp: '29°C',
     weatherConditions: 'Afternoon Heat & Sweet Relief',
@@ -1624,7 +1624,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Lapaz date pickleball and nihigda kos uncle brew wahhaha imo ko kasaban, nya nag jnl ta',
     quoteHighlight:
       'Pickleball date sa La Paz, laughing at Uncle Brew, and browsing JNL',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'La Paz, Uncle Brew & JNL',
     weatherTemp: '30°C',
     weatherConditions: 'Warm & Sporty',
@@ -1654,7 +1654,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Bday ante sonya, gahi kaykag ulo, adto jd makigmake out sa alphine eskina kay ngitngit, nangasakpan na nuon ta nilang dan ug lani hahaha, pero pa as if rag way nahitabo nya jam gamay dayun for the first time, we slept in each others arms cuddling, even for a while, it felt like forever',
     quoteHighlight:
       'For the first time, we slept in each other\'s arms cuddling. Even for a while, it felt like forever.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Alpine Corner & Party',
     weatherTemp: '27°C',
     weatherConditions: 'Starry & Secretive',
@@ -1685,7 +1685,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Bagats terminal, palit chargers DIY',
     quoteHighlight:
       'Bagat sa terminal and buying chargers together at DIY',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo Terminal & DIY',
     weatherTemp: '30°C',
     weatherConditions: 'Warm Afternoon',
@@ -1715,7 +1715,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Pastil sa patio practice anima christi',
     quoteHighlight:
       'Pastil sa patio and practicing Anima Christi together',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Patio & Church',
     weatherTemp: '28°C',
     weatherConditions: 'Gentle Evening Glow',
@@ -1745,7 +1745,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Sanrem date worthy, sunset pic',
     quoteHighlight:
       'San Remigio date worthy, watching and capturing the sunset by the sea',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'San Remigio Beach',
     weatherTemp: '29°C',
     weatherConditions: 'Golden Hour Coastline',
@@ -1775,7 +1775,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Surprised trilogy book monick bagtan nfa 7 11 uli',
     quoteHighlight:
       'Surprised you with the trilogy book, meeting at NFA, and 7-Eleven treats on the way home',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'NFA, 7-Eleven & Bogo',
     weatherTemp: '30°C',
     weatherConditions: 'Breezy & Cheerful',
@@ -1805,7 +1805,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Namilar sa lola ni pinky nya ngaon atbangs watsons naay kananan, i cried again cuz of my lame jokes',
     quoteHighlight:
       'Wake visit, eating across Watsons, and laughing so hard to tears from silly jokes',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Wake & Eatery across Watsons',
     weatherTemp: '27°C',
     weatherConditions: 'Cool Night Air',
@@ -1835,7 +1835,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Db dockside date sunset',
     quoteHighlight:
       'DB dockside sunset date, admiring the horizon and each other',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB Dockside',
     weatherTemp: '28°C',
     weatherConditions: 'Sunset Glow over the Water',
@@ -1865,7 +1865,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Practiced anima christi and budol² natay serves st peter imo ko sgean kasaba seg pangawat budbod nya hilot² sd kas imo kamot nya gi bring home ang pagkaons patay, nikaon ta ila joahna whilst you were cooking chicken, i hugged you from behind, dancing in the kitchen while were locked in each other with backhugs, we ate and went home, naghatud ta nila nya bisag lisud, still tried to finger you quietly bisag mag drive... youd have quiet hardbreaths and silent moans, you\'d grab my arm even harder while driving, i get goosebumps when you feel me touching you, nya nag share tag horror stories nya niagi tag ngit2 kaayo na lugar, nya nag anima christi ta pakanta pauli hahahaha nagpauban pajd pahatuds balay kay nahadlok hahaha',
     quoteHighlight:
       'Dancing in the kitchen locked in backhugs... driving home sharing horror stories and singing Anima Christi together',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'St. Peter, Joahna\'s House & Drive',
     weatherTemp: '27°C',
     weatherConditions: 'Dark Country Road & Starry Night',
@@ -1896,7 +1896,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'From nangitag bondpaper to an intense makeout session outside 7-11 parking area, yeah. i sucked the life out of you, nadrained jd ka paghuman hahaha\n\nPOV: IBOG KAYKAS IMO BBGIRL\n"lumay sa laway" "tara palit tag bondpaper?" "long or short"\n\nwhile dropping everyone, my fingers are secretly rubbing your clit harder, youd even guide my fingers to hit the spot, the taste of your pussy at my fingertips, lasa nimo kay "sure nga akoa"...',
     quoteHighlight:
       'From nangitag bondpaper to an intense makeout session outside 7-11 parking area... lasa nimo kay sure nga akoa',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: '7-Eleven Parking & DB',
     weatherTemp: '28°C',
     weatherConditions: 'Warm Dusk Air',
@@ -1927,7 +1927,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Lapaz serve, ngaon lapaz, 7 11 i cream date',
     quoteHighlight:
       'La Paz serve, eating together, and sweet 7-Eleven ice cream date',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'La Paz & 7-Eleven',
     weatherTemp: '29°C',
     weatherConditions: 'Warm Afternoon Sunshine',
@@ -1957,7 +1957,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Pool invite mis imo fam, whole barkada sang karaoke nagconcert',
     quoteHighlight:
       'Pool invite with your family, whole barkada singing karaoke in full concert mode',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Family Pool & Bogo',
     weatherTemp: '31°C',
     weatherConditions: 'Sunny Splash & Music',
@@ -1987,7 +1987,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Chika nights about ka sir roy ug mam aye dimo ganahan ni mam aye kay gors na maypas raniza nalang hahahah nya abot tag talks about the color brown, tumbler, boquet, bag, letters, maybe it all started jd sa ilys1892 jd dapat ato kasal brown themed sd, nya abot tag chika ka ella naggrieve siya nihilak ka',
     quoteHighlight:
       'Talks about the color brown... Maybe it all started sa ILYS1892, our wedding should be brown themed too',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '27°C',
     weatherConditions: 'Gentle Breezy Night',
@@ -2018,7 +2018,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Fetched u at db, you looked so beautiful in that black dress and i was crushing so hard then para di masakpan na gikuha mo alas 2 ta nanglarga, we stayed at medellin dockside and hugged each other with deep breathes and intense touching.. and long holds of kisses, we had to stop whenever the music ends para di mabati nagchula, had 1 hour of touching each other and makeout sessions while gelly and say² was at the back, we didnt care, we kissed and touched and breathed hard and fingered harder hangtud nalang nangakatag akong buhok ug nabungkag imong bingka',
     quoteHighlight:
       'You looked so beautiful in that black dress... 1 hour of touching each other and makeout sessions at Medellin dockside',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB & Medellin Dockside',
     weatherTemp: '30°C',
     weatherConditions: 'Warm Sea Breeze',
@@ -2049,7 +2049,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Nailon serve, kaon paghuman gitagaan kang maychille ug new pet na si chicky, nya niadto tag pantalan ato gialagaan maayo nya nindot kaykag buhok kato imo gi bun nya gibutngag clip with little strands sa atubangan',
     quoteHighlight:
       'Nailon serve, caring for our new pet Chicky at Pantalan, and admiring your gorgeous bun hair',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Nailon & Pantalan',
     weatherTemp: '29°C',
     weatherConditions: 'Sunny Coastline',
@@ -2079,7 +2079,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'First church date sa nailon, alone. MAKEOUT SA LUYO SA SIMBAHAN HAAA nya HAPPY PISTA NAILON\n\nsuroy ngitag tambal, nya kada way stock ma sad ko nya kiss ray tambal\n\nmy palms are already nailed to yours',
     quoteHighlight:
       'First church date sa Nailon, alone... Makeout sa luyo sa simbahan, my palms are already nailed to yours',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Nailon Church',
     weatherTemp: '30°C',
     weatherConditions: 'Festive & Sunny Church Grounds',
@@ -2109,7 +2109,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Uncle brew practice choir',
     quoteHighlight:
       'Uncle Brew choir practice, sharing melodies and cozy moments',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Uncle Brew',
     weatherTemp: '28°C',
     weatherConditions: 'Cozy Evening Cafe',
@@ -2139,7 +2139,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Hilak at 2am',
     quoteHighlight:
       'Crying at 2 AM, raw emotions and navigating deep feelings',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '25°C',
     weatherConditions: 'Quiet Midnight Breeze',
@@ -2169,7 +2169,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Had our first serious fights and talked it out sa sakyanan, i was ugly crying sobbing my tears out, dibaya ko ingnana kasayun pahilakon pero wana dinajd madala, you comforted me as you pulled me closer to your chest, nakaginhawa jd ko gamay knowing i didnt slept much the day before sgeg tyabaw, \n\nyou never left after seeing how much i was hurting\n\nnakaingon jd kog "so if magka problema rag gamay in the future, ang solution diay kay undangon? how else am i gonna take you seriously if gamayng sayop at risk nako"\n\npero naulian ras banana chips hahaha\nbudol ilang ann nagpainit tas oling kay nanginit natas usag usa nya napaso pjd ako bbgirl oyyy nya nagluto tag hotdog yayyy nya hatud sanrem\ntalks about traumas and pain at nighg',
     quoteHighlight:
       'You never left after seeing how much I was hurting. You comforted me as you pulled me closer to your chest.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Car Talk, Anne\'s House & San Remigio',
     weatherTemp: '27°C',
     weatherConditions: 'Warm Bonfire Glow & Tears',
@@ -2199,7 +2199,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Nailon serve dagat si anne guinness world record sudan nila kay ginisa, naglakaw sa hunas, nguyab 2nd time hahaha bisag oa ragud "my palms are already nailed to yours. 🥺"',
     quoteHighlight:
       'Naglakaw sa hunas, nguyab 2nd time... My palms are already nailed to yours.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Nailon Beach & Sea',
     weatherTemp: '30°C',
     weatherConditions: 'Low Tide Coast & Clear Skies',
@@ -2229,7 +2229,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Adto ta lapaz first time ka nag judge kay marites man ka, gipaadto tang fr ralph sa lapaz mangjudge ug mga youth org nila, it was the first time i saw you in that black top nga sleeveless, putcha kagwapa gision rajapun ko na, nangluod paka kay gipailis kas imong mama hahaha',
     quoteHighlight:
       'First time judging youth orgs with Fr. Ralph in La Paz, and you looked breathtaking in that black top',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'La Paz',
     weatherTemp: '31°C',
     weatherConditions: 'Sunny Afternoon',
@@ -2259,7 +2259,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Namilar sa taytayan, chuy kaayo and wale ni father "every tick of the clock is closer to our deaths, make every moment count" tinood jd, every tick is better when im with you..',
     quoteHighlight:
       '\'Every tick of the clock is closer to our deaths, make every moment count\'... Every tick is better when I\'m with you.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Taytayan',
     weatherTemp: '27°C',
     weatherConditions: 'Quiet Night Bells',
@@ -2290,7 +2290,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Went to db, gikapoy kayka nag taki² ug softball nya padulong uli stories kas imong soccer moments nga nabunog imo right na aping niitom nya mga taki² nimo na stories sge rkog katawa kay pa may² kayka, adto ta kawit artea nya date gamay explains aurora borealis\npag padung uli hapit tas aisle, daghan nakayg nahitabos aisle ba, diy patag cover sa windshield gamits jacket para di makitan\n\ngibikogan pa imong tiil ako gihilot, and i really missed u alot, went for a cuddle hug... my arms wrapped around you...\n\nthe world stopped for a moment... tasted every part of you... every scent... the taste of your neck.. every touch... \n\nthe aggressive deep breaths of sucking every part of you... my hands brushed against your body... until...\n\nevery slow... deep.. breaths... words cant explain how much in love I am with you...\n\nwe stopped for a moment checking the time if we\'ll be late... but head to head... eye to eye..\n\nas we stared at each other feeling each others heat.. feeling the tension..... your breath against my breath as we spoke... i buried my face against your neck... as our quiet groans filling the quiet roads... i want this feeling... im in love...... i wanna be inside you.... i wanna taste your soul.... \n\n\ni went for it... as I slowly pressed my lips against yours..... the taste of your lips..... tastes like mine.... as both our tongues intertwined... it felt like time stopped whilst tasting your soft and gentle lips... as I tasted every part of your soul.. i loved every moment of it.. I dont want it to stop... every deep breath makes us crave each others\' bodies closer.... so this is the feeling... of.... love.... of my first kiss....\n\nyour lips.... my lips.... apocalypse...\n\n\nas you grasped for every slow touch i had... ws my fingers ran through your body.. i could already taste your wet clit... the hardness of my dick pressed unto your clit as i tasted every part of you. \nhard. \n\nwe kissed. bodies interwined...\n\nthe love of my life... my greatest love.\n\ni felt more closer to you.... i really... love you... i had streaks of almost crying while hugging your body, maklaro ang gamayng sipon cuz i just cant believe I\'m so blessed to have someone as divine as you...\n\nnya bday mn ni kim² ngaon ta paghuman duwag uno ug impostor² and car duets sa sakyanan nindota jug tingog uy wtff\n\nand as i went home, tears randomly fell from my eyes as I just cant believe what happened...  it was just a memorable day..\n\nif only youd see yourself through my eyes.. \n\ni love you, bam...',
     quoteHighlight:
       'As I slowly pressed my lips against yours... It felt like time stopped. So this is the feeling of my first kiss.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB, Artea Kawit & The Aisle',
     weatherTemp: '26°C',
     weatherConditions: 'Starry & Enchanting Night',
@@ -2321,7 +2321,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Db date, nalangay pajd ko nakabangga kog kamunggay, date sa 711 and diy palit ug pang ayo, talks about life agi ug tapilon, had deep convos about other people and we had future talks about marriage and kids, ana paka na basin di nimo kaya emotionally mag raise, dont worry, well figure it out together, nya naabot mis 5pm na serve kordero na, practice choir and date sa nailon',
     quoteHighlight:
       'Future talks about marriage and kids... Don\'t worry, we\'ll figure it out together.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB, 7-Eleven, DIY, Tapilon & Nailon',
     weatherTemp: '29°C',
     weatherConditions: 'Warm Afternoon & Meaningful Roads',
@@ -2351,7 +2351,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Cbsaa choir serve gasalmo bambam nindot kayg tingog, then napay serve cebeco nindot sd kayg tingog we sat together sa van sa cebeco, ngaons ila, sila puros aquaflask tumblers akoa nature spring, paguli laag mi odlot sge rag pilit murag magnet, your amazing laugh really heals me, grabe ka caring sa lusping sa sakyanan, gaan patag solutions',
     quoteHighlight:
       'Sticking together like magnets in Odlot... Your amazing laugh really heals me.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'CBSAA, Cebeco & Odlot',
     weatherTemp: '30°C',
     weatherConditions: 'Cheerful Sunshine & Melodies',
@@ -2381,7 +2381,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Surprise saysay, citihardware, minteryo date stories sa mga namatay, kita puhon magtupad ta mamatay, celeb ang bday sa inyo nya nasuko pajd ka kay ako gikaon ang chicken skin sa inasal na imo jd gisave best for last core memory amputcha, pero hugs and kisses di ganahan muuli,\n\nbingo 10 nahimong 15\nthe way you always wait for me to come home, even tho late nakayko maabot, just to make sure im safe\n\nmy life always feels better after a hug from you',
     quoteHighlight:
       'The way you always wait for me to come home just to make sure I\'m safe... My life always feels better after a hug from you.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'CitiHardware, Cemetery, Home & Bogo',
     weatherTemp: '28°C',
     weatherConditions: 'Gentle Evening Breeze',
@@ -2412,7 +2412,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Db date fetched her sa school gate, gitanaw pajd mis mga tao pagbagat nako niya kuha sa iya bag ug pasulods sakyanan, random kaayo nangita mig cafe, para "official date", abi nimo watakibaw asa padong ato, ana dayun ko "you think i came unprepared?" dayun agi mig  2 ka cafe shops bati man, adto mis makapark mig tarong, nya  sudlonon kaayo random na cafe shop 2nd floor murag tagiya duha bahala na ang cctv, abot kawit chika ka abouts kapakboi ni benjie, nya adto tas kawit church atbang pajud ha kay gitugnaw nag ginaksanay,\n\n nya adto dayun dockside medellin para dika tugnawon,\nwe parked in a dark area, reclined the chair para kahigda ta, and we cuddled.... hard.. me on top... as my entire body weight pressed against yours... i wanted to be that much close to you...  the deep slow... heavy breaths... the spam kissing... our hearts... beat together... the scent of each other mixes as our bodies intertwined... and the heat... it felt through each other... BANG naulian ang katugnaw.. luhag pajd kaayo musayawg apil sa kanta ni mrld, kato part na "san daliii"... wahahhaha.. i still never got that first lip to lip kiss tho... pirme jd ka mudili.. but its okay, you already know i love you... so we went home.. pag uli random science facts kaayong blue led light ug ang dynamite cos ah ah im in the stars tonight bts biot... had a fun day and hunong dayuns traffic light para di masakpan... muto whilst she opened the door going out, you said the words... "bye labyu"... for the first time... i heard it from you.. grabe kashocked nako sge nag smile pag uli and babyee',
     quoteHighlight:
       'Whilst opening the door going out, you said the words... "Bye labyu"... For the first time I heard it from you.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB, Kawit Cafe & Medellin Dockside',
     weatherTemp: '27°C',
     weatherConditions: 'Chilly Evening to Warm Hearts',
@@ -2443,7 +2443,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'She always pushes me away, shed prefer hanging out with classmates rather than with me, i only have short times to go out and yet she always rejects everytime, my effort and assurance are almost never reciprocated and gives me the silent treatment but i understand the situation, but i feel like im sacrificing more like id have to work hard for something she gave so freely, id have to supress my own needs to be patient, but its ok, i have to understand the situation again, id always adjust my schedule since i have limited time we always wont meet m, transsctional updates, carrying convo, no curiousity bout me\n\nboquet, tumbler, old vintage letters why brown? maybe it goes back to where it all started, at 1892. i love you, bam.',
     quoteHighlight:
       'Bouquet, tumbler, old vintage letters... Why brown? Maybe it goes back to where it all started, at 1892. I love you, Bam.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '26°C',
     weatherConditions: 'Quiet Melancholy Breeze',
@@ -2473,7 +2473,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Went to kims house, lutog fries and ate icecream, we were like magnets na dijd mabuwag, hugged for a long time and sat at the sofa, ani diay foreshadowing sa mag live in na managtiayon, kiat pakayko manghilabots fries, sge lang mig gakos physical touch',
     quoteHighlight:
       'We were like magnets na dijd mabuwag, hugged for a long time at the sofa... Foreshadowing sa mag live in na managtiayon.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Kim\'s House',
     weatherTemp: '29°C',
     weatherConditions: 'Cozy Living Room Warmth',
@@ -2503,7 +2503,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Played crossword games, gacode tag app, every good night i still never received an i love you too back',
     quoteHighlight:
       'Played crossword games, gacode tag app, every good night holding onto hope and love',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '27°C',
     weatherConditions: 'Gentle Evening Screen Glow',
@@ -2534,7 +2534,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Ilys movie date',
     quoteHighlight:
       'ILYS1892 movie date, cuddled close and falling deeper in love',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '27°C',
     weatherConditions: 'Cozy Evening Glow',
@@ -2564,7 +2564,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Emergency cards, naghimo ko, nihimo pd kag imo sa canva "taysa gae kog 30 mins", trigger kas pdf pixelated',
     quoteHighlight:
       'Naghimo tag emergency cards... "Taysa gae kog 30 mins" sa Canva nya triggered sa pixelated PDF',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '29°C',
     weatherConditions: 'Sunny & Creative',
@@ -2594,7 +2594,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'First aid kit, medyas ug sapatos di pares',
     quoteHighlight:
       'First aid kit prep, laughing at mismatched socks and shoes',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '28°C',
     weatherConditions: 'Warm Afternoon',
@@ -2625,7 +2625,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Pool date with the barkada, sge rakog back hug nimo nya ganahan rapud ka, i fcking love it when it gives us pleasure both',
     quoteHighlight:
       'Pool date with the barkada, backhugs in the water and loving our closeness',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Pool & Bogo',
     weatherTemp: '30°C',
     weatherConditions: 'Warm Pool Splash',
@@ -2655,7 +2655,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Surprised wjth a tumbler bag daghan kayg bitbiton jd, magadjust ka din bahalag waka maanad kay ako na pirme dadon imo wallet gihatags koa',
     quoteHighlight:
       'Tumbler bag surprise and happily carrying your wallet wherever we go',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '28°C',
     weatherConditions: 'Sunny Morning Breeze',
@@ -2685,7 +2685,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Aways lumpia, all choirs party, hard launch sa papa momints, announce tibook complex "hi langga", kadawat ug trapo kaldero, "mudiay nibalhin" ka kuya reden, nabatian ni sir armand, it broke myday, still comforted me',
     quoteHighlight:
       'Announcing "Hi langga" to the entire complex... Hard launch moments and comforting each other through it all',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Complex & Party',
     weatherTemp: '29°C',
     weatherConditions: 'Festive Gathering & Cheerful Noise',
@@ -2715,7 +2715,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Foodpanda 1st time sa mt breeze\nme before you 1st movie date relatable lfe feels like a movie',
     quoteHighlight:
       '1st time FoodPanda at Mt. Breeze, 1st movie date watching "Me Before You"... Life feels like a movie with you.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Mt. Breeze',
     weatherTemp: '26°C',
     weatherConditions: 'Cool Hill Breeze & Movie Magic',
@@ -2746,7 +2746,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Nagmasakit ka maayo, naulian ra pagkaugma, sienna was in the hospital you comforted me, joke patas nahitabo natong duha sa ilahang ann (kato gurong nata ilang anne like exchanged cheek kisses), buntis maong nagcrave ug mangga',
     quoteHighlight:
       'You comforted me when Sienna was in the hospital... Joking about exchanged cheek kisses at Anne\'s and craving mangoes.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '27°C',
     weatherConditions: 'Gentle Christmas Breeze',
@@ -2776,7 +2776,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Braddex, kiat kaayo musayaw',
     quoteHighlight:
       'Braddex meal, laughing and dancing around playfully together',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Braddex & Bogo',
     weatherTemp: '29°C',
     weatherConditions: 'Sunny Afternoon',
@@ -2806,7 +2806,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Laag carbon,  jnl murag bata nag pushcart, malit para party, gaisano dawat pabako kung magpacker ko, big chuckie, efficasc, hugged alot sweaty durng dance practice, lawgan ug nips murag iro, nagpack sa mga raffle gifts, pilo sa imo shirt na purple pina limpyo pakaayo,',
     quoteHighlight:
       'JNL pushcart fun, sweaty hugs during dance practice, and folding your purple shirt so neatly',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Carbon, JNL & Gaisano',
     weatherTemp: '30°C',
     weatherConditions: 'Warm & Active Afternoon',
@@ -2836,7 +2836,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Seg kinaboang while nas atubangan musalmo, pugngan ang katawa kay masagpaan ni father, rugby sipok, jnl dagan², brought bag to bring shirts kay singtanon, not muted sa mess okay\n\n2am talks vc about say² mangsinghag, then joy and april forgiveness, ill always be your shoulder to cry on okayy?? 🥺🥺,\n"Sa imo rako naka in ani da😭😭😭"\n"Gets ko na ang mga oatch naman mag cry sa call"',
     quoteHighlight:
       'Holding back giggles in front of Father... 2AM video call: \'I\'ll always be your shoulder to cry on, okay?\'',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Church, JNL & Call',
     weatherTemp: '26°C',
     weatherConditions: 'Morning Choir to Midnight Secrets',
@@ -2866,7 +2866,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Andam sa party, badminton, long hugsss, sgeg hug bisag singot kaayo, silhigan tibook cebeco, car rides otw home, sleeping in her chest, nakabangga tricycle.',
     quoteHighlight:
       'Sweeping Cebeco together, endless sweaty hugs, and sleeping peacefully on her chest on the drive home',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Cebeco & Car',
     weatherTemp: '28°C',
     weatherConditions: 'Busy Afternoon & Cozy Drive Home',
@@ -2896,7 +2896,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Success party, so exhausted, gave her a hammer gift, pero pag abli plunger ug a very rare aquaflask nya gibawsan rsd ko nimo pagka ugma ug wallet sheeeeeshhh',
     quoteHighlight:
       'Success party gift surprise: a hammer box with a plunger and rare Aquaflask, and your wallet gift back',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Party Venue & Bogo',
     weatherTemp: '27°C',
     weatherConditions: 'Festive Night Celebration',
@@ -2927,7 +2927,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Dec 22- tried fixing speaker, gitik sa sofa nila ann, both tipsy and exchanged kisses and tight hugs then nag karaoke ug grabe, singot kaayo, intimate touchy clingy couple',
     quoteHighlight:
       'Both tipsy, exchanged kisses and tight hugs... Intimate touchy clingy couple',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Anne\'s House',
     weatherTemp: '27°C',
     weatherConditions: 'Warm Living Room Music',
@@ -2957,7 +2957,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Church serve - cebeco serve knoah mari, played killer²',
     quoteHighlight:
       'Church and Cebeco serves, playing games and sharing fun times together',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Church & Cebeco',
     weatherTemp: '28°C',
     weatherConditions: 'Festive Service Energy',
@@ -2987,7 +2987,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Car rides cayang - touches in the car\n\never since i knew a life with you, i dont wanna experience a life without you',
     quoteHighlight:
       'Ever since I knew a life with you, I don\'t wanna experience a life without you.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Cayang & Car',
     weatherTemp: '26°C',
     weatherConditions: 'Quiet Christmas Eve Starlight',
@@ -3018,7 +3018,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Coding whole day, kilig kaayo joke after joke after joke sa grok ug gpt',
     quoteHighlight:
       'Coding whole day, kilig kaayo joke after joke after joke',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '28°C',
     weatherConditions: 'Warm & Focused Glow',
@@ -3048,7 +3048,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Jabee worthy with gelly, spam kissed her, kanino kalang, kissed insecurities eyebags, spammed kiss whole face, sunset,',
     quoteHighlight:
       'Spam kissed her face and eyebags, kanino ka lang, and admiring the sunset',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Jollibee & Bogo',
     weatherTemp: '29°C',
     weatherConditions: 'Sunset Warmth & Golden Light',
@@ -3078,7 +3078,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Mass she checked up on me, hugged her, commend jokes, her defense tom, yhabyouuu',
     quoteHighlight:
       'Mass check up, warm hugs, wishing you love on defense tomorrow: yhabyouuu',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Church & Bogo',
     weatherTemp: '27°C',
     weatherConditions: 'Gentle Evening Breeze',
@@ -3108,7 +3108,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Parking cebeco - pa-lay² kuha wires piano - salmo bam² lpc - my embarassing stories - first plaza date - tuyok² bogo - uncle brew ambag dos or singko - avr  - hard kissing car - chika about franzene labay bag - tiil nagblister\n\nshes the love ive prayed for\ncompetitive bisag unsa na duwa',
     quoteHighlight:
       'First plaza date, hard kissing in the car... She\'s the love I\'ve prayed for.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Cebeco, Plaza, Uncle Brew & AVR',
     weatherTemp: '28°C',
     weatherConditions: 'Breezy Plaza Lights',
@@ -3138,7 +3138,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Monggos limonsito - carbon uncle -plaza date opening lights, fireworks, matching toothless shirts, supportive gf, gashort himala, used my jacket para itabon, held hands y\nthrough the crowd, nakitan si bestfriend, ',
     quoteHighlight:
       'Plaza opening lights, fireworks, matching Toothless shirts, and holding hands through the crowd',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Plaza, Carbon & Bogo',
     weatherTemp: '26°C',
     weatherConditions: 'Illuminated Festival Lights & Sparks',
@@ -3168,7 +3168,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Guadalupe mass - hold laughter sa katawa ni fr mwuahaha - platelets gamay na plato, rbc wbc, natagak panyo ni say², maye nakoy 6 ka sala sa imo, hugged hard pagbalik sa guadalupe ngita purple bag',
     quoteHighlight:
       'Guadalupe mass, holding back laughter, silly medical puns, and tight hugs',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Guadalupe Church',
     weatherTemp: '27°C',
     weatherConditions: 'Serene Sanctuary & Laughs',
@@ -3198,7 +3198,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Home alone kuha copies\nbless uncle, chips delight =  ikaw',
     quoteHighlight:
       'Bless Uncle, picking up copies, and Chips Delight = you',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Home & Uncle\'s',
     weatherTemp: '28°C',
     weatherConditions: 'Quiet Afternoon',
@@ -3228,7 +3228,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Lapaz serve, kuha piano cebeco - cuddle kissing - fireworks date pero epic fail fireworks',
     quoteHighlight:
       'La Paz serve, picking up the piano, cuddle kissing in the car, and epic fail fireworks',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'La Paz & Cebeco',
     weatherTemp: '27°C',
     weatherConditions: 'Evening Lights & Snuggles',
@@ -3258,7 +3258,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Tindog serve',
     quoteHighlight:
       'Serving together with joy and dedication at Tindog mass',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Tindog',
     weatherTemp: '28°C',
     weatherConditions: 'Morning Devotion',
@@ -3288,7 +3288,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Banban miss her sm buak efficascent,',
     quoteHighlight:
       'Banban, missing her so much, and the broken Efficascent mishap',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Banban',
     weatherTemp: '29°C',
     weatherConditions: 'Warm Afternoon Longing',
@@ -3318,7 +3318,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Got home no sleep nailon serve, she took care of me,\nif only you could see yourself through my eyes, your heart matches your looks... and the way you pout your mouth which i find it cute all the time "ngano mana bibiiiii?"',
     quoteHighlight:
       'She took care of me... Your heart matches your looks, and the way you pout: "Ngano mana bibiiiii?"',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Nailon & Home',
     weatherTemp: '27°C',
     weatherConditions: 'Gentle Sunday Morning Breeze',
@@ -3349,7 +3349,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Baby pics \nstanding here is me - grad song\ntop 3 overall graduate - open up parents\nboth of us crying\nctu atang 6pm - lanses ko pakuyog\n\nall started from sunscreen',
     quoteHighlight:
       'Both of us crying, opening up about our lives... And it all started from sunscreen.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'CTU & Bogo',
     weatherTemp: '27°C',
     weatherConditions: 'Warm Nostalgic Evening',
@@ -3380,7 +3380,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Went to DB and fetched you, we got Dfrost "friends-sized" fries and sundae ice cream. The way na you\'d still offer kay kibaw ko di ka palibre bisag tagsa ra, same sa Worthy. Adto nako nakarealize na ikaw nagbayad sa imo own drink abi ko nakalibre ko, kilig pa kaayo ko pagkibaw na independent kaayo ka, pero karon, ni-offer ko\'g 200, ni-offer ka\'g singko VERY FAIR HAHAHAHA, luv it, I feel important now!!\n\nWe talked inside the car about school stuff and I played with your Arduino robot, I was so amazed when you were explaining things, I was so mesmerized and super proud to the point ipakita nako sa random people ang imong duwaan. Nauwaw jud ka di ko nimo ilhon, ipadagan-dagan ta to nato sa plaza! Then hugged you close, I was sooo craving for your touch. The way our heads lean with each other, our hugs na murag gi super glue, you smell soooo good, I could sniff all day. Ako gibutngan ug ice cream ako lips gi-kiss sa imo cheeks kadaghan, you sucked my finger kay naay fries, slept on your chest, I realized... This is the woman I want to be with. Forever. Our baby talking while you were telling stories sa imo gallery while I was just staring at you while sitting on your chest, the way muana ka\'g "na koy bilbil", I fell in love even moreee, my squishy girl is my teddy bear, you\'re so beautiful to the point I gave you spam kisses... Oh yeah, the staring contest, you have the most amazing eyes... I wanna kiss you so much.\n\nNatawag si mama, we drove home as we held hands the entire ride... Played karaoke songs in the car, kalit lag Elena of Avalor, passing the mic with each other holding hands HAHAHAH, "Elsa? Do you wanna build a snowman?" Dayun... You singing Hamilton gracefully, couldn\'t hold my kilig with the amazing voiceee... Nindot kaayo storytelling sa Hamilton songs otw home, the way you sang with voice cracks, heavy growling, and too much emotion. I fell hard. You lift my feet off the ground, and spin me around... You make me crazier... Us harmonizing as the air around us slowly speaking, "he/she\'s the one". In our getaway car, We Don\'t Talk About Bruno, nakuyawan ka kalit lang ko\'g shagit sa mga parts nako and then we got home, tago-tago pa ta kay masakpan nya gihatod, then I hugged you so much I carried your smell home, ay jud isaba akong ka-clingy.\n\nThen pag-abot, we talked about your system, nindot kaayo ka\'g ideas and reklamo pa ko sa akong 5-star na lugaw na tig-100.',
     quoteHighlight:
       'You lift my feet off the ground, and spin me around... You make me crazier... Us harmonizing as the air around us slowly speaking, "he/she\'s the one".',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB, Dfrost & Getaway Car',
     weatherTemp: '27°C',
     weatherConditions: 'Sunset Drive & Car Karaoke Glow',
@@ -3410,7 +3410,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Serve shrine - ante approval, giluod sa lugaw akong  gisagolag coke',
     quoteHighlight:
       'Serving at the shrine, getting Ante\'s approval, and the infamous Coke in lugaw',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Shrine & Bogo',
     weatherTemp: '28°C',
     weatherConditions: 'Serene Sunset at Shrine',
@@ -3440,7 +3440,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Lugaw 1k drawing - code research - uli ko emergency manghud - kuyawan ako mata nas trapal say² - hugged bambam tight - kisses infront of fam nangatug\n\nmagsuwat 4th finger kubal kay 2 fingers magtukods bolpen',
     quoteHighlight:
       'Hugged BamBam tight, secret kisses while family slept, and noticing the little callus on your finger',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '27°C',
     weatherConditions: 'Cozy Living Room Glow',
@@ -3470,7 +3470,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       '1st traditional manok, slept each other sa cebeco, helmet fights haha, learned piano, tusok and physical abhse',
     quoteHighlight:
       'First traditional chicken, sleeping together at Cebeco, and laughing during helmet fights',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Cebeco & Bogo',
     weatherTemp: '28°C',
     weatherConditions: 'Gentle Evening Lights',
@@ -3500,7 +3500,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Made up stories w father rey resaba kay nay pusil where  our lifeless bodies lied down together, vc fixing code sa research, we didnt want to end the call, bisag unsa lay gitabian bisag sakit ulo\n\n1st person i messaged palinog\nu easily get distracted when theres a dog or cat everytime nakay istory tell',
     quoteHighlight:
       '1st person I messaged during the earthquake... And never wanting to end the call.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '26°C',
     weatherConditions: 'Midnight Call Screen Glow',
@@ -3531,7 +3531,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Went to db, gikapoy kayka nag taki² ug softball nya padulong uli stories kas imong soccer moments nga nabunog imo right na aping niitom nya mga taki² nimo na stories sge rkog katawa kay pa may² kayka, adto ta kawit artea nya date gamay explains aurora borealis\npag padung uli hapit tas aisle, daghan nakayg nahitabos aisle ba, diy patag cover sa windshield gamits jacket para di makitan\n\ngibikogan pa imong tiil ako gihilot, and i really missed u alot, went for a cuddle hug... my arms wrapped around you...\n\nthe world stopped for a moment... tasted every part of you... every scent... the taste of your neck.. every touch... \n\nthe aggressive deep breaths of sucking every part of you... my hands brushed against your body... until...\n\nevery slow... deep.. breaths... words cant explain how much in love I am with you...\n\nwe stopped for a moment checking the time if we\'ll be late... but head to head... eye to eye..\n\nas we stared at each other feeling each others heat.. feeling the tension..... your breath against my breath as we spoke... i buried my face against your neck... as our quiet groans filling the quiet roads... i want this feeling... im in love...... i wanna be inside you.... i wanna taste your soul.... \n\n\ni went for it... as I slowly pressed my lips against yours..... the taste of your lips..... tastes like mine.... as both our tongues intertwined... it felt like time stopped whilst tasting your soft and gentle lips... as I tasted every part of your soul.. i loved every moment of it.. I dont want it to stop... every deep breath makes us crave each others\' bodies closer.... so this is the feeling... of.... love.... of my first kiss....\n\nyour lips.... my lips.... apocalypse...\n\n\nas you grasped for every slow touch i had... ws my fingers ran through your body.. i could already taste your wet clit... the hardness of my dick pressed unto your clit as i tasted every part of you. \nhard. \n\nwe kissed. bodies interwined...\n\nthe love of my life... my greatest love.\n\ni felt more closer to you.... i really... love you... i had streaks of almost crying while hugging your body, maklaro ang gamayng sipon cuz i just cant believe I\'m so blessed to have someone as divine as you...\n\nnya bday mn ni kim² ngaon ta paghuman duwag uno ug impostor² and car duets sa sakyanan nindota jug tingog uy wtff\n\nand as i went home, tears randomly fell from my eyes as I just cant believe what happened...  it was just a memorable day..\n\nif only youd see yourself through my eyes.. \n\ni love you, bam...',
     quoteHighlight:
       'As I slowly pressed my lips against yours... It felt like time stopped. So this is the feeling of my first kiss.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB, Artea Kawit & The Aisle',
     weatherTemp: '26°C',
     weatherConditions: 'Starry & Enchanting Night',
@@ -3562,7 +3562,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Db date, nalangay pajd ko nakabangga kog kamunggay, date sa 711 and diy palit ug pang ayo, talks about life agi ug tapilon, had deep convos about other people and we had future talks about marriage and kids, ana paka na basin di nimo kaya emotionally mag raise, dont worry, well figure it out together, nya naabot mis 5pm na serve kordero na, practice choir and date sa nailon',
     quoteHighlight:
       'Future talks about marriage and kids... Don\'t worry, we\'ll figure it out together.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB, 7-Eleven, DIY, Tapilon & Nailon',
     weatherTemp: '29°C',
     weatherConditions: 'Warm Afternoon & Meaningful Roads',
@@ -3592,7 +3592,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Cbsaa choir serve gasalmo bambam nindot kayg tingog, then napay serve cebeco nindot sd kayg tingog we sat together sa van sa cebeco, ngaons ila, sila puros aquaflask tumblers akoa nature spring, paguli laag mi odlot sge rag pilit murag magnet, your amazing laugh really heals me, grabe ka caring sa lusping sa sakyanan, gaan patag solutions',
     quoteHighlight:
       'Sticking together like magnets in Odlot... Your amazing laugh really heals me.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'CBSAA, Cebeco & Odlot',
     weatherTemp: '30°C',
     weatherConditions: 'Cheerful Sunshine & Melodies',
@@ -3622,7 +3622,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Surprise saysay, citihardware, minteryo date stories sa mga namatay, kita puhon magtupad ta mamatay, celeb ang bday sa inyo nya nasuko pajd ka kay ako gikaon ang chicken skin sa inasal na imo jd gisave best for last core memory amputcha, pero hugs and kisses di ganahan muuli,\n\nbingo 10 nahimong 15\nthe way you always wait for me to come home, even tho late nakayko maabot, just to make sure im safe\n\nmy life always feels better after a hug from you',
     quoteHighlight:
       'The way you always wait for me to come home just to make sure I\'m safe... My life always feels better after a hug from you.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'CitiHardware, Cemetery, Home & Bogo',
     weatherTemp: '28°C',
     weatherConditions: 'Gentle Evening Breeze',
@@ -3653,7 +3653,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Db date fetched her sa school gate, gitanaw pajd mis mga tao pagbagat nako niya kuha sa iya bag ug pasulods sakyanan, random kaayo nangita mig cafe, para "official date", abi nimo watakibaw asa padong ato, ana dayun ko "you think i came unprepared?" dayun agi mig  2 ka cafe shops bati man, adto mis makapark mig tarong, nya  sudlonon kaayo random na cafe shop 2nd floor murag tagiya duha bahala na ang cctv, abot kawit chika ka abouts kapakboi ni benjie, nya adto tas kawit church atbang pajud ha kay gitugnaw nag ginaksanay,\n\n nya adto dayun dockside medellin para dika tugnawon,\nwe parked in a dark area, reclined the chair para kahigda ta, and we cuddled.... hard.. me on top... as my entire body weight pressed against yours... i wanted to be that much close to you...  the deep slow... heavy breaths... the spam kissing... our hearts... beat together... the scent of each other mixes as our bodies intertwined... and the heat... it felt through each other... BANG naulian ang katugnaw.. luhag pajd kaayo musayawg apil sa kanta ni mrld, kato part na "san daliii"... wahahhaha.. i still never got that first lip to lip kiss tho... pirme jd ka mudili.. but its okay, you already know i love you... so we went home.. pag uli random science facts kaayong blue led light ug ang dynamite cos ah ah im in the stars tonight bts biot... had a fun day and hunong dayuns traffic light para di masakpan... muto whilst she opened the door going out, you said the words... "bye labyu"... for the first time... i heard it from you.. grabe kashocked nako sge nag smile pag uli and babyee',
     quoteHighlight:
       'Whilst opening the door going out, you said the words... "Bye labyu"... For the first time I heard it from you.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB, Kawit Cafe & Medellin Dockside',
     weatherTemp: '27°C',
     weatherConditions: 'Chilly Evening to Warm Hearts',
@@ -3684,7 +3684,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'She always pushes me away, shed prefer hanging out with classmates rather than with me, i only have short times to go out and yet she always rejects everytime, my effort and assurance are almost never reciprocated and gives me the silent treatment but i understand the situation, but i feel like im sacrificing more like id have to work hard for something she gave so freely, id have to supress my own needs to be patient, but its ok, i have to understand the situation again, id always adjust my schedule since i have limited time we always wont meet m, transsctional updates, carrying convo, no curiousity bout me\n\nboquet, tumbler, old vintage letters why brown? maybe it goes back to where it all started, at 1892. i love you, bam.',
     quoteHighlight:
       'Bouquet, tumbler, old vintage letters... Why brown? Maybe it goes back to where it all started, at 1892. I love you, Bam.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '26°C',
     weatherConditions: 'Quiet Melancholy Breeze',
@@ -3714,7 +3714,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Went to kims house, lutog fries and ate icecream, we were like magnets na dijd mabuwag, hugged for a long time and sat at the sofa, ani diay foreshadowing sa mag live in na managtiayon, kiat pakayko manghilabots fries, sge lang mig gakos physical touch',
     quoteHighlight:
       'We were like magnets na dijd mabuwag, hugged for a long time at the sofa... Foreshadowing sa mag live in na managtiayon.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Kim\'s House',
     weatherTemp: '29°C',
     weatherConditions: 'Cozy Living Room Warmth',
@@ -3744,7 +3744,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Played crossword games, gacode tag app, every good night i still never received an i love you too back',
     quoteHighlight:
       'Played crossword games, gacode tag app, every good night holding onto hope and love',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '27°C',
     weatherConditions: 'Gentle Evening Screen Glow',
@@ -3775,7 +3775,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Ilys movie date',
     quoteHighlight:
       'ILYS1892 movie date, cuddled close and falling deeper in love',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '27°C',
     weatherConditions: 'Cozy Evening Glow',
@@ -3805,7 +3805,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Emergency cards, naghimo ko, nihimo pd kag imo sa canva "taysa gae kog 30 mins", trigger kas pdf pixelated',
     quoteHighlight:
       'Naghimo tag emergency cards... "Taysa gae kog 30 mins" sa Canva nya triggered sa pixelated PDF',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '29°C',
     weatherConditions: 'Sunny & Creative',
@@ -3835,7 +3835,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'First aid kit, medyas ug sapatos di pares',
     quoteHighlight:
       'First aid kit prep, laughing at mismatched socks and shoes',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '28°C',
     weatherConditions: 'Warm Afternoon',
@@ -3866,7 +3866,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Pool date with the barkada, sge rakog back hug nimo nya ganahan rapud ka, i fcking love it when it gives us pleasure both',
     quoteHighlight:
       'Pool date with the barkada, backhugs in the water and loving our closeness',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Pool & Bogo',
     weatherTemp: '30°C',
     weatherConditions: 'Warm Pool Splash',
@@ -3896,7 +3896,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Surprised wjth a tumbler bag daghan kayg bitbiton jd, magadjust ka din bahalag waka maanad kay ako na pirme dadon imo wallet gihatags koa',
     quoteHighlight:
       'Tumbler bag surprise and happily carrying your wallet wherever we go',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '28°C',
     weatherConditions: 'Sunny Morning Breeze',
@@ -3926,7 +3926,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Aways lumpia, all choirs party, hard launch sa papa momints, announce tibook complex "hi langga", kadawat ug trapo kaldero, "mudiay nibalhin" ka kuya reden, nabatian ni sir armand, it broke myday, still comforted me',
     quoteHighlight:
       'Announcing "Hi langga" to the entire complex... Hard launch moments and comforting each other through it all',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Complex & Party',
     weatherTemp: '29°C',
     weatherConditions: 'Festive Gathering & Cheerful Noise',
@@ -3956,7 +3956,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Foodpanda 1st time sa mt breeze\nme before you 1st movie date relatable lfe feels like a movie',
     quoteHighlight:
       '1st time FoodPanda at Mt. Breeze, 1st movie date watching "Me Before You"... Life feels like a movie with you.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Mt. Breeze',
     weatherTemp: '26°C',
     weatherConditions: 'Cool Hill Breeze & Movie Magic',
@@ -3987,7 +3987,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Nagmasakit ka maayo, naulian ra pagkaugma, sienna was in the hospital you comforted me, joke patas nahitabo natong duha sa ilahang ann (kato gurong nata ilang anne like exchanged cheek kisses), buntis maong nagcrave ug mangga',
     quoteHighlight:
       'You comforted me when Sienna was in the hospital... Joking about exchanged cheek kisses at Anne\'s and craving mangoes.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '27°C',
     weatherConditions: 'Gentle Christmas Breeze',
@@ -4017,7 +4017,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Braddex, kiat kaayo musayaw',
     quoteHighlight:
       'Braddex meal, laughing and dancing around playfully together',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Braddex & Bogo',
     weatherTemp: '29°C',
     weatherConditions: 'Sunny Afternoon',
@@ -4047,7 +4047,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Laag carbon,  jnl murag bata nag pushcart, malit para party, gaisano dawat pabako kung magpacker ko, big chuckie, efficasc, hugged alot sweaty durng dance practice, lawgan ug nips murag iro, nagpack sa mga raffle gifts, pilo sa imo shirt na purple pina limpyo pakaayo,',
     quoteHighlight:
       'JNL pushcart fun, sweaty hugs during dance practice, and folding your purple shirt so neatly',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Carbon, JNL & Gaisano',
     weatherTemp: '30°C',
     weatherConditions: 'Warm & Active Afternoon',
@@ -4077,7 +4077,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Seg kinaboang while nas atubangan musalmo, pugngan ang katawa kay masagpaan ni father, rugby sipok, jnl dagan², brought bag to bring shirts kay singtanon, not muted sa mess okay\n\n2am talks vc about say² mangsinghag, then joy and april forgiveness, ill always be your shoulder to cry on okayy?? 🥺🥺,\n"Sa imo rako naka in ani da😭😭😭"\n"Gets ko na ang mga oatch naman mag cry sa call"',
     quoteHighlight:
       'Holding back giggles in front of Father... 2AM video call: \'I\'ll always be your shoulder to cry on, okay?\'',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Church, JNL & Call',
     weatherTemp: '26°C',
     weatherConditions: 'Morning Choir to Midnight Secrets',
@@ -4107,7 +4107,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Andam sa party, badminton, long hugsss, sgeg hug bisag singot kaayo, silhigan tibook cebeco, car rides otw home, sleeping in her chest, nakabangga tricycle.',
     quoteHighlight:
       'Sweeping Cebeco together, endless sweaty hugs, and sleeping peacefully on her chest on the drive home',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Cebeco & Car',
     weatherTemp: '28°C',
     weatherConditions: 'Busy Afternoon & Cozy Drive Home',
@@ -4137,7 +4137,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Success party, so exhausted, gave her a hammer gift, pero pag abli plunger ug a very rare aquaflask nya gibawsan rsd ko nimo pagka ugma ug wallet sheeeeeshhh',
     quoteHighlight:
       'Success party gift surprise: a hammer box with a plunger and rare Aquaflask, and your wallet gift back',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Party Venue & Bogo',
     weatherTemp: '27°C',
     weatherConditions: 'Festive Night Celebration',
@@ -4168,7 +4168,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Dec 22- tried fixing speaker, gitik sa sofa nila ann, both tipsy and exchanged kisses and tight hugs then nag karaoke ug grabe, singot kaayo, intimate touchy clingy couple',
     quoteHighlight:
       'Both tipsy, exchanged kisses and tight hugs... Intimate touchy clingy couple',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Anne\'s House',
     weatherTemp: '27°C',
     weatherConditions: 'Warm Living Room Music',
@@ -4198,7 +4198,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Church serve - cebeco serve knoah mari, played killer²',
     quoteHighlight:
       'Church and Cebeco serves, playing games and sharing fun times together',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Church & Cebeco',
     weatherTemp: '28°C',
     weatherConditions: 'Festive Service Energy',
@@ -4228,7 +4228,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Car rides cayang - touches in the car\n\never since i knew a life with you, i dont wanna experience a life without you',
     quoteHighlight:
       'Ever since I knew a life with you, I don\'t wanna experience a life without you.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Cayang & Car',
     weatherTemp: '26°C',
     weatherConditions: 'Quiet Christmas Eve Starlight',
@@ -4259,7 +4259,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Coding whole day, kilig kaayo joke after joke after joke sa grok ug gpt',
     quoteHighlight:
       'Coding whole day, kilig kaayo joke after joke after joke',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '28°C',
     weatherConditions: 'Warm & Focused Glow',
@@ -4289,7 +4289,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Jabee worthy with gelly, spam kissed her, kanino kalang, kissed insecurities eyebags, spammed kiss whole face, sunset,',
     quoteHighlight:
       'Spam kissed her face and eyebags, kanino ka lang, and admiring the sunset',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Jollibee & Bogo',
     weatherTemp: '29°C',
     weatherConditions: 'Sunset Warmth & Golden Light',
@@ -4319,7 +4319,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Mass she checked up on me, hugged her, commend jokes, her defense tom, yhabyouuu',
     quoteHighlight:
       'Mass check up, warm hugs, wishing you love on defense tomorrow: yhabyouuu',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Church & Bogo',
     weatherTemp: '27°C',
     weatherConditions: 'Gentle Evening Breeze',
@@ -4349,7 +4349,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Parking cebeco - pa-lay² kuha wires piano - salmo bam² lpc - my embarassing stories - first plaza date - tuyok² bogo - uncle brew ambag dos or singko - avr  - hard kissing car - chika about franzene labay bag - tiil nagblister\n\nshes the love ive prayed for\ncompetitive bisag unsa na duwa',
     quoteHighlight:
       'First plaza date, hard kissing in the car... She\'s the love I\'ve prayed for.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Cebeco, Plaza, Uncle Brew & AVR',
     weatherTemp: '28°C',
     weatherConditions: 'Breezy Plaza Lights',
@@ -4379,7 +4379,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Monggos limonsito - carbon uncle -plaza date opening lights, fireworks, matching toothless shirts, supportive gf, gashort himala, used my jacket para itabon, held hands y\nthrough the crowd, nakitan si bestfriend, ',
     quoteHighlight:
       'Plaza opening lights, fireworks, matching Toothless shirts, and holding hands through the crowd',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Plaza, Carbon & Bogo',
     weatherTemp: '26°C',
     weatherConditions: 'Illuminated Festival Lights & Sparks',
@@ -4409,7 +4409,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Guadalupe mass - hold laughter sa katawa ni fr mwuahaha - platelets gamay na plato, rbc wbc, natagak panyo ni say², maye nakoy 6 ka sala sa imo, hugged hard pagbalik sa guadalupe ngita purple bag',
     quoteHighlight:
       'Guadalupe mass, holding back laughter, silly medical puns, and tight hugs',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Guadalupe Church',
     weatherTemp: '27°C',
     weatherConditions: 'Serene Sanctuary & Laughs',
@@ -4439,7 +4439,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Home alone kuha copies\nbless uncle, chips delight =  ikaw',
     quoteHighlight:
       'Bless Uncle, picking up copies, and Chips Delight = you',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Home & Uncle\'s',
     weatherTemp: '28°C',
     weatherConditions: 'Quiet Afternoon',
@@ -4469,7 +4469,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Lapaz serve, kuha piano cebeco - cuddle kissing - fireworks date pero epic fail fireworks',
     quoteHighlight:
       'La Paz serve, picking up the piano, cuddle kissing in the car, and epic fail fireworks',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'La Paz & Cebeco',
     weatherTemp: '27°C',
     weatherConditions: 'Evening Lights & Snuggles',
@@ -4499,7 +4499,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Tindog serve',
     quoteHighlight:
       'Serving together with joy and dedication at Tindog mass',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Tindog',
     weatherTemp: '28°C',
     weatherConditions: 'Morning Devotion',
@@ -4529,7 +4529,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Banban miss her sm buak efficascent,',
     quoteHighlight:
       'Banban, missing her so much, and the broken Efficascent mishap',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Banban',
     weatherTemp: '29°C',
     weatherConditions: 'Warm Afternoon Longing',
@@ -4559,7 +4559,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Got home no sleep nailon serve, she took care of me,\nif only you could see yourself through my eyes, your heart matches your looks... and the way you pout your mouth which i find it cute all the time "ngano mana bibiiiii?"',
     quoteHighlight:
       'She took care of me... Your heart matches your looks, and the way you pout: "Ngano mana bibiiiii?"',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Nailon & Home',
     weatherTemp: '27°C',
     weatherConditions: 'Gentle Sunday Morning Breeze',
@@ -4590,7 +4590,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Baby pics \nstanding here is me - grad song\ntop 3 overall graduate - open up parents\nboth of us crying\nctu atang 6pm - lanses ko pakuyog\n\nall started from sunscreen',
     quoteHighlight:
       'Both of us crying, opening up about our lives... And it all started from sunscreen.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'CTU & Bogo',
     weatherTemp: '27°C',
     weatherConditions: 'Warm Nostalgic Evening',
@@ -4621,7 +4621,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Went to DB and fetched you, we got Dfrost "friends-sized" fries and sundae ice cream. The way na you\'d still offer kay kibaw ko di ka palibre bisag tagsa ra, same sa Worthy. Adto nako nakarealize na ikaw nagbayad sa imo own drink abi ko nakalibre ko, kilig pa kaayo ko pagkibaw na independent kaayo ka, pero karon, ni-offer ko\'g 200, ni-offer ka\'g singko VERY FAIR HAHAHAHA, luv it, I feel important now!!\n\nWe talked inside the car about school stuff and I played with your Arduino robot, I was so amazed when you were explaining things, I was so mesmerized and super proud to the point ipakita nako sa random people ang imong duwaan. Nauwaw jud ka di ko nimo ilhon, ipadagan-dagan ta to nato sa plaza! Then hugged you close, I was sooo craving for your touch. The way our heads lean with each other, our hugs na murag gi super glue, you smell soooo good, I could sniff all day. Ako gibutngan ug ice cream ako lips gi-kiss sa imo cheeks kadaghan, you sucked my finger kay naay fries, slept on your chest, I realized... This is the woman I want to be with. Forever. Our baby talking while you were telling stories sa imo gallery while I was just staring at you while sitting on your chest, the way muana ka\'g "na koy bilbil", I fell in love even moreee, my squishy girl is my teddy bear, you\'re so beautiful to the point I gave you spam kisses... Oh yeah, the staring contest, you have the most amazing eyes... I wanna kiss you so much.\n\nNatawag si mama, we drove home as we held hands the entire ride... Played karaoke songs in the car, kalit lag Elena of Avalor, passing the mic with each other holding hands HAHAHAH, "Elsa? Do you wanna build a snowman?" Dayun... You singing Hamilton gracefully, couldn\'t hold my kilig with the amazing voiceee... Nindot kaayo storytelling sa Hamilton songs otw home, the way you sang with voice cracks, heavy growling, and too much emotion. I fell hard. You lift my feet off the ground, and spin me around... You make me crazier... Us harmonizing as the air around us slowly speaking, "he/she\'s the one". In our getaway car, We Don\'t Talk About Bruno, nakuyawan ka kalit lang ko\'g shagit sa mga parts nako and then we got home, tago-tago pa ta kay masakpan nya gihatod, then I hugged you so much I carried your smell home, ay jud isaba akong ka-clingy.\n\nThen pag-abot, we talked about your system, nindot kaayo ka\'g ideas and reklamo pa ko sa akong 5-star na lugaw na tig-100.',
     quoteHighlight:
       'You lift my feet off the ground, and spin me around... You make me crazier... Us harmonizing as the air around us slowly speaking, "he/she\'s the one".',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'DB, Dfrost & Getaway Car',
     weatherTemp: '27°C',
     weatherConditions: 'Sunset Drive & Car Karaoke Glow',
@@ -4651,7 +4651,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Serve shrine - ante approval, giluod sa lugaw akong  gisagolag coke',
     quoteHighlight:
       'Serving at the shrine, getting Ante\'s approval, and the infamous Coke in lugaw',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Shrine & Bogo',
     weatherTemp: '28°C',
     weatherConditions: 'Serene Sunset at Shrine',
@@ -4681,7 +4681,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Lugaw 1k drawing - code research - uli ko emergency manghud - kuyawan ako mata nas trapal say² - hugged bambam tight - kisses infront of fam nangatug\n\nmagsuwat 4th finger kubal kay 2 fingers magtukods bolpen',
     quoteHighlight:
       'Hugged BamBam tight, secret kisses while family slept, and noticing the little callus on your finger',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '27°C',
     weatherConditions: 'Cozy Living Room Glow',
@@ -4711,7 +4711,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       '1st traditional manok, slept each other sa cebeco, helmet fights haha, learned piano, tusok and physical abhse',
     quoteHighlight:
       'First traditional chicken, sleeping together at Cebeco, and laughing during helmet fights',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Cebeco & Bogo',
     weatherTemp: '28°C',
     weatherConditions: 'Gentle Evening Lights',
@@ -4741,7 +4741,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Made up stories w father rey resaba kay nay pusil where  our lifeless bodies lied down together, vc fixing code sa research, we didnt want to end the call, bisag unsa lay gitabian bisag sakit ulo\n\n1st person i messaged palinog\nu easily get distracted when theres a dog or cat everytime nakay istory tell',
     quoteHighlight:
       '1st person I messaged during the earthquake... And never wanting to end the call.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '26°C',
     weatherConditions: 'Midnight Call Screen Glow',
@@ -4772,7 +4772,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Haya lolo ni Kim, Truth or Dare, confessed.\n\nA night surrounded by friends that took an unexpected turn when the game asked the truth, and I finally confessed what my heart had been carrying for you, Bam.',
     quoteHighlight:
       'Truth or dare... And I finally confessed.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '27°C',
     weatherConditions: 'Quiet Evening Air',
@@ -4802,7 +4802,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Nigawas ako true feelings cuz I realized I didn\'t wanna lose her tungod sa linog.\n\nFlirted a lot sa MOMPs na GC about linog-linog, magbantay lagi daw mi\'s kalibutan uy hahaha, nya na koy very scary story katong paglinog, seryoso kay ko nag-story tell sa GC, very thrilling, kay hadlok jud kaayo to, ngitngit, nya kuyaw nya wa pa juy tubig, muto na successful akong pagkalibang na wa giuyog nya Bam-Bam ra juy interesado kaayo\'s story.\n\nHad a couple nights where we had each other during sa laay na linog, but for us it felt like we had each other, stargazing pa mi, "Lookup Bam", "Akong nakita trapal", may diay.',
     quoteHighlight:
       'Nigawas ako true feelings kay di ko ganahan mawala ka... "Lookup Bam", "Akong nakita trapal".',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '26°C',
     weatherConditions: 'Quake Night Glow',
@@ -4832,7 +4832,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Capelinha first time at their place dish washing and UNO card game and eating lunch and dinner together with a rose-shaped tissue paper. Gave first time romantically to a girl.',
     quoteHighlight:
       'Folded a rose-shaped tissue paper... The first time giving something romantically to a girl.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bam’s House, Bogo City',
     weatherTemp: '28°C',
     weatherConditions: 'Gentle Afternoon Sunshine',
@@ -4862,7 +4862,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Quiet whole time gapractice sa ila. Even in quiet moments when few words were spoken, having you right beside me made the whole room calm.',
     quoteHighlight:
       'Quiet the whole time... But peace was right beside you.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bam’s House, Bogo City',
     weatherTemp: '27°C',
     weatherConditions: 'Cozy Afternoon',
@@ -4892,7 +4892,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Wa mi tug halos andam birthday ni Uncle Nilo, yehey, hilak, kaon, ty ice cream Kiara, lugaw, kuyapan si Pinky. Ibog ko Zea. Karealize ko na murag sayop ako gibuhat naghilot-hilot ko ni Pinky nakuyapan while Zea glanced at me with jealousy, pero niexplain ra ko paghuman na she\'s just a lil sister.\n\nAdto mi\'s ila starts bouquet then few hours, nya magpractice mi\'s church, di jud siya musakay\'s akoa naghuwat pa ko, then sa church practice kanta for Uncle Nilo. We talked the entire time while naghimo mig petals para sa bouquet and nagsinungay ming Quency fc kay ko, I just reminded Bam-Bam of our Louisean history together when she was in Gr 9, I was in 10, and I said that she was the first girl I added to my MyDay FB stories and I explained wondering why we stopped and blamed it on the pandemic and dropped the "my Carmelita line" and the "Aster and Rome lines" which are books I read cuz of her from Wattpad. Chika sad ko nakit-an nako siya\'s DIY gasolo nya I was with an ex-friend.\n\nBack at her place tiwas mi\'s bouquet and luoy kay\'s Bam-Bam subawan hahaha pero gwapa japun nya muto malit mig glue stick. Justine fav flavor man Bam-Bam rocky road, akoa cookies and cream, timinga naa ang duha ka flavor 2-in-1 ako gilargo\'g palit, sige lage siya\'g thank you hahaha. When she was sweating trapohan nako\'g panyo and nanghugas na sad mig mga baso.',
     quoteHighlight:
       'Carmelita, Aster & Rome... And wiping your sweat while we washed dishes together.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Church & Bam’s Place, Bogo City',
     weatherTemp: '28°C',
     weatherConditions: 'Busy Warm Breeze',
@@ -4922,7 +4922,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Grabe\'g pangandam kulba, libog kinsay dad-on kay amo isurprise si Zea sa iya birthday adto\'s DB. Luya pangita\'g cake kay puro closed tanan kay gilinog, ngita pa ko\'g kandila na muspark-spark pero na-epic fail ra japun, kulbaan pa mi na di muuna\'g uli kay magkabalios nya. Pero it was a success! But in her POV, niadto ra diay\'g DB not for projects, but gapanic diay kay naspoiled na\'s surprise, may gae supportive ra sila tanan. Anyways kaon Jollibee while gacelebrate, then uli, car rides.\n\nNisugot na jud siya sa atubangan mulingkod, yeah talked a little bit, both of us shy. She suddenly got silent and emotional during the car ride. That was it. I realized, this is the person I want to have as the passenger princess of my life. Idk if she was crying or was just tired. All I know is, I love her.',
     quoteHighlight:
       'Nisugot na jud siya sa atubangan mulingkod... This is the person I want to have as the passenger princess of my life.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Dfrost DB & Jollibee, Bogo City',
     weatherTemp: '27°C',
     weatherConditions: 'Emotional Evening City Lights',
@@ -4952,7 +4952,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Murder mystery card games, lami-a\'g mata Bam-Bam uy.\n\nWhile solving cards and suspecting each other, all I could really pay attention to was how deeply captivating your eyes were every time you looked across the table.',
     quoteHighlight:
       'Murder mystery card games... Lami-a\'g mata Bam-Bam uy.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '27°C',
     weatherConditions: 'Playful Evening Lights',
@@ -4982,7 +4982,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'First prosesyon together, she got quiet, I stood still next to her.\n\nWalking step for step with candles and prayers, keeping close so she always knew she wasn\'t walking alone.',
     quoteHighlight:
       'First prosesyon together... She got quiet, I stood still next to her.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Parish Procession Route, Bogo City',
     weatherTemp: '26°C',
     weatherConditions: 'Candlelit Night Procession',
@@ -5012,7 +5012,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Lamaw together, adto ila Uncle Nilo. I realized I really want her close for the rest of my life. Brushed her hair while gatabi si Uncle. Fuck she\'s so gorgeous. Tupperware nako na murag baso ang gidak-on.',
     quoteHighlight:
       'Brushed her hair while gatabi si Uncle... I realized I really want her close for the rest of my life.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Uncle Nilo’s Place, Bogo City',
     weatherTemp: '28°C',
     weatherConditions: 'Warm Afternoon Gathering',
@@ -5042,7 +5042,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Piyok alone minteryo—ingnan\'s Pom-Pom chant 4 lagi, nag-chant 2 nuon hahaha.\n\nAll Souls Day cemetery antics and laugh-out-loud choir moments.',
     quoteHighlight:
       'Ingnan\'s Pom-Pom chant 4 lagi, nag-chant 2 nuon hahaha.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Cemetery, Bogo City',
     weatherTemp: '27°C',
     weatherConditions: 'All Saints Evening Crowds',
@@ -5072,7 +5072,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Odlot Kawit nguyab bookmark keychain angle-angle.\n\nThe unforgettable day our official courting story began. Handing her the special bookmark and keychain, capturing her beautiful smiles from every angle, and formally opening the sweetest chapter of our lives.',
     quoteHighlight:
       'Odlot Kawit... The bookmark, the keychain, and the official start of forever.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Odlot & Kawit, Northern Cebu',
     weatherTemp: '28°C',
     weatherConditions: 'Coastal Sunlight & Pure Joy',
@@ -5102,7 +5102,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Tambay ila Bam-Bam.\n\nFresh from the joy of officially courting, spending cozy, comfortable hours just hanging out at her place.',
     quoteHighlight:
       'Tambay ila Bam-Bam... Just being together.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bam’s House, Bogo City',
     weatherTemp: '27°C',
     weatherConditions: 'Afternoon Breeze',
@@ -5132,7 +5132,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Sunday talks church.\n\nServing together on Sunday and sharing heartfelt conversations about life, church, and the sweet future ahead.',
     quoteHighlight:
       'Sunday talks at church... Serving and talking with you.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Parish Church, Bogo City',
     weatherTemp: '28°C',
     weatherConditions: 'Bright Sunday Sunlight',
@@ -5162,7 +5162,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Birthday ni Ate Cyra.\n\nGathering together to celebrate Ate Cyra’s special day with good food, family laughs, and keeping close to Zea.',
     quoteHighlight:
       'Ate Cyra’s birthday... Celebrating together.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Bogo City, Cebu',
     weatherTemp: '27°C',
     weatherConditions: 'Festive Evening',
@@ -5192,7 +5192,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Patintero, singot kay\'s Zea.\n\nCompetitive street games where she gave it her all, running back and forth, breathless and sweating, looking prettier than ever with that glowing smile.',
     quoteHighlight:
       'Patintero, singot kay\'s Zea... Glowing with that competitive spirit.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Neighborhood Street, Bogo City',
     weatherTemp: '29°C',
     weatherConditions: 'Warm Active Afternoon',
@@ -5223,7 +5223,7 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
       'Remembered the 1st time we met at Cebeco - I had doubts that you were mad at me for a long time, for months, we had all those little glances. For Valentine’s Day, I finally talked to you. It was our first time talking and I remember it just like it was yesterday.\n\nIt all started sa OFFICE CHAIR sa Cebeco.\n\nBefore the practice started, you specifically sat down sa mga sopranos kay na koy tuyo ato, then Bam-Bam kay TAPAD NAKO. Muto she sat down the office chair na naay ligid, then luhag kaayo siya iya gituyok iya lingkoranan giigo akong tiil sa iyang tiil, "ay sorry ya", pa as-if pud ni siya. Ako pud na pilingon sa\'kong huna-huna, "oh lagi Bam ay sige\'g patagad di ko magpahalata na ibog gihapon ko nimo".\n\nThen paghuman\'s practice, nangaon mi nya nagpaduol jud ko niya nakigdungag kaon, hangol pa kaayo ko\'g fruit salad ato. I was very interested on how\'s life been doing for her after we stopped talking for 5 years. We were eating ice cream at Cebeco LPC and our tumblers were filled with ice cream. I literally took the chance to talk to you and nangumusta ra ko asa ka skwela, and was so proud already by asking, "MAG-ULIAN KA SA DB? 5AM MUMATA? KAPOYA ANA!" then you said, "na-anad ra man ko ya kay mahal man jud mag-boarding house."',
     quoteHighlight:
       'It all started sa office chair sa Cebeco... "Ay sorry ya." Di ko magpahalata na ibog gihapon ko nimo.',
-    signOffAuthor: 'JP • St. 1',
+    signOffAuthor: 'John Paul . Your baby',
     location: 'Cebeco LPC, Bogo City',
     weatherTemp: '27°C',
     weatherConditions: 'Valentines Glow & Reunited Spark',
