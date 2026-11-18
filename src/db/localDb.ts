@@ -229,14 +229,18 @@ class LocalDatabase {
       memCache.secretYearNotes = savedNotes && Array.isArray(savedNotes) ? savedNotes : [];
       memCache.digitalLoveLetters = savedLetters && Array.isArray(savedLetters) ? savedLetters : [];
 
-      // (2026-07-13) Auto-seed imported August 2026 memories if missing; was absent
+      // (2026-07-13) Auto-seed imported July & August 2026 keepsakes; was 4 august only
       let memoriesUpdated = false;
       for (const item of INITIAL_MEMORIES) {
         const existingIdx = memCache.memories.findIndex((m) => m.dateISO === item.dateISO);
         if (existingIdx === -1) {
           memCache.memories.push(item);
           memoriesUpdated = true;
-        } else if (!memCache.memories[existingIdx].storyBody || memCache.memories[existingIdx].storyBody.length < 20) {
+        } else if (
+          !memCache.memories[existingIdx].storyBody ||
+          memCache.memories[existingIdx].storyBody.length < 20 ||
+          memCache.memories[existingIdx].id.endsWith('-imported')
+        ) {
           memCache.memories[existingIdx] = { ...item, id: memCache.memories[existingIdx].id };
           memoriesUpdated = true;
         }
