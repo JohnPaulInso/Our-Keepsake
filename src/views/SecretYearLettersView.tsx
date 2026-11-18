@@ -206,12 +206,20 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
     onToast(`Secret year note saved for ${profile.partner2Name}!`, 'success');
   };
 
+  // (2026-07-13) Sort love letters latest to oldest by date; was unsorted list
   const filteredLetters = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return digitalLoveLetters;
-    return digitalLoveLetters.filter((l) => {
-      const hay = `${l.title} ${l.occasion} ${l.salutation} ${l.body} ${l.signOff} ${l.paperNotes || ''} ${formatStandardDate(l.dateISO)}`.toLowerCase();
-      return hay.includes(q);
+    const list = q
+      ? digitalLoveLetters.filter((l) => {
+          const hay = `${l.title} ${l.occasion} ${l.salutation} ${l.body} ${l.signOff} ${l.paperNotes || ''} ${formatStandardDate(l.dateISO)}`.toLowerCase();
+          return hay.includes(q);
+        })
+      : [...digitalLoveLetters];
+
+    return list.sort((a, b) => {
+      const dateComp = (b.dateISO || '').localeCompare(a.dateISO || '');
+      if (dateComp !== 0) return dateComp;
+      return (b.updatedAt || 0) - (a.updatedAt || 0);
     });
   }, [digitalLoveLetters, search]);
 
