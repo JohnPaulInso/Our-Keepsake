@@ -10,9 +10,57 @@ interface MonthlyNotepadViewProps {
   initialMonth?: number;
   onBackToTimeline: () => void;
   onToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
+  // (2026-07-13) Live sync notepad date edits into keepsake memories; was none
+  onUpdateMemoriesLive?: (entries: { dateISO: string; story: string }[]) => void;
 }
 
 const DATE_CHAR_LIMIT = 3000;
+
+// (2026-07-13) Parse date entries like 'Nov 16, 2026 - content' vs raw plain text
+export function parseDateEntriesFromNotepad(
+  text: string,
+  fallbackYear: number,
+  fallbackMonth: number
+): { dateISO: string; story: string }[] {
+  const blocks = text.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+  const results: { dateISO: string; story: string }[] = [];
+
+  const MONTH_MAP: Record<string, number> = {
+    jan: 1, january: 1,
+    feb: 2, february: 2,
+    mar: 3, march: 3,
+    apr: 4, april: 4,
+    may: 5,
+    jun: 6, june: 6,
+    jul: 7, july: 7,
+    aug: 8, august: 8,
+    sep: 9, september: 9,
+    oct: 10, october: 10,
+    nov: 11, november: 11,
+    dec: 12, december: 12,
+  };
+
+  for (const block of blocks) {
+    const match = block.match(
+      /^(?:([A-Za-z]+)\s+)?(\d{1,2})(?:st|nd|rd|th)?(?:,?\s*(\d{4}))?\s*[-:—]\s*([\s\S]*)$/
+    );
+    if (match) {
+      const monthStr = match[1]?.toLowerCase();
+      const day = parseInt(match[2], 10);
+      const parsedYear = match[3] ? parseInt(match[3], 10) : fallbackYear;
+      const parsedMonth =
+        monthStr && MONTH_MAP[monthStr] ? MONTH_MAP[monthStr] : fallbackMonth + 1;
+      const story = match[4].trim();
+
+      if (day >= 1 && day <= 31 && parsedMonth >= 1 && parsedMonth <= 12) {
+        const dateISO = `${parsedYear}-${String(parsedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        results.push({ dateISO, story });
+      }
+    }
+  }
+
+  return results;
+}
 
 export const MonthlyNotepadView: React.FC<MonthlyNotepadViewProps> = ({
   profile,
@@ -21,6 +69,7 @@ export const MonthlyNotepadView: React.FC<MonthlyNotepadViewProps> = ({
   initialMonth,
   onBackToTimeline,
   onToast,
+  onUpdateMemoriesLive,
 }) => {
   const [year, setYear] = useState<number>(() => initialYear ?? new Date().getFullYear());
   const [month, setMonth] = useState<number>(() => initialMonth ?? new Date().getMonth());
@@ -96,6 +145,32 @@ export const MonthlyNotepadView: React.FC<MonthlyNotepadViewProps> = ({
     adjustHeight();
   }, [notepadText, monthKey]);
 
+  // (2026-07-13) Debounced live-sync of edited date entries to memory ledger; was none
+  const syncTimerRef = useRef<number | null>(null);
+
+  const triggerLiveSync = (text: string) => {
+    if (syncTimerRef.current) {
+      clearTimeout(syncTimerRef.current);
+    }
+    syncTimerRef.current = window.setTimeout(() => {
+      if (onUpdateMemoriesLive) {
+        const entries = parseDateEntriesFromNotepad(text, year, month);
+        if (entries.length > 0) {
+          onUpdateMemoriesLive(entries);
+        }
+      }
+    }, 600);
+  };
+
+  const handleBlur = () => {
+    if (onUpdateMemoriesLive) {
+      const entries = parseDateEntriesFromNotepad(notepadText, year, month);
+      if (entries.length > 0) {
+        onUpdateMemoriesLive(entries);
+      }
+    }
+  };
+
   // Enforce 3000 chars limit per date entry
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const raw = e.target.value;
@@ -115,6 +190,7 @@ export const MonthlyNotepadView: React.FC<MonthlyNotepadViewProps> = ({
     }
     setNotepadText(finalVal);
     DB.setMonthlyNotepad(monthKey, finalVal);
+    triggerLiveSync(finalVal);
   };
 
   const maxDateBlockLength = useMemo(() => {
@@ -315,11 +391,12 @@ export const MonthlyNotepadView: React.FC<MonthlyNotepadViewProps> = ({
         }`}
       >
         {/* Clean Google Keep Seamless Textarea without Outer Padding */}
-        <div className="w-full flex-1 px-3 sm:px-6 pt-3 pb-24">
+        <div className="w-full flex-1 px-3 sm:px-6 pt-3 pb-32 md:pb-24">
           <textarea
             ref={textareaRef}
             value={notepadText}
             onChange={handleTextChange}
+            onBlur={handleBlur}
             placeholder={`nov 15 - after mass service niadto tag goldilocks...\n\nnov 16 - fetched u at db and ngaon ta burger...`}
             rows={20}
             className="w-full bg-transparent font-sans text-[13.5px] sm:text-[14px] leading-relaxed text-[#202124] dark:text-on-surface focus:outline-none resize-none border-0 p-0 m-0 placeholder:text-outline/40 select-text overflow-hidden"
@@ -328,7 +405,7 @@ export const MonthlyNotepadView: React.FC<MonthlyNotepadViewProps> = ({
         </div>
 
         {/* Minimal Google Keep Bottom Status Bar */}
-        <div className="fixed bottom-0 left-0 right-0 max-w-[820px] mx-auto px-4 py-2 bg-surface-bright/95 backdrop-blur-md border-t border-outline-variant/20 flex items-center justify-between text-[11px] text-secondary font-sans z-20 no-print">
+        <div className="fixed bottom-16 md:bottom-0 left-0 right-0 max-w-[820px] mx-auto px-4 py-2 bg-surface-bright/95 backdrop-blur-md border-t border-outline-variant/20 flex items-center justify-between text-[11px] text-secondary font-sans z-20 no-print">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[14px] text-emerald-600">cloud_done</span>
             <span>Saved to Vault</span>

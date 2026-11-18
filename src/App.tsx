@@ -330,6 +330,65 @@ export const App: React.FC = () => {
     syncManager.schedulePush();
   };
 
+  // (2026-07-13) Live sync date entries from notepad to memory ledger; was none
+  const handleUpdateMemoriesFromNotepad = async (
+    entries: { dateISO: string; story: string }[]
+  ) => {
+    let nextList = [...memories];
+    let hasChanged = false;
+
+    for (const { dateISO, story } of entries) {
+      if (!story) continue;
+      const existingIdx = nextList.findIndex((m) => m.dateISO === dateISO);
+      if (existingIdx !== -1) {
+        if (nextList[existingIdx].storyBody !== story) {
+          nextList[existingIdx] = {
+            ...nextList[existingIdx],
+            storyBody: story,
+            snippet: story.slice(0, 160),
+            updatedAt: Date.now(),
+          };
+          hasChanged = true;
+        }
+      } else {
+        const newMemory: KeepsakeMemory = {
+          id: `mem-${dateISO}-${Date.now()}`,
+          keepsakeNumber: memories.length + 1,
+          volumeNumber: 15,
+          dateISO,
+          timeFormatted: 'All Day',
+          title: story.split('\n')[0].slice(0, 36) || `Keepsake for ${dateISO}`,
+          snippet: story.slice(0, 160),
+          storyBody: story,
+          quoteHighlight: '',
+          signOffAuthor: profile.partner1Name,
+          location: 'Bogo City, Cebu',
+          weatherTemp: '28°C',
+          weatherConditions: 'Gentle Breeze',
+          moodVibe: 'Tender & Sweet',
+          vibeTags: ['Cozy Rainy Day', 'First Time'],
+          categories: ['EVENT'],
+          dotIndicators: ['MOCHA', 'GOLD'],
+          photos: [],
+          partnerNotes: [],
+          isSealed: true,
+          sealLabel: 'Sealed Keepsake',
+          sealIcon: 'favorite',
+          sortOrder: 1,
+          updatedAt: Date.now(),
+        };
+        nextList.unshift(newMemory);
+        hasChanged = true;
+      }
+    }
+
+    if (hasChanged) {
+      setMemories(nextList);
+      await DB.setMemories(nextList);
+      syncManager.schedulePush();
+    }
+  };
+
   const handleDeleteSecretNote = async (id: string) => {
     const nextList = secretNotes.filter((n) => n.id !== id);
     await DB.setSecretYearNotes(nextList);
@@ -953,13 +1012,14 @@ export const App: React.FC = () => {
               />
             )}
 
-            {/* (2026-07-13) Render MonthlyNotepadView for notepad tab; was unhandled */}
+            {/* (2026-07-13) Pass live sync callback to MonthlyNotepadView; was omitted */}
             {activeTab === 'notepad' && (
               <MonthlyNotepadView
                 profile={profile}
                 memories={memories}
                 onBackToTimeline={() => switchTab('timeline')}
                 onToast={addToast}
+                onUpdateMemoriesLive={handleUpdateMemoriesFromNotepad}
               />
             )}
           </>
@@ -969,8 +1029,7 @@ export const App: React.FC = () => {
       {/* Global Toast Container above Bottom Navigation */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-      {/* Bottom Navigation Bar matching Stitch Design (Mobile Only) */}
-      {/* (2026-07-13) Hide bottom navbar on tablet and desktop vs mobile only */}
+      {/* (2026-07-13) Symmetrical mobile bottom nav with Notepad tab; was without notepad */}
       <nav className="md:hidden fixed bottom-0 w-full z-50 pb-safe bg-surface-bright/98 backdrop-blur-md border-t border-outline-variant/30 rounded-t-2xl shadow-[0_-4px_20px_rgba(74,59,50,0.08)] no-print">
         <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-around">
           <button
@@ -979,30 +1038,30 @@ export const App: React.FC = () => {
               setEditingMemory(null);
               switchTab('timeline');
             }}
-            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 transition-colors ${
+            className={`flex flex-col items-center justify-center min-w-[50px] min-h-[44px] gap-0.5 transition-colors ${
               activeTab === 'timeline'
                 ? 'text-primary font-bold'
                 : 'text-on-surface-variant hover:text-on-surface font-medium'
             }`}
           >
             <span className="material-symbols-outlined text-[22px]">auto_stories</span>
-            <span className="font-label-md text-label-md tracking-wider">Timeline</span>
+            <span className="font-label-md text-[11px] tracking-wider">Timeline</span>
           </button>
 
           <button
             type="button"
             onClick={() => {
               setEditingMemory(null);
-              switchTab('story');
+              switchTab('notepad');
             }}
-            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 transition-colors ${
-              activeTab === 'story'
+            className={`flex flex-col items-center justify-center min-w-[50px] min-h-[44px] gap-0.5 transition-colors ${
+              activeTab === 'notepad'
                 ? 'text-primary font-bold'
                 : 'text-on-surface-variant hover:text-on-surface font-medium'
             }`}
           >
-            <span className="material-symbols-outlined text-[22px]">menu_book</span>
-            <span className="font-label-md text-label-md tracking-wider">Story</span>
+            <span className="material-symbols-outlined text-[22px]">edit_note</span>
+            <span className="font-label-md text-[11px] tracking-wider">Notepad</span>
           </button>
 
           <div className="flex items-center justify-center -mt-5">
@@ -1023,16 +1082,16 @@ export const App: React.FC = () => {
             type="button"
             onClick={() => {
               setEditingMemory(null);
-              switchTab('capsule');
+              switchTab('story');
             }}
-            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 transition-colors ${
-              activeTab === 'capsule'
+            className={`flex flex-col items-center justify-center min-w-[50px] min-h-[44px] gap-0.5 transition-colors ${
+              activeTab === 'story'
                 ? 'text-primary font-bold'
                 : 'text-on-surface-variant hover:text-on-surface font-medium'
             }`}
           >
-            <span className="material-symbols-outlined text-[22px]">inventory_2</span>
-            <span className="font-label-md text-label-md tracking-wider">Capsule</span>
+            <span className="material-symbols-outlined text-[22px]">menu_book</span>
+            <span className="font-label-md text-[11px] tracking-wider">Story</span>
           </button>
 
           <button
@@ -1041,14 +1100,14 @@ export const App: React.FC = () => {
               setEditingMemory(null);
               switchTab('letters');
             }}
-            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] gap-0.5 transition-colors relative ${
-              activeTab === 'letters'
+            className={`flex flex-col items-center justify-center min-w-[50px] min-h-[44px] gap-0.5 transition-colors relative ${
+              activeTab === 'letters' || activeTab === 'capsule'
                 ? 'text-primary font-bold'
                 : 'text-on-surface-variant hover:text-on-surface font-medium'
             }`}
           >
             <span className="material-symbols-outlined text-[22px]">mail</span>
-            <span className="font-label-md text-label-md tracking-wider">Letters</span>
+            <span className="font-label-md text-[11px] tracking-wider">Letters</span>
           </button>
         </div>
       </nav>
