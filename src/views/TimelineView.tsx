@@ -382,7 +382,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     });
   };
 
+  // (2026-07-13) Bypass overlay delay if closed; was unconditional timeout
   const closeDateOverlay = (callback?: () => void) => {
+    if (!isFullscreenDateOpen) {
+      if (callback) callback();
+      return;
+    }
     setIsOverlayClosing(true);
     setIsOverlayVisible(false);
     setTimeout(() => {
@@ -472,8 +477,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     const mStr = String(calendarMonth + 1).padStart(2, '0');
     const dStr = String(selectedDay).padStart(2, '0');
     const targetIso = `${calendarYear}-${mStr}-${dStr}`;
-    // (2026-07-13) Load date memory directly via date index; was scan all dates
-    return DB.getMemoriesByDateSync(targetIso);
+    // (2026-07-13) Filter reactive memories prop; was DB.getMemoriesByDateSync
+    return memories.filter((m) => m.dateISO === targetIso);
   }, [calendarYear, calendarMonth, selectedDay, memories]);
 
   const primaryDateMemory = selectedDayMemories[0] || null;
@@ -528,7 +533,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       updatedAt: Date.now(),
       sortOrder: 0,
     };
-    closeDateOverlay(() => onEditMemory(memoryToEdit));
+    // (2026-07-13) Open composer immediately when closed; was closeDateOverlay
+    if (isFullscreenDateOpen) {
+      closeDateOverlay(() => onEditMemory(memoryToEdit));
+    } else {
+      onEditMemory(memoryToEdit);
+    }
   };
 
   useEffect(() => {

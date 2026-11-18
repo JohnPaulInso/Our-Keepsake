@@ -116,7 +116,7 @@ export const MonthlyNotepadView: React.FC<MonthlyNotepadViewProps> = ({
       .join('\n\n');
   }, [memories, monthKey]);
 
-  // Load saved notepad or default to compiled notes
+  // (2026-07-13) Only load note when monthKey changes; was autoCompiledNotes
   useEffect(() => {
     const saved = DB.getMonthlyNotepad(monthKey);
     if (saved !== null) {
@@ -131,7 +131,8 @@ export const MonthlyNotepadView: React.FC<MonthlyNotepadViewProps> = ({
         setNotepadText('');
       }
     }
-  }, [monthKey, autoCompiledNotes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [monthKey]);
 
   // Auto-grow textarea with unlimited spacing downward
   const adjustHeight = () => {
@@ -225,8 +226,11 @@ export const MonthlyNotepadView: React.FC<MonthlyNotepadViewProps> = ({
     }, 180);
   };
 
-  // Touch Swipe handlers
+  // (2026-07-13) Exclude textarea from swipe navigation; was all touches
   const handleTouchStart = (e: React.TouchEvent) => {
+    if ((e.target as HTMLElement)?.tagName === 'TEXTAREA' || (e.target as HTMLElement)?.closest('textarea')) {
+      return;
+    }
     if (e.touches.length === 1) {
       setTouchStartX(e.touches[0].clientX);
       setTouchStartY(e.touches[0].clientY);

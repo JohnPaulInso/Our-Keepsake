@@ -973,7 +973,9 @@ export const App: React.FC = () => {
               ))}
 
             {activeTab === 'new-date' && (
+              // (2026-07-13) Add key to reinitialize on edit change; was unkeyed
               <ComposerView
+                key={editingMemory?.id || 'new-composer'}
                 profile={profile}
                 editingMemory={editingMemory}
                 totalMemoriesCount={memories.length}
