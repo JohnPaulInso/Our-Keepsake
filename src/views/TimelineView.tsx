@@ -1401,14 +1401,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             value={sortBy}
             onChange={(val) => setSortBy(val as 'custom' | 'newest' | 'oldest')}
           />
-          {/* (2026-07-13) Support dotColor and clear selectedDay; was icon only */}
+          // (2026-07-13) Remove color words from dot filter; was color prefixes
           <CustomDropdown
             options={[
-              { value: 'ALL', label: 'All Dot Colors', icon: 'palette' },
-              { value: 'GOLD', label: 'Gold • Events', dotColor: '#E5A93C' },
-              { value: 'MOCHA', label: 'Mocha • Date', dotColor: '#5C4033' },
-              { value: 'ROSE', label: 'Rose • Intimacy', dotColor: '#C96B78' },
-              { value: 'BURGUNDY', label: 'Burgundy • Milestone', dotColor: '#8B263E' },
+              { value: 'ALL', label: 'All Dots', icon: 'palette' },
+              { value: 'GOLD', label: 'Events', dotColor: '#E5A93C' },
+              { value: 'MOCHA', label: 'Date', dotColor: '#5C4033' },
+              { value: 'ROSE', label: 'Intimacy', dotColor: '#C96B78' },
+              { value: 'BURGUNDY', label: 'Milestone', dotColor: '#8B263E' },
             ]}
             value={dotFilter}
             onChange={(val) => {
@@ -1428,7 +1428,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               {filteredMemories.length === 1 ? 'memory' : 'memories'}
               {dotFilter !== 'ALL' && (
                 <span className="ml-1 text-primary font-semibold">
-                  • {dotFilter.toLowerCase()} dot
+                  • {dotFilter === 'GOLD' ? 'Events' : dotFilter === 'MOCHA' ? 'Date' : dotFilter === 'ROSE' ? 'Intimacy' : 'Milestone'}
                 </span>
               )}
               {matchingSecretNotes.length > 0
@@ -1768,7 +1768,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   ? 'bg-[#E5A93C]/20 ring-1 ring-[#E5A93C] font-semibold'
                   : 'hover:bg-surface-container-low'
               }`}
-              title="Filter by Gold Events"
+              title="Filter by Events"
             >
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#E5A93C' }} />
               <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
@@ -1786,7 +1786,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   ? 'bg-[#5C4033]/20 ring-1 ring-[#5C4033] font-semibold'
                   : 'hover:bg-surface-container-low'
               }`}
-              title="Filter by Mocha Date"
+              title="Filter by Date"
             >
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#5C4033' }} />
               <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
@@ -1804,7 +1804,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   ? 'bg-[#C96B78]/20 ring-1 ring-[#C96B78] font-semibold'
                   : 'hover:bg-surface-container-low'
               }`}
-              title="Filter by Rose Intimacy"
+              title="Filter by Intimacy"
             >
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#C96B78' }} />
               <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
@@ -1822,7 +1822,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   ? 'bg-[#8B263E]/20 ring-1 ring-[#8B263E] font-semibold'
                   : 'hover:bg-surface-container-low'
               }`}
-              title="Filter by Burgundy Milestone"
+              title="Filter by Milestone"
             >
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#8B263E' }} />
               <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
