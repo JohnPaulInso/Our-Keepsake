@@ -137,7 +137,8 @@ export const CapsuleVaultView: React.FC<CapsuleVaultViewProps> = ({
       setPasscodeInput('');
       onToast('Ceremonial Time Capsule unlocked for JP & Zea!', 'success');
     } else {
-      onToast('Passcode hint: Try 1014 (Oct 14) or tap Biometric Unlock.', 'warning');
+      // (2026-07-13) Remove passcode hint; was Passcode hint: Try 1014...
+      onToast('Incorrect passcode. Please try again or tap Biometric Unlock.', 'warning');
     }
   };
 

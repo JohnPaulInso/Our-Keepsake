@@ -143,9 +143,8 @@ export const PinLockModal: React.FC<PinLockModalProps> = ({ onUnlock }) => {
               Unlocked! Opening sanctuary... 💕
             </p>
           ) : (
-            <p className="text-secondary/60 font-label-md text-[11px]">
-              Hint: 7777
-            </p>
+            /* (2026-07-13) Remove PIN hint; was Hint: 7777 */
+            null
           )}
         </div>
 
