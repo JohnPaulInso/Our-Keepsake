@@ -41,8 +41,37 @@ export const DEFAULT_COUPLE_PROFILE: CoupleProfile = {
   updatedAt: 1730000000000,
 };
 
-// (2026-07-13) Seed complete July and August 2026 keepsakes; was 4 august entries
+// (2026-07-13) Import Our First Sleepover & Vacation keepsake; was absent
 export const INITIAL_MEMORIES: KeepsakeMemory[] = [
+  {
+    id: 'mem-2026-06-22-imported',
+    keepsakeNumber: 1,
+    volumeNumber: 1,
+    dateISO: '2026-06-22',
+    timeFormatted: '9:00 AM',
+    title: 'Our First Sleepover & Vacation',
+    letterHeading: 'Our First Sleepover & Vacation',
+    snippet:
+      'Our first sleepover and vacation together at Cliff Resort, The Ruins, and Bakhawan.',
+    storyBody: `June 22-23 - Around 9 am gikuha tika nya napaman tay time, didto ta luyos iglesia dapit sa cogon nya park tas kalibunan, nagpatay jd tag maayu bahalag huot, kurog² jd ta and eyecontact while fingering and lulu²ing, top tier.. Nindot kaayo ang kulba kay it made me felt closer to you.. We fucked.. As in fucked.. Hard.. Uyog jung sakyanan... Nya kuha nato silang franz ug julius, ngadto ta db  nagouting sa cliff resort ngandam tas ato mga gamit and naa tas igbaw sa bunk bed nya sge tag kapakong kay ubos kayg ceiling nya nangadto tag the ruins mga 4-5pm nagpics ta, nya uli ta, grabe kaytag pag pangandam kay nagluto tag sinugbang baboy nya lami kaytag setup ana pakag "fine dining" nya sge rmn tag kiss ato atubangans ilaha, nya ngandam ta, nya nangaon, nya tago kos pics hahaha, nagtabi ta about psych² and mga stories ug symptoms ngano ingnana ang nafeels usa ka tao, nya nagduwa tag uno paghuman lingaw kaayo kay pirme ma +4 si franz nya unayon tikag +2 HAHAHHA\n\nMya nangatug nata habol rjd atong pangtago, mga 1am dugay kayta nakatug kay sge tag luhag, hilom kayng palibot nag finingeray na diay nya eye contact ray gamit pangcommunicate, ngitngit kaayu and gamayng lihok musaba, mutingog pajd usahay imo chechay kay nagbasa sge lng jd tag tinutukay, kay akong gi finger ilawms habol, lami kaayo matug basta katapad ka... Basta magbasa si chechay nya murag mubuwa na tubig tingog, hunong ta kay basin mabatian nila, eyecontact pag communicate sa ngitngit, piyong kadiyot finger dako, tando gamay, kuot dako, nya u slept on my chest jd nagbuntag for the first time and lami kaayung tug tapad ka,\n\nPagmata nagdungag tingog ang alarm alas 4 bisag unsay ringtone and hapit japun tag fingeray ginagmay kay imo mn jd birahon ako kamot WHAHAHAH, nya bangon ta para magpictorial unta pero bati kay way sand, una kog tug balik nya while nangandam silag breakfast, nagshower together ta for the first time, lami kaykag reaction basta malamian kay tibook lawas nimo malanay ka while the droplets are pouring against our skin as i gave you a back hug.. Naked.., while gashower ta i pressed you hard on the wall whilst the cold droplets of the shower were being spat against us, tugnaw pajd pero luhag kaytas cr bisag unsang position, bwesit pajd angcr kay way lock and glass ang shower room tuwalya ra ato giali, bahala na, lami man,\n\nGrabeg chula nato pagkaligo kuot japun, nya after ligo skincare gamay, higda balik kuot nasd gamay sa kama kay gisolo natong room, nya nakatug man ka then nangaon ta pagmata nimo nya nag horse riding ta paghuman saka tas the ruins then ngadto tag bakhawan kay nag pool ta, enjoy gamay ligo and labay² sa beach ball and nangluod paka kay giluwaan nakog fountain2 imo baba sakong gilimogmog hahahahhahah, kaon gamay, then adto ila anne natug ko para diko questionon nila nya kapoy sd ko ato, then uli ta`,
+    quoteHighlight:
+      'You slept on my chest for the first time and lami kaayo matug basta katapad ka.',
+    signOffAuthor: 'JP • St. 1',
+    location: 'Cliff Resort, The Ruins & Bakhawan',
+    weatherTemp: '30°C',
+    weatherConditions: 'Warm & Sunny Vacation',
+    moodVibe: 'Romantic, Intimate & Sweet',
+    vibeTags: ['Date', 'Events', 'Intimacy', 'Milestone', 'Vacation', 'Sleepover'],
+    categories: ['EVENT', 'PHOTO', 'ANNIVERSARY'],
+    dotIndicators: ['MOCHA', 'GOLD', 'ROSE', 'BURGUNDY'],
+    photos: [],
+    partnerNotes: [],
+    isSealed: true,
+    sealLabel: 'Sealed in Chapter 1 • JP & Zea',
+    sealIcon: 'favorite',
+    sortOrder: 0,
+    updatedAt: 1782000000000,
+  },
   {
     id: 'mem-2026-07-05-imported',
     keepsakeNumber: 1,
