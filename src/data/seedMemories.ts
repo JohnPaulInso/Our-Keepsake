@@ -5206,6 +5206,37 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     sortOrder: 130,
     updatedAt: 1762861800000,
   },
+  // (2026-07-13) Add Feb 14 2025 Cebeco office chair memory; was starting Sept
+  {
+    id: 'mem-2025-02-14-imported',
+    keepsakeNumber: 113,
+    volumeNumber: 1,
+    dateISO: '2025-02-14',
+    timeFormatted: '5:30 PM',
+    title: 'Office Chair at Cebeco, Valentines Day & First Talk in 5 Years',
+    letterHeading: 'Office Chair at Cebeco, Valentines Day & First Talk in 5 Years',
+    snippet:
+      'Valentines Day at Cebeco LPC where it all started: the rolling office chair bump, fruit salad, ice cream tumblers, and breaking 5 years of silence.',
+    storyBody:
+      'Remembered the 1st time we met at Cebeco - I had doubts that you were mad at me for a long time, for months, we had all those little glances. For Valentine’s Day, I finally talked to you. It was our first time talking and I remember it just like it was yesterday.\n\nIt all started sa OFFICE CHAIR sa Cebeco.\n\nBefore the practice started, you specifically sat down sa mga sopranos kay na koy tuyo ato, then Bam-Bam kay TAPAD NAKO. Muto she sat down the office chair na naay ligid, then luhag kaayo siya iya gituyok iya lingkoranan giigo akong tiil sa iyang tiil, "ay sorry ya", pa as-if pud ni siya. Ako pud na pilingon sa\'kong huna-huna, "oh lagi Bam ay sige\'g patagad di ko magpahalata na ibog gihapon ko nimo".\n\nThen paghuman\'s practice, nangaon mi nya nagpaduol jud ko niya nakigdungag kaon, hangol pa kaayo ko\'g fruit salad ato. I was very interested on how\'s life been doing for her after we stopped talking for 5 years. We were eating ice cream at Cebeco LPC and our tumblers were filled with ice cream. I literally took the chance to talk to you and nangumusta ra ko asa ka skwela, and was so proud already by asking, "MAG-ULIAN KA SA DB? 5AM MUMATA? KAPOYA ANA!" then you said, "na-anad ra man ko ya kay mahal man jud mag-boarding house."',
+    quoteHighlight:
+      'It all started sa office chair sa Cebeco... "Ay sorry ya." Di ko magpahalata na ibog gihapon ko nimo.',
+    signOffAuthor: 'JP • St. 1',
+    location: 'Cebeco LPC, Bogo City',
+    weatherTemp: '27°C',
+    weatherConditions: 'Valentines Glow & Reunited Spark',
+    moodVibe: 'Valentines Sparks, Rolling Chair Bumps & Reconnecting After 5 Years',
+    vibeTags: ['First Time', 'Laughter', 'Milestone', 'Deep Talks'],
+    categories: ['ANNIVERSARY', 'EVENT'],
+    dotIndicators: ['BURGUNDY', 'ROSE', 'GOLD'],
+    photos: [],
+    partnerNotes: [],
+    isSealed: true,
+    sealLabel: 'Sealed in Chapter 1 • JP & Zea',
+    sealIcon: 'favorite',
+    sortOrder: 131,
+    updatedAt: 1739525400000,
+  },
 ];
 
 export const INITIAL_SECRET_YEAR_NOTES: SecretYearNote[] = [];
