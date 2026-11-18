@@ -1688,30 +1688,36 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           })}
         </div>
 
-        {/* (2026-07-13) Update calendar legend to Events, Date, Milestone; was media */}
+        {/* (2026-07-13) Include Intimacy rose dot in calendar legend; was omitted */}
         <div className="flex items-center justify-between pt-space-sm mt-space-sm border-t border-outline-variant/30">
-          <div className="flex flex-wrap items-center justify-between gap-y-1.5 gap-x-3 w-full pt-1">
+          <div className="flex flex-wrap items-center justify-between gap-y-1.5 gap-x-2.5 sm:gap-x-3 w-full pt-1">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#E5A93C' }} />
-              <span className="text-on-surface-variant calendar-legend-font text-[14px]">
+              <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
                 Events
               </span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#5C4033' }} />
-              <span className="text-on-surface-variant calendar-legend-font text-[14px]">
+              <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
                 Date
               </span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#C96B78' }} />
-              <span className="text-on-surface-variant calendar-legend-font text-[14px]">
+              <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
+                Intimacy
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#8B263E' }} />
+              <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
                 Milestone
               </span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-primary" />
-              <span className="text-on-surface-variant calendar-legend-font text-[14px]">
+              <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
                 Selected
               </span>
             </div>
