@@ -230,9 +230,15 @@ class LocalDatabase {
       memCache.digitalLoveLetters = savedLetters && Array.isArray(savedLetters) ? savedLetters : [];
     }
 
-    // (2026-07-13) Upgrade saved avatar to COUPLE_AVATAR_URL; was google placeholder
+    // (2026-07-13) Upgrade saved avatar to COUPLE_AVATAR_URL; was root string
     if (savedProfile && savedProfile.partner1Name) {
-      if (!savedProfile.avatarUrl || savedProfile.avatarUrl.includes('googleusercontent.com')) {
+      if (
+        !savedProfile.avatarUrl ||
+        savedProfile.avatarUrl.includes('googleusercontent.com') ||
+        savedProfile.avatarUrl.startsWith('/meandzea') ||
+        savedProfile.avatarUrl === '/meandzea.png' ||
+        savedProfile.avatarUrl === './meandzea.png'
+      ) {
         savedProfile.avatarUrl = COUPLE_AVATAR_URL;
         await idbSet('coupleProfile', savedProfile);
       }

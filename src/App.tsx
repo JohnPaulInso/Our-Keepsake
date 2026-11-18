@@ -80,6 +80,14 @@ export const App: React.FC = () => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
+  // (2026-07-13) Helper for robust avatar resolution; was raw string check
+  const getAvatarSrc = (url?: string): string => {
+    if (!url || url.includes('googleusercontent.com') || url.startsWith('/meandzea') || url === './meandzea.png') {
+      return COUPLE_AVATAR_URL;
+    }
+    return url;
+  };
+
   // Hydrate IndexedDB before boot per SKILL.md Part 6 Rule 2
   useEffect(() => {
     let mounted = true;
@@ -649,11 +657,16 @@ export const App: React.FC = () => {
             onClick={() => navigate('/backup')}
             className="flex items-center gap-3 p-2 rounded-xl hover:bg-surface-container-low cursor-pointer transition-colors"
           >
-            {/* (2026-07-13) Use meandzea.png as couple avatar vs google placeholder */}
+            {/* (2026-07-13) Render bundled avatar asset with fallback; was literal path */}
             <img
               alt="Couple Profile"
               className="w-10 h-10 rounded-full object-cover ring-2 ring-tertiary-fixed-dim shrink-0"
-              src={profile.avatarUrl && !profile.avatarUrl.includes('googleusercontent.com') ? profile.avatarUrl : COUPLE_AVATAR_URL}
+              src={getAvatarSrc(profile.avatarUrl)}
+              onError={(e) => {
+                if (e.currentTarget.src !== COUPLE_AVATAR_URL) {
+                  e.currentTarget.src = COUPLE_AVATAR_URL;
+                }
+              }}
             />
             <div className="flex flex-col min-w-0">
               <span className="font-label-md text-label-md font-bold text-primary truncate">
@@ -778,11 +791,16 @@ export const App: React.FC = () => {
               aria-label="Loving Couple Profile & Backup Studio"
               className="p-0.5 rounded-full ring-1 ring-tertiary-fixed-dim/70 shadow-sm transition-transform active:scale-95"
             >
-              {/* (2026-07-13) Use meandzea.png as couple avatar vs google placeholder */}
+              {/* (2026-07-13) Render bundled avatar asset with fallback; was literal path */}
               <img
                 alt="Couple Profile"
                 className="w-8 h-8 rounded-full object-cover"
-                src={profile.avatarUrl && !profile.avatarUrl.includes('googleusercontent.com') ? profile.avatarUrl : COUPLE_AVATAR_URL}
+                src={getAvatarSrc(profile.avatarUrl)}
+                onError={(e) => {
+                  if (e.currentTarget.src !== COUPLE_AVATAR_URL) {
+                    e.currentTarget.src = COUPLE_AVATAR_URL;
+                  }
+                }}
               />
             </button>
           </div>
