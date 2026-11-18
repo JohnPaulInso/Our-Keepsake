@@ -1,5 +1,6 @@
-// (2026-07-13) Add Digital Love Letters before paper & Secret Year Notes view
+// (2026-07-13) Import createPortal for full overlay; was trapped in main
 import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { CoupleProfile, DigitalLoveLetter, SecretYearNote } from '../types';
 import { formatStandardDate } from '../utils/dateFormat';
 import { CustomDropdown } from '../components/CustomDropdown';
@@ -623,10 +624,10 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
         </div>
       )}
 
-      {/* (2026-07-13) Simplified clean Love Letter modal; was 8 cluttered inputs */}
-      {readingLetter && (
+      {/* (2026-07-13) Portal letter reader to document body; was trapped in main z-10 */}
+      {readingLetter && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 select-text"
+          className="fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 select-text no-print"
           onClick={() => setReadingLetter(null)}
         >
           <div
@@ -679,37 +680,53 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
               </p>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Add / Edit Digital Love Letter Modal */}
-      {letterComposerOpen && (
+      {/* (2026-07-13) Love letter composer full overlay; was modal with navs showing */}
+      {letterComposerOpen && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed inset-0 z-[100] bg-black/65 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setLetterComposerOpen(false)}
+          id="love-letter-composer-overlay"
+          className="fixed inset-0 z-[120] bg-[#fbf8f4] text-primary w-full h-full min-h-screen overflow-y-auto flex flex-col select-text no-print"
+          style={{
+            paddingTop: 'env(safe-area-inset-top, 0px)',
+            paddingBottom: 'max(24px, env(safe-area-inset-bottom, 24px))',
+          }}
         >
-          <form
-            onSubmit={handleSaveLetterSubmit}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-xl max-h-[92dvh] overflow-y-auto bg-surface-container-lowest rounded-2xl p-5 sm:p-7 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col gap-4"
-          >
-            <div className="flex items-center justify-between border-b border-outline-variant/30 pb-3">
-              <div>
-                <h3 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl font-bold text-primary">
-                  {editingLetter ? 'Edit Love Letter' : `Write Love Letter for ${profile.partner2Name}`}
-                </h3>
-                <span className="text-xs text-secondary italic">A digital keepsake copy of your heartfelt words</span>
-              </div>
+          {/* Top navigation bar */}
+          <div className="sticky top-0 z-10 bg-[#fbf8f4]/95 backdrop-blur-md border-b border-outline-variant/30 px-4 sm:px-6 py-3.5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setLetterComposerOpen(false)}
-                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors"
+                aria-label="Return to letters view"
+                className="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-95"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span className="material-symbols-outlined text-[22px]">arrow_back</span>
               </button>
+              <div>
+                <h2 className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-bold text-primary leading-tight">
+                  {editingLetter ? 'Edit Love Letter' : `Write Love Letter for ${profile.partner2Name}`}
+                </h2>
+                <span className="text-xs text-secondary italic">A digital keepsake copy of your heartfelt words</span>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setLetterComposerOpen(false)}
+              className="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors"
+              aria-label="Close composer"
+            >
+              <span className="material-symbols-outlined text-[20px]">close</span>
+            </button>
+          </div>
 
-            <div className="flex flex-col gap-1">
+          <form
+            onSubmit={handleSaveLetterSubmit}
+            className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-5 flex-1"
+          >
+            <div className="flex flex-col gap-1.5">
               <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
                 Letter Title
               </label>
@@ -719,12 +736,12 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                 onChange={(e) => setLetterTitle(e.target.value)}
                 placeholder="E.g., Penelope or To My Favorite Person..."
                 required
-                className="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-low text-primary font-serif text-base border border-outline-variant/40 focus:border-primary/60 outline-none transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-surface-container-lowest text-primary font-serif text-base sm:text-lg border border-outline-variant/40 focus:border-primary/60 outline-none transition-colors shadow-xs"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1">
+            <div className="grid grid-cols-2 gap-3.5">
+              <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
                   Date
                 </label>
@@ -732,10 +749,10 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                   type="date"
                   value={letterDateISO}
                   onChange={(e) => setLetterDateISO(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-surface-container-low text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
                 />
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
                   Occasion / Tag
                 </label>
@@ -744,26 +761,26 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                   value={letterOccasion}
                   onChange={(e) => setLetterOccasion(e.target.value)}
                   placeholder="E.g., Apology & Love"
-                  className="w-full px-3 py-2 rounded-xl bg-surface-container-low text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-surface-container-lowest text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
                 />
               </div>
             </div>
 
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1.5 flex-1">
               <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
                 Your Letter
               </label>
               <textarea
-                rows={11}
+                rows={12}
                 value={letterBody}
                 onChange={(e) => setLetterBody(e.target.value)}
                 placeholder={`Write or paste your letter for ${profile.partner2Name} here...`}
                 required
-                className="w-full p-4 rounded-xl bg-[#fdfbf7] text-[#3b2d24] font-['Cormorant_Garamond',Georgia,serif] text-base sm:text-lg leading-relaxed border border-outline-variant/40 focus:border-primary/60 outline-none resize-y"
+                className="w-full p-4 rounded-xl bg-[#fdfbf7] text-[#3b2d24] font-['Cormorant_Garamond',Georgia,serif] text-base sm:text-lg leading-relaxed border border-outline-variant/40 focus:border-primary/60 outline-none min-h-[260px] resize-y shadow-xs"
               />
             </div>
 
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1.5">
               <label className="text-[11px] uppercase tracking-wider text-outline font-semibold">
                 Sign-off
               </label>
@@ -772,27 +789,28 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                 value={letterSignOff}
                 onChange={(e) => setLetterSignOff(e.target.value)}
                 placeholder="E.g., -JP or Forever yours, JP"
-                className="w-full px-3.5 py-2 rounded-xl bg-surface-container-low text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none"
+                className="w-full px-4 py-2.5 rounded-xl bg-surface-container-lowest text-primary text-sm border border-outline-variant/40 focus:border-primary/60 outline-none shadow-xs"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-outline-variant/20">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/20 mt-2">
               <button
                 type="button"
                 onClick={() => setLetterComposerOpen(false)}
-                className="px-4 py-2 rounded-xl bg-surface-container-low text-secondary text-xs uppercase font-semibold hover:bg-surface-container transition-colors"
+                className="px-5 py-2.5 rounded-xl bg-surface-container-low text-secondary text-xs uppercase font-semibold hover:bg-surface-container transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-xs uppercase tracking-wider font-semibold shadow-md hover:bg-primary/95 transition-all active:scale-95"
+                className="px-6 py-2.5 rounded-xl bg-primary text-on-primary text-xs uppercase tracking-wider font-semibold shadow-md hover:bg-primary/95 transition-all active:scale-95"
               >
                 Save Love Letter
               </button>
             </div>
           </form>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Add / Edit Secret Year Note Modal */}
