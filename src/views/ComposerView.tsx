@@ -216,6 +216,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     editingMemory?.photos || []
   );
   const [pendingCropSrc, setPendingCropSrc] = useState<string | null>(null);
+  const [pendingCropCaption, setPendingCropCaption] = useState<string>('with my bb bambam');
+  const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
   // (2026-07-13) Auto-open device gallery on intent; was modal popup
   useEffect(() => {
@@ -426,12 +428,26 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     onToast(`Voice note captured (${formatDuration(res.durationSeconds)})!`, 'success');
   };
 
-  // (2026-07-13) Copy files before reset & compress; was reset before copy
+  // (2026-07-13) Set 1:1 cropper on select & with my bb bambam; was raw filename
   const handleSelectPhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
     if (!fileList || fileList.length === 0) return;
     const files = Array.from(fileList).slice(0, 5);
     e.target.value = '';
+
+    if (files.length === 1) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const dataUrl = ev.target?.result as string;
+        if (dataUrl) {
+          setEditingPhotoId(null);
+          setPendingCropCaption('with my bb bambam');
+          setPendingCropSrc(dataUrl);
+        }
+      };
+      reader.readAsDataURL(files[0]);
+      return;
+    }
 
     const newPolaroids: PolaroidPhoto[] = [];
     const now = Date.now();
@@ -443,7 +459,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
           newPolaroids.push({
             id: `ph-${now}-${i}`,
             url: compressedUrl,
-            caption: file.name.replace(/\.[^.]+$/, '') || `Photo ${i + 1}`,
+            caption: 'with my bb bambam',
             tag: 'POLAROID',
           });
         }
@@ -453,7 +469,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     }
     if (newPolaroids.length > 0) {
       setPhotos((prev) => [...prev, ...newPolaroids]);
-      onToast(`Attached ${newPolaroids.length} photo${newPolaroids.length > 1 ? 's' : ''}!`, 'success');
+      onToast(`Attached ${newPolaroids.length} polaroids! Tap "Crop 1:1" to position.`, 'success');
     }
   };
 
@@ -1037,12 +1053,26 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                     key={photo.id}
                     className="bg-[#ffffff] p-3 rounded-xl shadow-xs border border-[#e2dcd5] flex flex-col items-center gap-2"
                   >
-                    <div className="w-full aspect-[4/3] rounded-lg overflow-hidden bg-surface-container relative">
+                    {/* (2026-07-13) Add Crop 1:1 button & square aspect ratio; was uncropped 4:3 */}
+                    <div className="w-full aspect-square rounded-lg overflow-hidden bg-surface-container relative group">
                       <img
                         className="w-full h-full object-cover"
-                        alt={photo.caption || 'Polaroid Memory'}
+                        alt={photo.caption || 'with my bb bambam'}
                         src={photo.url}
                       />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingPhotoId(photo.id);
+                          setPendingCropCaption(photo.caption || 'with my bb bambam');
+                          setPendingCropSrc(photo.url);
+                        }}
+                        title="Adjust 1:1 ratio crop"
+                        className="absolute top-2 left-2 px-2.5 py-1 rounded-md bg-surface-container-lowest/95 hover:bg-surface-container-lowest text-primary text-[11px] font-semibold backdrop-blur-sm shadow-xs flex items-center gap-1 transition-transform active:scale-95"
+                      >
+                        <span className="material-symbols-outlined text-[13px]">crop</span>
+                        <span>Crop 1:1</span>
+                      </button>
                       <button
                         type="button"
                         onClick={() =>
@@ -1063,7 +1093,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                             prev.map((p, i) => (i === index ? { ...p, caption: val } : p))
                           );
                         }}
-                        placeholder={`Caption for ${profile.partner2Name}...`}
+                        placeholder="with my bb bambam"
                         className="w-full bg-transparent font-['Cormorant_Garamond',serif] italic text-sm text-primary placeholder:text-outline/60 focus:outline-none border-b border-outline-variant/30 pb-0.5 text-center"
                       />
                       <div className="flex items-center justify-between text-[10px] text-secondary font-mono">
@@ -1262,23 +1292,40 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       </div>
 
       {/* (2026-07-13) Render modals with createPortal to escape navbar z-index */}
+      {/* (2026-07-13) Support editingPhotoId in cropper modal; was append new only */}
       {pendingCropSrc &&
         createPortal(
           <ImageCropperModal
             imageSrc={pendingCropSrc}
-            onCancel={() => setPendingCropSrc(null)}
-            onComplete={(finalUrl, caption, tag) => {
-              setPhotos((prev) => [
-                ...prev,
-                {
-                  id: `ph-${Date.now()}`,
-                  url: finalUrl,
-                  caption,
-                  tag,
-                },
-              ]);
+            initialCaption={pendingCropCaption || 'with my bb bambam'}
+            onCancel={() => {
               setPendingCropSrc(null);
-              onToast('High-resolution Polaroid developed & attached!', 'success');
+              setEditingPhotoId(null);
+            }}
+            onComplete={(finalUrl, caption, tag) => {
+              if (editingPhotoId) {
+                setPhotos((prev) =>
+                  prev.map((p) =>
+                    p.id === editingPhotoId
+                      ? { ...p, url: finalUrl, caption: caption || 'with my bb bambam', tag }
+                      : p
+                  )
+                );
+                onToast('Polaroid 1:1 crop updated!', 'success');
+              } else {
+                setPhotos((prev) => [
+                  ...prev,
+                  {
+                    id: `ph-${Date.now()}`,
+                    url: finalUrl,
+                    caption: caption || 'with my bb bambam',
+                    tag,
+                  },
+                ]);
+                onToast('Polaroid framed in 1:1 ratio!', 'success');
+              }
+              setPendingCropSrc(null);
+              setEditingPhotoId(null);
             }}
           />,
           document.body

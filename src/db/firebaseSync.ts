@@ -2,9 +2,6 @@
 import { initializeApp, FirebaseApp, getApps } from 'firebase/app';
 import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics';
 import {
-  initializeFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,
   getFirestore,
   doc,
   collection,
@@ -12,6 +9,7 @@ import {
   getDoc,
   deleteDoc,
   onSnapshot,
+  enableIndexedDbPersistence,
   Firestore,
   Unsubscribe,
 } from 'firebase/firestore';
@@ -163,16 +161,7 @@ class FirebaseSyncManager {
         })
         .catch(() => {});
 
-      // (2026-07-13) Use persistentLocalCache; was enableIndexedDbPersistence
-      try {
-        this.db = initializeFirestore(this.app, {
-          localCache: persistentLocalCache({
-            tabManager: persistentMultipleTabManager(),
-          }),
-        });
-      } catch {
-        this.db = getFirestore(this.app);
-      }
+      this.db = getFirestore(this.app);
       this.auth = getAuth(this.app);
       // (2026-07-13) Fix APK initial sync & auth state; was unawaited anon login
       if (this.auth && !this.auth.currentUser) {
@@ -181,6 +170,12 @@ class FirebaseSyncManager {
         } catch {
           // Continue if offline or anonymous auth not enabled
         }
+      }
+
+      try {
+        await enableIndexedDbPersistence(this.db);
+      } catch {
+        // Multi-tab or unsupported WebView fallback
       }
 
       await DB.ready;

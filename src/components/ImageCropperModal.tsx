@@ -2,14 +2,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { uploadOptimizedImage } from '../utils/imageUploader';
 
+// (2026-07-13) Set 1:1 ratio math & 'with my bb bambam' default; was 3x offset
 interface ImageCropperModalProps {
   imageSrc: string;
+  initialCaption?: string;
+  initialTag?: string;
   onCancel: () => void;
   onComplete: (finalUrl: string, caption: string, tag: string) => void;
 }
 
 export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   imageSrc,
+  initialCaption = 'with my bb bambam',
+  initialTag = 'POLAROID',
   onCancel,
   onComplete,
 }) => {
@@ -17,10 +22,11 @@ export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [caption, setCaption] = useState('');
-  const [tag, setTag] = useState('POLAROID');
+  const [caption, setCaption] = useState(initialCaption || 'with my bb bambam');
+  const [tag, setTag] = useState(initialTag || 'POLAROID');
   const [isProcessing, setIsProcessing] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     document.body.classList.add('overflow-hidden');
@@ -62,11 +68,14 @@ export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
         ctx.imageSmoothingQuality = 'high';
 
         const img = imgRef.current;
+        const container = containerRef.current;
+        const containerSize = container?.clientWidth || 360;
+        const multiplier = outputSize / containerSize;
         const scale = Math.max(outputSize / img.naturalWidth, outputSize / img.naturalHeight) * zoom;
         const drawW = img.naturalWidth * scale;
         const drawH = img.naturalHeight * scale;
-        const drawX = (outputSize - drawW) / 2 + offset.x * 3;
-        const drawY = (outputSize - drawH) / 2 + offset.y * 3;
+        const drawX = (outputSize - drawW) / 2 + offset.x * multiplier;
+        const drawY = (outputSize - drawH) / 2 + offset.y * multiplier;
 
         ctx.drawImage(img, drawX, drawY, drawW, drawH);
       }
@@ -74,8 +83,8 @@ export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
       const uploadedUrl = await uploadOptimizedImage(highResDataUrl);
       onComplete(
         uploadedUrl,
-        caption.trim() || 'Sweet instant with Zea',
-        tag.trim().toUpperCase() || 'KEEPSAKE'
+        caption.trim() || 'with my bb bambam',
+        tag.trim().toUpperCase() || 'POLAROID'
       );
     } finally {
       setIsProcessing(false);
@@ -97,7 +106,7 @@ export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-secondary text-[20px]">crop_rotate</span>
             <h3 className="font-headline-sm text-headline-sm text-primary">
-              Develop Polaroid Frame (1600px HD)
+              Position 1:1 Polaroid Frame
             </h3>
           </div>
           <button
@@ -111,7 +120,8 @@ export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
 
         {/* Interactive Square Polaroid Preview */}
         <div
-          className="relative w-full aspect-square rounded-xl overflow-hidden bg-surface-container-high border-4 border-surface-bright shadow-inner cursor-grab active:cursor-grabbing select-none flex items-center justify-center"
+          ref={containerRef}
+          className="relative w-full aspect-square rounded-xl overflow-hidden bg-surface-container-high border-4 border-surface-bright shadow-inner cursor-grab active:cursor-grabbing select-none flex items-center justify-center touch-none"
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -128,9 +138,19 @@ export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
             }}
             className="max-w-none w-full h-full object-cover pointer-events-none"
           />
-          <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-primary/75 text-on-primary font-label-md text-[10px] tracking-wider">
-            Drag to Pan • 0.92 Quality
+          <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-primary/85 text-on-primary font-label-md text-[10px] tracking-wider">
+            1:1 Frame • Drag to Pan
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              setOffset({ x: 0, y: 0 });
+              setZoom(1);
+            }}
+            className="absolute top-2 right-2 px-2 py-0.5 rounded bg-surface-container-lowest/90 text-primary text-[10px] font-semibold border border-outline-variant/30 backdrop-blur-xs"
+          >
+            Center 1:1
+          </button>
         </div>
 
         {/* Zoom Slider */}
@@ -158,7 +178,7 @@ export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
               type="text"
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              placeholder="E.g., Zea laughing by the window..."
+              placeholder="with my bb bambam"
               className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm focus:outline-none border border-outline-variant/40"
             />
           </div>

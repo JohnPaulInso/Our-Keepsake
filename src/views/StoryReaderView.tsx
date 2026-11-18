@@ -210,7 +210,9 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
 
     ctx.fillStyle = '#33251d';
     ctx.font = 'italic 34px "Playfair Display", Georgia, serif';
-    ctx.fillText(`“${memory.photos[0]?.caption || memory.moodVibe}”`, 540, 1350);
+    // (2026-07-13) Set with my bb bambam lockscreen caption; was raw caption
+    const polaroidCaption = memory.photos[0]?.caption && !memory.photos[0].caption.startsWith('download') && !memory.photos[0].caption.startsWith('Photo ') ? memory.photos[0].caption : 'with my bb bambam';
+    ctx.fillText(`“${polaroidCaption}”`, 540, 1350);
 
     ctx.fillStyle = '#755844';
     ctx.font = '500 28px "Plus Jakarta Sans", sans-serif';
@@ -735,8 +737,9 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                     src={photo.url}
                   />
                 </div>
+                {/* (2026-07-13) Set default with my bb bambam; was raw photo.caption */}
                 <p className="font-italic-quote text-body-sm text-secondary text-center italic tracking-wide font-serif">
-                  “{photo.caption}”
+                  “{photo.caption && !photo.caption.startsWith('download') && !photo.caption.startsWith('Photo ') ? photo.caption : 'with my bb bambam'}”
                 </p>
               </div>
             ))}
