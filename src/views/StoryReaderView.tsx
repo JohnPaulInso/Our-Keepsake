@@ -388,7 +388,8 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
         </header>
 
         <div className="relative z-10 text-on-surface-variant">
-          <p className="font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[14px] sm:text-[15px] text-on-surface/95 leading-[1.65] text-left mb-4 whitespace-pre-line">
+          {/* (2026-07-13) Justify story body paragraphs; was text-left */}
+          <p className="font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[14px] sm:text-[15px] text-on-surface/95 leading-[1.65] text-justify mb-4 whitespace-pre-line">
             <span className="float-left font-['Playfair_Display',Georgia,serif] text-[44px] sm:text-[48px] leading-[0.82] font-semibold text-secondary pr-2 pt-[3px]">
               {dropCapChar}
             </span>
@@ -407,7 +408,7 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
           {remainingParas.map((para, i) => (
             <p
               key={i}
-              className="font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[14px] sm:text-[15px] text-on-surface/90 leading-[1.7] text-left mb-3 whitespace-pre-line"
+              className="font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[14px] sm:text-[15px] text-on-surface/90 leading-[1.7] text-justify mb-3 whitespace-pre-line"
             >
               {para}
             </p>
