@@ -51,6 +51,7 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo [3/4] Assembling Android Debug APK via Gradle...
 pushd android
+:: (2026-07-13) Assemble debug APK cleanly via Gradle; properties holds testOnly
 call gradlew.bat assembleDebug
 set GRADLE_STATUS=%ERRORLEVEL%
 popd

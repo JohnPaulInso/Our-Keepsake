@@ -22,13 +22,15 @@ allprojects {
         google()
         mavenCentral()
     }
-    // (2026-07-13) Set Java 17 compatibility for JDK 17 vs default Java 21
-    afterEvaluate { project ->
-        if (project.hasProperty('android')) {
-            project.android {
-                compileOptions {
-                    sourceCompatibility = JavaVersion.VERSION_17
-                    targetCompatibility = JavaVersion.VERSION_17
+    // (2026-07-13) Set Java 17 compatibility on android plugins; was failing on root
+    subprojects { subproject ->
+        afterEvaluate {
+            if (subproject.plugins.hasPlugin('com.android.application') || subproject.plugins.hasPlugin('com.android.library')) {
+                subproject.android {
+                    compileOptions {
+                        sourceCompatibility = JavaVersion.VERSION_17
+                        targetCompatibility = JavaVersion.VERSION_17
+                    }
                 }
             }
         }
