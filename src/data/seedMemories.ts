@@ -1881,6 +1881,37 @@ export const INITIAL_MEMORIES: KeepsakeMemory[] = [
     sortOrder: 61,
     updatedAt: 1772877600000,
   },
+  // (2026-07-13) Seed Feb 19, 2026 makeout keepsake with auto dots; was up to Mar 7
+  {
+    id: 'mem-2026-02-19-imported',
+    keepsakeNumber: 44,
+    volumeNumber: 1,
+    dateISO: '2026-02-19',
+    timeFormatted: '6:30 PM',
+    title: 'Bondpaper Search & 7-Eleven Parking Makeout',
+    letterHeading: 'Bondpaper Search & 7-Eleven Parking Makeout',
+    snippet:
+      'From searching for bondpaper to an intense makeout session outside 7-Eleven parking area, completely captivated and deeply in love.',
+    storyBody:
+      'From nangitag bondpaper to an intense makeout session outside 7-11 parking area, yeah. i sucked the life out of you, nadrained jd ka paghuman hahaha\n\nPOV: IBOG KAYKAS IMO BBGIRL\n"lumay sa laway" "tara palit tag bondpaper?" "long or short"\n\nwhile dropping everyone, my fingers are secretly rubbing your clit harder, youd even guide my fingers to hit the spot, the taste of your pussy at my fingertips, lasa nimo kay "sure nga akoa"...',
+    quoteHighlight:
+      'From nangitag bondpaper to an intense makeout session outside 7-11 parking area... lasa nimo kay sure nga akoa',
+    signOffAuthor: 'JP • St. 1',
+    location: '7-Eleven Parking & DB',
+    weatherTemp: '28°C',
+    weatherConditions: 'Warm Dusk Air',
+    moodVibe: 'Intense Passion & Captivated',
+    vibeTags: ['First Time', 'Deep Talks'],
+    categories: ['EVENT'],
+    dotIndicators: ['MOCHA', 'GOLD', 'ROSE'],
+    photos: [],
+    partnerNotes: [],
+    isSealed: true,
+    sealLabel: 'Sealed in Chapter 1 • JP & Zea',
+    sealIcon: 'favorite',
+    sortOrder: 62,
+    updatedAt: 1771495200000,
+  },
 ];
 
 export const INITIAL_SECRET_YEAR_NOTES: SecretYearNote[] = [];
