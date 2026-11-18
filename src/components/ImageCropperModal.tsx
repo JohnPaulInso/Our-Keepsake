@@ -11,7 +11,7 @@ interface ImageCropperModalProps {
   onComplete: (finalUrl: string, caption: string, tag: string) => void;
 }
 
-// (2026-07-13) Add smart fit & center snapping crop; was unconstrained fill
+// (2026-07-13) Clamp object-position 0-100% & snap center; was raw offset
 export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   imageSrc,
   initialCaption = 'with my bb bambam',
@@ -19,11 +19,10 @@ export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   onCancel,
   onComplete,
 }) => {
-  const [fitMode, setFitMode] = useState<'fit' | 'fill'>('fit');
   const [zoom, setZoom] = useState(1);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [posPercent, setPosPercent] = useState({ x: 0.5, y: 0.5 });
   const [dragging, setDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ clientX: 0, clientY: 0, startX: 0.5, startY: 0.5 });
   const [caption, setCaption] = useState(initialCaption || 'with my bb bambam');
   const [tag, setTag] = useState(initialTag || 'POLAROID');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -38,48 +37,59 @@ export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
   }, []);
 
   const handlePointerDown = (e: React.PointerEvent) => {
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {}
     setDragging(true);
-    setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+    setDragStart({
+      clientX: e.clientX,
+      clientY: e.clientY,
+      startX: posPercent.x,
+      startY: posPercent.y,
+    });
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!dragging) return;
-    const rawX = e.clientX - dragStart.x;
-    const rawY = e.clientY - dragStart.y;
+    const deltaX = e.clientX - dragStart.clientX;
+    const deltaY = e.clientY - dragStart.clientY;
 
     const container = containerRef.current;
     const img = imgRef.current;
-    if (!container || !img) {
-      setOffset({ x: rawX, y: rawY });
-      return;
-    }
+    if (!container || !img) return;
 
     const containerSize = container.clientWidth || 360;
     const natW = img.naturalWidth || containerSize;
     const natH = img.naturalHeight || containerSize;
 
-    const baseScale =
-      fitMode === 'fit'
-        ? Math.min(containerSize / natW, containerSize / natH)
-        : Math.max(containerSize / natW, containerSize / natH);
+    const scale = Math.max(containerSize / natW, containerSize / natH) * zoom;
+    const dispW = natW * scale;
+    const dispH = natH * scale;
 
-    const dispW = natW * baseScale * zoom;
-    const dispH = natH * baseScale * zoom;
+    const excessX = dispW - containerSize;
+    const excessY = dispH - containerSize;
 
-    const maxOffsetX = Math.max(0, (dispW - containerSize) / 2);
-    const maxOffsetY = Math.max(0, (dispH - containerSize) / 2);
+    let nextX = 0.5;
+    if (excessX > 1) {
+      nextX = dragStart.startX - deltaX / excessX;
+      nextX = Math.max(0, Math.min(1, nextX));
+      if (Math.abs(nextX - 0.5) < 0.05) nextX = 0.5;
+    }
 
-    let clampedX = Math.max(-maxOffsetX, Math.min(maxOffsetX, rawX));
-    let clampedY = Math.max(-maxOffsetY, Math.min(maxOffsetY, rawY));
+    let nextY = 0.5;
+    if (excessY > 1) {
+      nextY = dragStart.startY - deltaY / excessY;
+      nextY = Math.max(0, Math.min(1, nextY));
+      if (Math.abs(nextY - 0.5) < 0.05) nextY = 0.5;
+    }
 
-    // Magnetic snap to center within 10px
-    if (Math.abs(clampedX) < 10) clampedX = 0;
-    if (Math.abs(clampedY) < 10) clampedY = 0;
-
-    setOffset({ x: clampedX, y: clampedY });
+    setPosPercent({ x: nextX, y: nextY });
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e: React.PointerEvent) => {
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {}
     setDragging(false);
   };
 
@@ -99,36 +109,17 @@ export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
         ctx.imageSmoothingQuality = 'high';
 
         const img = imgRef.current;
-        const container = containerRef.current;
-        const containerSize = container?.clientWidth || 360;
-        const multiplier = outputSize / containerSize;
+        const scale = Math.max(outputSize / img.naturalWidth, outputSize / img.naturalHeight) * zoom;
+        const scaledW = img.naturalWidth * scale;
+        const scaledH = img.naturalHeight * scale;
 
-        if (fitMode === 'fit') {
-          // Draw soft ambient backdrop
-          const bgScale = Math.max(outputSize / img.naturalWidth, outputSize / img.naturalHeight) * 1.08;
-          const bgW = img.naturalWidth * bgScale;
-          const bgH = img.naturalHeight * bgScale;
-          ctx.save();
-          ctx.filter = 'blur(40px) brightness(0.85)';
-          ctx.drawImage(img, (outputSize - bgW) / 2, (outputSize - bgH) / 2, bgW, bgH);
-          ctx.restore();
+        const excessX = scaledW - outputSize;
+        const excessY = scaledH - outputSize;
 
-          // Draw full photo with all sides preserved
-          const scale = Math.min(outputSize / img.naturalWidth, outputSize / img.naturalHeight) * zoom;
-          const drawW = img.naturalWidth * scale;
-          const drawH = img.naturalHeight * scale;
-          const drawX = (outputSize - drawW) / 2 + offset.x * multiplier;
-          const drawY = (outputSize - drawH) / 2 + offset.y * multiplier;
-          ctx.drawImage(img, drawX, drawY, drawW, drawH);
-        } else {
-          // Fill mode: clamped & snapped to center
-          const scale = Math.max(outputSize / img.naturalWidth, outputSize / img.naturalHeight) * zoom;
-          const drawW = img.naturalWidth * scale;
-          const drawH = img.naturalHeight * scale;
-          const drawX = (outputSize - drawW) / 2 + offset.x * multiplier;
-          const drawY = (outputSize - drawH) / 2 + offset.y * multiplier;
-          ctx.drawImage(img, drawX, drawY, drawW, drawH);
-        }
+        const drawX = -excessX * posPercent.x;
+        const drawY = -excessY * posPercent.y;
+
+        ctx.drawImage(img, drawX, drawY, scaledW, scaledH);
       }
       const highResDataUrl = canvas.toDataURL('image/jpeg', 0.92);
       const uploadedUrl = await uploadOptimizedImage(highResDataUrl);
@@ -142,7 +133,7 @@ export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
     }
   };
 
-  const isSnapped = offset.x === 0 && offset.y === 0;
+  const isSnapped = posPercent.x === 0.5 && posPercent.y === 0.5;
 
   return (
     <div
@@ -171,93 +162,50 @@ export const ImageCropperModal: React.FC<ImageCropperModalProps> = ({
           </button>
         </div>
 
-        {/* Smart Fit vs Fill 1:1 Mode Selector */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface-container-low border border-outline-variant/30">
-          <button
-            type="button"
-            onClick={() => {
-              setFitMode('fit');
-              setOffset({ x: 0, y: 0 });
-              setZoom(1);
-            }}
-            className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-              fitMode === 'fit'
-                ? 'bg-primary text-on-primary shadow-xs'
-                : 'text-secondary hover:text-primary'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[15px]">aspect_ratio</span>
-            <span>Smart Fit (Whole Photo)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setFitMode('fill');
-              setOffset({ x: 0, y: 0 });
-              setZoom(1);
-            }}
-            className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-              fitMode === 'fill'
-                ? 'bg-primary text-on-primary shadow-xs'
-                : 'text-secondary hover:text-primary'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[15px]">crop_square</span>
-            <span>Fill Square (1:1)</span>
-          </button>
-        </div>
-
-        {/* Interactive Square Polaroid Preview */}
+        {/* Interactive Square Polaroid Preview - No black borders */}
         <div
           ref={containerRef}
-          className="relative w-full aspect-square rounded-xl overflow-hidden bg-[#18120e] border-4 border-surface-bright shadow-inner cursor-grab active:cursor-grabbing select-none flex items-center justify-center touch-none"
+          className="relative w-full aspect-square rounded-xl overflow-hidden bg-[#fbf9f5] border-4 border-surface-bright shadow-inner cursor-grab active:cursor-grabbing select-none flex items-center justify-center touch-none"
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
+          onPointerCancel={handlePointerUp}
         >
-          {fitMode === 'fit' && (
-            <img
-              src={imageSrc}
-              alt="Ambient backdrop"
-              className="absolute inset-0 w-full h-full object-cover blur-xl opacity-60 scale-110 pointer-events-none"
-            />
-          )}
-
           <img
             ref={imgRef}
             src={imageSrc}
             alt="Crop preview"
             draggable={false}
             style={{
-              transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
-              transition: dragging ? 'none' : 'transform 0.15s ease-out',
+              objectFit: 'cover',
+              objectPosition: `${posPercent.x * 100}% ${posPercent.y * 100}%`,
+              transform: zoom > 1 ? `scale(${zoom})` : undefined,
+              transformOrigin: `${posPercent.x * 100}% ${posPercent.y * 100}%`,
+              transition: dragging ? 'none' : 'object-position 0.1s ease-out',
             }}
-            className={`max-w-none pointer-events-none relative z-10 ${
-              fitMode === 'fit' ? 'w-full h-full object-contain' : 'w-full h-full object-cover'
-            }`}
+            className="w-full h-full pointer-events-none select-none block"
           />
 
           {isSnapped && (
             <div className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
-              <div className="w-6 h-[1.5px] bg-secondary/80 shadow-xs" />
-              <div className="h-6 w-[1.5px] bg-secondary/80 absolute shadow-xs" />
+              <div className="w-6 h-[1.5px] bg-primary/70 shadow-xs" />
+              <div className="h-6 w-[1.5px] bg-primary/70 absolute shadow-xs" />
             </div>
           )}
 
           <div className="absolute bottom-2 left-2 z-20 px-2 py-0.5 rounded bg-primary/85 text-on-primary font-label-md text-[10px] tracking-wider">
-            {fitMode === 'fit' ? 'Smart Fit • Sides Preserved' : 'Fill 1:1 • Center Snapped'}
+            Smart 1:1 • Drag to Position
           </div>
 
           <button
             type="button"
             onClick={() => {
-              setOffset({ x: 0, y: 0 });
+              setPosPercent({ x: 0.5, y: 0.5 });
               setZoom(1);
             }}
-            className="absolute top-2 right-2 z-20 px-2 py-0.5 rounded bg-surface-container-lowest/90 text-primary text-[10px] font-semibold border border-outline-variant/30 backdrop-blur-xs flex items-center gap-1"
+            className="absolute top-2 right-2 z-20 px-2.5 py-1 rounded bg-surface-container-lowest/95 text-primary text-[10px] font-semibold border border-outline-variant/30 backdrop-blur-xs flex items-center gap-1 active:scale-95 transition-transform shadow-xs"
           >
-            <span className="material-symbols-outlined text-[12px]">filter_center_focus</span>
+            <span className="material-symbols-outlined text-[13px]">filter_center_focus</span>
             <span>Snap Center</span>
           </button>
         </div>
