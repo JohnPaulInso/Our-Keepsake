@@ -7,6 +7,7 @@ import {
   DotIndicator,
   KeepsakeMemory,
   MemoryCategory,
+  PartnerReplyNote,
   PolaroidPhoto,
 } from '../types';
 // (2026-07-13) Import capitalizeFirstLetters & getTodayISO; was without capitalize
@@ -112,6 +113,11 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
   }, [existingMemories, dateISO]);
 
   // (2026-07-13) Auto-load content when date matches existing memory; was blank form
+  // (2026-07-13) Track editable margin notes in edit mode; was read-only
+  const [partnerNotes, setPartnerNotes] = useState<PartnerReplyNote[]>(
+    editingMemory?.partnerNotes || []
+  );
+
   useEffect(() => {
     if (existingForDate && !editingMemory && !storyBody) {
       setTitle(existingForDate.title || '');
@@ -121,6 +127,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       setSelectedTags(existingForDate.vibeTags || []);
       setSelectedDots(existingForDate.dotIndicators || ['MOCHA']);
       setPhotos(existingForDate.photos || []);
+      setPartnerNotes(existingForDate.partnerNotes || []);
       if (existingForDate.audioMemo?.url) {
         setVoiceTitle(existingForDate.audioMemo.title || `Whispered note for ${profile.partner2Name}`);
         setVoiceDurationSec(existingForDate.audioMemo.durationSeconds || 42);
@@ -201,7 +208,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       location !== (editingMemory.location || 'Bogo City, Cebu') ||
       photos.length !== (editingMemory.photos?.length || 0) ||
       voiceDataUrl !== editingMemory.audioMemo?.url ||
-      videoUrl !== editingMemory.videoCapsule?.url
+      videoUrl !== editingMemory.videoCapsule?.url ||
+      JSON.stringify(partnerNotes) !== JSON.stringify(editingMemory.partnerNotes || [])
     );
   }, [
     editingMemory,
@@ -212,6 +220,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     voiceDataUrl,
     videoUrl,
     location,
+    partnerNotes,
   ]);
 
   useEffect(() => {
@@ -234,6 +243,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       setSelectedTags(editingMemory.vibeTags || []);
       setSelectedDots(editingMemory.dotIndicators || ['MOCHA']);
       setPhotos(editingMemory.photos || []);
+      setPartnerNotes(editingMemory.partnerNotes || []);
       setVoiceTitle(editingMemory.audioMemo?.title || `Whispered note for ${profile.partner2Name}`);
       setVoiceDurationSec(editingMemory.audioMemo?.durationSeconds || 42);
       setVoiceDataUrl(editingMemory.audioMemo?.url);
@@ -437,7 +447,14 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
             resolution: '1080p HD',
           }
         : undefined,
-      partnerNotes: editingMemory?.partnerNotes || [],
+      // (2026-07-13) Save edited/filtered partnerNotes; was immutable copy
+      partnerNotes: partnerNotes
+        .map((n) => ({
+          ...n,
+          author: n.author.trim() || profile.partner1Name,
+          text: n.text.trim(),
+        }))
+        .filter((n) => n.text.length > 0),
       isSealed: !isDraft,
       isDraft,
       // (2026-07-13) Set sealLabel with dynamic chapter number; was Chapter II
@@ -1043,6 +1060,74 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
             />
           </div>
         </div>
+
+        {/* (2026-07-13) Edit or delete margin notes when present in edit mode; was none */}
+        {partnerNotes.length > 0 && (
+          <div className="bg-surface-container-lowest rounded-2xl p-space-md sm:p-space-lg shadow-sm border border-outline-variant/25 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[18px] text-secondary">
+                  sticky_note_2
+                </span>
+                <span className="font-label-md text-label-md uppercase tracking-wider text-outline font-semibold">
+                  Handwritten Margin Notes ({partnerNotes.length})
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {partnerNotes.map((note) => (
+                <div
+                  key={note.id}
+                  className="bg-surface-container-low/70 rounded-xl p-3.5 border border-outline-variant/30 flex flex-col gap-2"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <span className="font-label-md text-[10px] uppercase tracking-wider text-outline shrink-0">
+                        From
+                      </span>
+                      <input
+                        type="text"
+                        value={note.author}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setPartnerNotes((prev) =>
+                            prev.map((n) => (n.id === note.id ? { ...n, author: val } : n))
+                          );
+                        }}
+                        placeholder={profile.partner1Name}
+                        className="w-full max-w-[160px] px-2.5 py-1 rounded-lg bg-surface-container-lowest text-primary text-xs font-semibold border border-outline-variant/30 focus:outline-none focus:border-secondary"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPartnerNotes((prev) => prev.filter((n) => n.id !== note.id));
+                        onToast('Margin note removed. Save to apply changes.', 'info');
+                      }}
+                      title="Delete margin note"
+                      className="w-8 h-8 rounded-lg bg-surface-container-lowest text-error hover:bg-error/10 flex items-center justify-center border border-outline-variant/30 shrink-0 active:scale-95 transition-transform"
+                    >
+                      <span className="material-symbols-outlined text-[17px]">delete</span>
+                    </button>
+                  </div>
+                  <textarea
+                    rows={2}
+                    value={note.text}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setPartnerNotes((prev) =>
+                        prev.map((n) => (n.id === note.id ? { ...n, text: val } : n))
+                      );
+                    }}
+                    placeholder="Edit margin note..."
+                    className="w-full p-2.5 rounded-lg bg-surface-container-lowest text-primary font-serif italic text-sm border border-outline-variant/30 focus:outline-none focus:border-secondary resize-y"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Editorial Footer & Sealing Actions */}
         <div className="pt-space-md flex flex-col gap-space-sm">
