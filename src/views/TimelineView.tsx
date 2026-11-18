@@ -1922,14 +1922,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           {/* Subtle paper dot background texture */}
           <div className="fixed inset-0 pointer-events-none opacity-[0.035] bg-[radial-gradient(#4a3b32_1px,transparent_1px)] [background-size:20px_20px] -z-10" />
 
-          {/* (2026-07-13) Enforce webkit/standard blur over APK top inset; was unblurred */}
+          {/* (2026-07-13) Use frosted-glass-bar on overlay top inset; was raw /85 var */}
           <div
             style={{
               paddingTop: 'max(12px, env(safe-area-inset-top, 12px))',
-              WebkitBackdropFilter: 'blur(20px)',
-              backdropFilter: 'blur(20px)',
             }}
-            className="w-full sticky top-0 z-30 bg-background/85 backdrop-blur-xl border-b border-outline-variant/15 pb-3 px-4 md:px-8"
+            className="w-full sticky top-0 z-30 frosted-glass-bar border-b border-outline-variant/20 pb-3 px-4 md:px-8 shadow-[0_2px_12px_rgba(74,59,50,0.04)]"
           >
             <div className="w-full max-w-xl mx-auto flex items-center justify-between gap-2">
               <button

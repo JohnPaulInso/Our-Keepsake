@@ -885,8 +885,8 @@ export const App: React.FC = () => {
         </div>
       </aside>
 
-      {/* Top Sticky Stationery Header (Mobile) */}
-      <header className="md:hidden fixed top-0 w-full z-50 pt-safe bg-surface-bright/98 backdrop-blur-md shadow-[0_1px_8px_rgba(74,59,50,0.04)] no-print">
+      {/* (2026-07-13) Apply true frosted glass on mobile header; was broken /98 */}
+      <header className="md:hidden fixed top-0 w-full z-50 pt-safe frosted-glass-bar border-b border-outline-variant/25 shadow-[0_2px_12px_rgba(74,59,50,0.05)] no-print">
         <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-between">
           <div
             onClick={() => requestTabNavigation('timeline')}
@@ -1148,8 +1148,8 @@ export const App: React.FC = () => {
       {/* Global Toast Container above Bottom Navigation */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-      {/* (2026-07-13) Reorder tabs: timeline, story, letters, notepad; was notepad first */}
-      <nav className="md:hidden fixed bottom-0 w-full z-50 pb-safe bg-surface-bright/98 backdrop-blur-md border-t border-outline-variant/30 rounded-t-2xl shadow-[0_-4px_20px_rgba(74,59,50,0.08)] no-print">
+      {/* (2026-07-13) Apply milky frosted glass on bottom nav; was transparent /98 */}
+      <nav className="md:hidden fixed bottom-0 w-full z-50 pb-safe frosted-glass-bar border-t border-outline-variant/35 rounded-t-2xl shadow-[0_-6px_24px_rgba(51,37,29,0.08),inset_0_1px_0_rgba(255,255,255,0.75)] no-print">
         <div className="h-16 px-gutter max-w-[760px] mx-auto flex items-center justify-around">
           <button
             type="button"

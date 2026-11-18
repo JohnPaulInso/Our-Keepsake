@@ -22,6 +22,19 @@ input, textarea, [contenteditable="true"] {
   padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
 }
 
+/* (2026-07-13) Milky frosted glass for nav & sticky bars; was transparent /98 */
+.frosted-glass-bar {
+  background-color: rgba(251, 249, 245, 0.84);
+  background-color: color-mix(in srgb, var(--surface-bright) 84%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+}
+
+[data-theme="dark"] .frosted-glass-bar {
+  background-color: rgba(34, 27, 23, 0.84);
+  background-color: color-mix(in srgb, var(--surface-bright) 84%, transparent);
+}
+
 .truncate-single {
   white-space: nowrap;
   overflow: hidden;
