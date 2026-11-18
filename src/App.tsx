@@ -1035,6 +1035,7 @@ export const App: React.FC = () => {
               ))}
 
             {activeTab === 'new-date' && (
+              // (2026-07-13) Connect onDirtyChange and safe tab cancel; was immediate
               // (2026-07-13) Pass existingMemories to disallow duplicate dates; was absent
               <ComposerView
                 key={editingMemory?.id || 'new-composer'}

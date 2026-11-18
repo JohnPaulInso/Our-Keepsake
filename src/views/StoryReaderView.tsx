@@ -353,8 +353,16 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
           <p className="font-label-md text-label-md uppercase tracking-widest text-secondary mb-1">
             A Letter Written For {profile.partner2Name}
           </p>
-          <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight leading-snug font-serif">
-            {memory.letterHeading || memory.title}
+          {/* (2026-07-13) Add big memory icon before story heading; was plain title */}
+          <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight leading-snug font-serif flex items-center gap-2.5">
+            <span
+              className="material-symbols-outlined text-[28px] text-secondary shrink-0"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+              aria-hidden="true"
+            >
+              auto_awesome
+            </span>
+            <span>{memory.letterHeading || memory.title}</span>
           </h1>
           <div className="w-12 h-0.5 bg-secondary-container mt-3 rounded-full" />
         </header>

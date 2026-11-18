@@ -142,8 +142,16 @@ const SortableMemoryCard: React.FC<SortableMemoryCardProps> = ({
         onClick={() => onOpenMemory(memory.id)}
         className="cursor-pointer group"
       >
-        <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-primary font-serif leading-snug mb-space-xs group-hover:text-secondary transition-colors">
-          {memory.title || 'Untitled Memory'}
+        {/* (2026-07-13) Add big memory icon before card title; was plain title */}
+        <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-primary font-serif leading-snug mb-space-xs group-hover:text-secondary transition-colors flex items-center gap-2">
+          <span
+            className="material-symbols-outlined text-[24px] sm:text-[28px] text-secondary shrink-0"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+            aria-hidden="true"
+          >
+            auto_awesome
+          </span>
+          <span>{memory.title || 'Untitled Memory'}</span>
         </h2>
         <p className="font-body-md text-body-md text-on-surface-variant mb-space-md font-serif italic leading-relaxed clamp-3">
           “{memory.snippet || memory.storyBody}”
@@ -1420,8 +1428,18 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 {primaryDateMemory ? 'Recorded Moment' : 'Unwritten Page'}
               </span>
             </div>
-            <h3 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-primary font-bold leading-tight">
-              {primaryDateMemory ? primaryDateMemory.title : 'A Quiet Day in Our Story'}
+            {/* (2026-07-13) Add big memory icon before title; was plain text */}
+            <h3 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl text-primary font-bold leading-tight flex items-center gap-2">
+              {primaryDateMemory && (
+                <span
+                  className="material-symbols-outlined text-[24px] sm:text-[28px] text-secondary shrink-0"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                  aria-hidden="true"
+                >
+                  auto_awesome
+                </span>
+              )}
+              <span>{primaryDateMemory ? primaryDateMemory.title : 'A Quiet Day in Our Story'}</span>
             </h3>
             <p className="font-['Cormorant_Garamond',serif] italic text-sm sm:text-base text-on-surface-variant leading-relaxed mt-1 line-clamp-3">
               “{primaryDateMemory?.snippet || primaryDateMemory?.storyBody || `No memories recorded for this specific date yet. Every moment with ${profile.partner2Name} is a keepsake waiting to be written.`}”
@@ -1802,9 +1820,18 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 auto_awesome
               </span>
             </div>
-            {/* (2026-07-13) Add polaroids, VMs, videos, Google Fonts & Edit; was text only */}
-            <h2 className="font-['Playfair_Display',Georgia,serif] text-primary tracking-tight font-semibold text-2xl md:text-3xl">
-              {primaryDateMemory ? primaryDateMemory.title || "Preserve Today's Chapter" : "Preserve Today's Chapter"}
+            {/* (2026-07-13) Add big memory icon before date modal title; was text only */}
+            <h2 className="font-['Playfair_Display',Georgia,serif] text-primary tracking-tight font-semibold text-2xl md:text-3xl flex items-center justify-center gap-2.5">
+              {primaryDateMemory && (
+                <span
+                  className="material-symbols-outlined text-[28px] md:text-[32px] text-secondary shrink-0"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                  aria-hidden="true"
+                >
+                  auto_awesome
+                </span>
+              )}
+              <span>{primaryDateMemory ? primaryDateMemory.title || "Preserve Today's Chapter" : "Preserve Today's Chapter"}</span>
             </h2>
             <p className="text-secondary mt-1 max-w-xs leading-relaxed font-['Cormorant_Garamond',serif] italic text-base">
               Every little moment with {profile.partner2Name} is worth remembering forever.
