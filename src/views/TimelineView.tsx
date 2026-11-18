@@ -1408,7 +1408,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             value={sortBy}
             onChange={(val) => setSortBy(val as 'custom' | 'newest' | 'oldest')}
           />
-          // (2026-07-13) Remove color words from dot filter; was color prefixes
           <CustomDropdown
             options={[
               { value: 'ALL', label: 'All Dots', icon: 'palette' },
