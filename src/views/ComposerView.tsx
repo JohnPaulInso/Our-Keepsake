@@ -324,7 +324,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
           return prev + 1;
         });
       }, 1000);
-      onToast('Recording voice note... Tap again to seal audio.', 'info');
+      // (2026-07-13) Rename seal audio prompt to save; was seal audio
+      onToast('Recording voice note... Tap again to save audio.', 'info');
     } else {
       await handleStopRecording();
     }
@@ -560,7 +561,8 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
               edit_note
             </span>
             <span className="flex-1 min-w-0">
-              Editing keepsake for <strong>{formatStandardDate(dateISO)}</strong>. Sealing will update this date&apos;s memory in your memory box.
+              {/* (2026-07-13) Rename Sealing notice to Saving; was Sealing */}
+              Editing keepsake for <strong>{formatStandardDate(dateISO)}</strong>. Saving will update this date&apos;s memory in your memory box.
             </span>
           </div>
         )}
@@ -1054,8 +1056,9 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                 <circle cx="12" cy="12" r="10" />
               </svg>
             </div>
+            {/* (2026-07-13) Rename Seal button to Save; was Seal into Our Memory Box */}
             <span className="tracking-wide font-semibold text-surface-bright">
-              Seal into Our Memory Box
+              Save to Our Memory Box
             </span>
           </button>
 

@@ -31,8 +31,9 @@ import {
 import { calculateDaysTogether, formatDuration, formatStandardDate, getChapterNumber, capitalizeFirstLetters } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 import { CustomDropdown } from '../components/CustomDropdown';
-// (2026-07-13) Import DB in TimelineView for date queries; was unimported
+// (2026-07-13) Import StoryReaderView for unified date overlay; was separate UI
 import { DB } from '../db/localDb';
+import { StoryReaderView } from './StoryReaderView';
 
 // (2026-07-13) Add digitalLoveLetters to TimelineViewProps vs secretNotes only
 interface TimelineViewProps {
@@ -51,6 +52,10 @@ interface TimelineViewProps {
   onSaveMemory?: (memory: KeepsakeMemory, isDraft: boolean) => void;
   // (2026-07-13) Pass active calendar year & month to notepad; was no args
   onOpenMonthlyNotepad?: (year?: number, month?: number) => void;
+  // (2026-07-13) Add delete, partner note & toast handlers for embedded StoryReader
+  onDeleteMemory?: (id: string) => void;
+  onAddPartnerNote?: (memoryId: string, author: string, text: string) => void;
+  onToast?: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
 }
 
 // (2026-07-13) Format date with weekday for easy date identification; was plain
@@ -400,9 +405,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   onReorderMemories,
   onOpenSecretNotesTab,
   onOpenProfileModal,
-  // (2026-07-13) Destructure onOpenMonthlyNotepad and onSaveMemory; was unpassed
+  // (2026-07-13) Destructure notepad, save, delete, note & toast props; was fewer
   onOpenMonthlyNotepad,
   onSaveMemory,
+  onDeleteMemory,
+  onAddPartnerNote,
+  onToast,
 }) => {
   const [activeCategory, setActiveCategory] = useState<
     'ALL' | 'PHOTO' | 'VOICE_MEMO' | 'VIDEO' | 'ANNIVERSARY' | 'DRAFT'
@@ -2048,190 +2056,101 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             <span>Swipe left or right to switch dates</span>
           </div>
 
-          {/* Romantic Header from Screenshot */}
-          <div className="flex flex-col items-center text-center mb-6">
-            <div className="relative mb-3 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-secondary-container/50 flex items-center justify-center text-primary shadow-inner">
-                <svg className="w-9 h-9" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 48 48">
-                  <path d="M14 34c0-7 4-13 12-13 5 0 9 3 11 8 .5 1.5 1.5 3 3 3h1c1.5 0 2.5 1 2.5 2.5s-1 2.5-2.5 2.5h-5c-2 0-3 1-4 2" />
-                  <path d="M14 26c-2 0-4-1.5-4-4 0-3 2-6 5-6h5c3 0 5 2 5 5v5" />
-                  <circle cx="17" cy="20" fill="currentColor" r="1.2" />
-                  <circle cx="39" cy="18" fill="#cca440" r="1.5" />
-                </svg>
-              </div>
-              <span className="absolute -top-1 -right-2 text-tertiary-fixed-dim material-symbols-outlined text-[18px]">
-                auto_awesome
-              </span>
+          {/* (2026-07-13) Render exact StoryReaderView inside overlay for saved dates; was separate copy */}
+          {primaryDateMemory ? (
+            <div className="w-full max-w-xl">
+              <StoryReaderView
+                embeddedInOverlay
+                profile={profile}
+                memory={primaryDateMemory}
+                allMemories={memories}
+                onSelectMemory={(id) => {
+                  const target = memories.find((m) => m.id === id);
+                  if (target && /^\d{4}-\d{2}-\d{2}$/.test(target.dateISO)) {
+                    const [y, mm, dd] = target.dateISO.split('-').map(Number);
+                    setCalendarYear(y);
+                    setCalendarMonth(mm - 1);
+                    setSelectedDay(dd);
+                  } else {
+                    closeDateOverlay(() => onOpenMemory(id));
+                  }
+                }}
+                onBackToTimeline={() => closeDateOverlay()}
+                onEditMemory={(m) => closeDateOverlay(() => onEditMemory(m))}
+                onDeleteMemory={(id) => {
+                  closeDateOverlay();
+                  onDeleteMemory?.(id);
+                }}
+                onAddPartnerNote={(memoryId, author, text) => {
+                  onAddPartnerNote?.(memoryId, author, text);
+                }}
+                onToast={(msg, type) => {
+                  onToast?.(msg, type);
+                }}
+              />
             </div>
-            {/* (2026-07-13) Remove icon left of modal title; was auto_awesome */}
-            <h2
-              className={`font-['Playfair_Display',Georgia,serif] tracking-tight text-2xl md:text-3xl text-center ${
-                primaryDateMemory ? 'text-primary font-semibold' : 'text-outline/70 font-normal italic'
-              }`}
-            >
-              <span>{primaryDateMemory ? capitalizeFirstLetters(primaryDateMemory.title) || "Preserve Today's Chapter" : "Preserve Today's Chapter"}</span>
-            </h2>
-            {/* (2026-07-13) Gray out subtitle & pills when date is empty; was dark */}
-            <p
-              className={`mt-1 max-w-xs leading-relaxed font-['Cormorant_Garamond',serif] italic text-base ${
-                primaryDateMemory ? 'text-secondary' : 'text-outline/60'
-              }`}
-            >
-              Every little moment with {profile.partner2Name} is worth remembering forever.
-            </p>
-          </div>
-
-          {/* Context Pills: Date & Time and Location & Vibe matching screenshot */}
-          <div className="w-full max-w-xl grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5 font-['Plus_Jakarta_Sans',sans-serif]">
-            <div
-              className={`flex items-center justify-between px-4 py-3 bg-surface-container-low rounded-full shadow-sm border border-outline-variant/30 ${
-                primaryDateMemory ? 'text-primary' : 'text-outline/60 opacity-75'
-              }`}
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span
-                  className={`material-symbols-outlined text-[20px] ${
-                    primaryDateMemory ? 'text-secondary' : 'text-outline/50'
-                  }`}
-                >
-                  calendar_today
-                </span>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
-                    Date
-                  </span>
-                  <span
-                    className={`text-sm font-medium truncate-single ${
-                      primaryDateMemory ? 'text-primary' : 'text-outline/60'
-                    }`}
-                  >
-                    {selectedDayFormatted} • Whole Day Note
+          ) : (
+            <>
+              {/* Empty Date Romantic Header (Grayed) */}
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="relative mb-3 flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-secondary-container/50 flex items-center justify-center text-primary shadow-inner">
+                    <svg className="w-9 h-9" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 48 48">
+                      <path d="M14 34c0-7 4-13 12-13 5 0 9 3 11 8 .5 1.5 1.5 3 3 3h1c1.5 0 2.5 1 2.5 2.5s-1 2.5-2.5 2.5h-5c-2 0-3 1-4 2" />
+                      <path d="M14 26c-2 0-4-1.5-4-4 0-3 2-6 5-6h5c3 0 5 2 5 5v5" />
+                      <circle cx="17" cy="20" fill="currentColor" r="1.2" />
+                      <circle cx="39" cy="18" fill="#cca440" r="1.5" />
+                    </svg>
+                  </div>
+                  <span className="absolute -top-1 -right-2 text-tertiary-fixed-dim material-symbols-outlined text-[18px]">
+                    auto_awesome
                   </span>
                 </div>
+                <h2 className="font-['Playfair_Display',Georgia,serif] tracking-tight text-2xl md:text-3xl text-center text-outline/70 font-normal italic">
+                  <span>Preserve Today&apos;s Chapter</span>
+                </h2>
+                <p className="mt-1 max-w-xs leading-relaxed font-['Cormorant_Garamond',serif] italic text-base text-outline/60">
+                  Every little moment with {profile.partner2Name} is worth remembering forever.
+                </p>
               </div>
-            </div>
 
-            <div
-              className={`flex items-center justify-between px-4 py-3 bg-surface-container-low rounded-full shadow-sm border border-outline-variant/30 ${
-                primaryDateMemory ? 'text-primary' : 'text-outline/60 opacity-75'
-              }`}
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span
-                  className={`material-symbols-outlined text-[20px] ${
-                    primaryDateMemory ? 'text-tertiary-container' : 'text-outline/50'
-                  }`}
-                >
-                  location_on
-                </span>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
-                    Location
-                  </span>
-                  <span
-                    className={`text-sm font-medium truncate-single ${
-                      primaryDateMemory ? 'text-primary' : 'text-outline/60'
-                    }`}
-                  >
-                    {primaryDateMemory?.location || 'Bogo City, Cebu'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* (2026-07-13) Refine parchment letter card typography; was oversized */}
-          <article
-            className={`w-full max-w-xl rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden flex flex-col border mb-8 ${
-              primaryDateMemory
-                ? 'bg-surface-container-lowest border-outline-variant/30'
-                : 'bg-surface-container-low/70 border-outline-variant/25 font-[\'Plus_Jakarta_Sans\',sans-serif]'
-            }`}
-          >
-            {primaryDateMemory ? (
-              (() => {
-                const overlayFormattedBody = capitalizeFirstLetters(
-                  primaryDateMemory.storyBody || primaryDateMemory.snippet || 'A cherished day together.'
-                );
-                const overlayParas = overlayFormattedBody.split(/\n\n+/).filter(Boolean);
-                const overlayFirstPara = overlayParas[0] || '';
-                const overlayDropCap = overlayFirstPara.charAt(0).toUpperCase() || 'I';
-                const overlayFirstRest = overlayFirstPara.slice(1);
-                const overlayRestParas = overlayParas.slice(1);
-                return (
-                  <>
-                    {/* (2026-07-13) Remove icon left of card title & size 2-line drop cap; was 30px */}
-                    <header className="mb-4 relative z-10">
-                      <h3 className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-semibold text-primary tracking-tight leading-snug">
-                        {capitalizeFirstLetters(primaryDateMemory.letterHeading || primaryDateMemory.title)}
-                      </h3>
-                      <div className="w-10 h-0.5 bg-secondary-container mt-2.5 rounded-full" />
-                    </header>
-
-                    <div id="heartfelt-note-view-container" className="relative z-10 text-on-surface-variant">
-                      <p className="font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[14px] sm:text-[15px] text-on-surface/95 leading-[1.65] text-left mb-4 whitespace-pre-line">
-                        <span className="float-left font-['Playfair_Display',Georgia,serif] text-[44px] sm:text-[48px] leading-[0.82] font-semibold text-secondary pr-2 pt-[3px]">
-                          {overlayDropCap}
-                        </span>
-                        {overlayFirstRest}
-                      </p>
-
-                      {primaryDateMemory.quoteHighlight && (
-                        <div className="px-4 py-3.5 bg-surface-container-low/65 rounded-xl my-4 border border-outline-variant/25">
-                          {/* (2026-07-13) Increase quote font size; was text-[15px] sm:text-base */}
-                          <p className="font-['Cormorant_Garamond',Georgia,serif] text-lg sm:text-xl font-medium text-secondary text-center italic leading-relaxed">
-                            “{primaryDateMemory.quoteHighlight}”
-                          </p>
-                        </div>
-                      )}
-
-                      {overlayRestParas.map((para, i) => (
-                        <p
-                          key={i}
-                          className="font-['Plus_Jakarta_Sans',Roboto,sans-serif] text-[14px] sm:text-[15px] text-on-surface/90 leading-[1.7] text-left mb-3 whitespace-pre-line"
-                        >
-                          {para}
-                        </p>
-                      ))}
-
-                      <div className="relative mt-5 pt-3 flex flex-col items-end">
-                        <div className="absolute -bottom-2 -right-1 w-28 h-16 opacity-[0.06] pointer-events-none select-none flex items-center justify-center">
-                          <svg className="w-full h-full fill-primary" viewBox="0 0 120 75">
-                            <path d="M15,45 C20,38 32,32 50,33 C68,34 82,25 92,25 C102,25 106,30 110,38 C113,44 112,52 108,58 C102,65 92,68 78,68 C55,68 35,66 22,64 C14,62 10,54 15,45 Z" />
-                            <ellipse cx="98" cy="24" rx="4" ry="7" transform="rotate(-15 98 24)" />
-                            <path
-                              d="M102,34 C104,34 106,36 104,38"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeLinecap="round"
-                              strokeWidth="2"
-                            />
-                            <path
-                              d="M88,32 Q93,35 97,32"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeLinecap="round"
-                              strokeWidth="2"
-                            />
-                            <circle className="fill-tertiary-fixed-dim" cx="80" cy="22" r="5" />
-                            <path d="M80,17 Q82,14 84,15" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                          </svg>
-                        </div>
-                        {/* (2026-07-13) Increase sign-off font sizes; was text-base & 10px */}
-                        <span className="relative z-10 font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl text-secondary italic">
-                          Yours always,
-                        </span>
-                        <span className="relative z-10 font-['Plus_Jakarta_Sans',sans-serif] text-xs font-semibold uppercase tracking-[0.14em] text-outline mt-0.5">
-                          {primaryDateMemory.signOffAuthor || `${profile.partner1Name} • St. ${primaryDateMemory.volumeNumber || 1}`}
-                        </span>
-                      </div>
+              {/* Empty Date Context Pills (Grayed) */}
+              <div className="w-full max-w-xl grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5 font-['Plus_Jakarta_Sans',sans-serif]">
+                <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low rounded-full shadow-sm border border-outline-variant/30 text-outline/60 opacity-75">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="material-symbols-outlined text-[20px] text-outline/50">
+                      calendar_today
+                    </span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
+                        Date
+                      </span>
+                      <span className="text-sm font-medium truncate-single text-outline/60">
+                        {selectedDayFormatted} • Whole Day Note
+                      </span>
                     </div>
-                  </>
-                );
-              })()
-            ) : (
-              <>
-                {/* Watermark in corner for empty state */}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between px-4 py-3 bg-surface-container-low rounded-full shadow-sm border border-outline-variant/30 text-outline/60 opacity-75">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="material-symbols-outlined text-[20px] text-outline/50">
+                      location_on
+                    </span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[10px] uppercase tracking-wider text-outline font-semibold">
+                        Location
+                      </span>
+                      <span className="text-sm font-medium truncate-single text-outline/60">
+                        Bogo City, Cebu
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Empty Date Grayed Placeholder Card */}
+              <article className="w-full max-w-xl rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden flex flex-col border mb-8 bg-surface-container-low/70 border-outline-variant/25 font-['Plus_Jakarta_Sans',sans-serif]">
                 <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-[0.05] pointer-events-none text-primary">
                   <svg fill="currentColor" viewBox="0 0 100 100">
                     <path d="M20 70c0-18 12-32 30-32 15 0 26 8 30 20 2 4 4 8 8 8h4c4 0 6 3 6 7s-3 7-6 7h-12c-5 0-8 3-10 6H20z" />
@@ -2261,155 +2180,20 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     </p>
                   </div>
                 </div>
-              </>
-            )}
 
-                {/* Polaroids Attached */}
-                {allDatePhotos.length > 0 && (
-                  <div className="mt-6 flex flex-col gap-4 w-full">
-                    <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block">
-                      Polaroid Keepsakes ({allDatePhotos.length})
-                    </span>
-                    {allDatePhotos.map((photo, idx) => (
-                      <div
-                        key={photo.id || idx}
-                        className="bg-[#faf8f5] p-3.5 pb-5 rounded-xl shadow-sm border border-outline-variant/35 text-center flex flex-col items-center"
-                      >
-                        <div className="w-full overflow-hidden rounded-lg bg-surface-container-high aspect-[4/3] mb-3">
-                          <img
-                            src={photo.url}
-                            alt={photo.caption || 'Polaroid'}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        {photo.caption && (
-                          <p className="font-['Cormorant_Garamond',serif] italic text-base text-primary/90 font-medium px-2">
-                            “{photo.caption}”
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Voice Notes Attached */}
-                {allDateAudio.length > 0 && (
-                  <div className="mt-6 flex flex-col gap-3 w-full">
-                    <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block">
-                      Voice Memories &amp; Audio Notes
-                    </span>
-                    {allDateAudio.map((memo, idx) => {
-                      const isCurrentTrack = audioState.currentTrackId === memo.id;
-                      const isPlaying = isCurrentTrack && audioState.isPlaying;
-                      return (
-                        <div
-                          key={memo.id || idx}
-                          className="bg-[#342721] text-[#fbf9f4] rounded-2xl p-4 shadow-sm border border-[#48372e]"
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-1.5 text-[#cca440] text-[11px] font-bold uppercase tracking-wider">
-                              <span className="material-symbols-outlined text-[16px]">mic</span>
-                              <span>Voice Note</span>
-                            </div>
-                            <span className="text-[10px] text-[#cca440]/90 font-mono uppercase tracking-wider">
-                              WAV • Mastered
-                            </span>
-                          </div>
-                          <p className="text-sm italic font-['Cormorant_Garamond',serif] text-[#f0e8e2] mb-3">
-                            “{memo.title || 'Whispered note for Zea'}”
-                          </p>
-                          <div className="flex items-center gap-3">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                audioEngine.toggleTrack(
-                                  memo.id,
-                                  memo.durationSeconds || 42,
-                                  memo.url,
-                                  memo.synthNotes
-                                );
-                              }}
-                              className="w-10 h-10 rounded-full bg-[#cca440] text-[#342721] flex items-center justify-center shadow-md active:scale-95 flex-shrink-0 transition-transform"
-                            >
-                              <span className="material-symbols-outlined text-[22px]">
-                                {isPlaying ? 'pause' : 'play_arrow'}
-                              </span>
-                            </button>
-                            <div className="flex-1 flex flex-col gap-1.5 min-w-0">
-                              <div className="flex items-center justify-between text-[11px] font-mono text-[#dcd4cd]">
-                                <span>
-                                  {isCurrentTrack ? formatDuration(audioState.currentTime) : '00:00'}
-                                  {' / '}
-                                  {memo.durationFormatted || '00:42'}
-                                </span>
-                                <span className="text-[10px] text-[#a4968d]">128 kbps</span>
-                              </div>
-                              <div className="h-1.5 bg-[#201814] rounded-full overflow-hidden">
-                                <div
-                                  className="h-full bg-[#cca440] transition-all duration-150"
-                                  style={{
-                                    width: `${
-                                      isCurrentTrack
-                                        ? (audioState.currentTime / Math.max(1, audioState.duration)) * 100
-                                        : 0
-                                    }%`,
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Videos Attached */}
-                {allDateVideos.length > 0 && (
-                  <div className="mt-6 flex flex-col gap-3 w-full">
-                    <span className="text-[10px] uppercase tracking-wider text-outline font-semibold block">
-                      Video Capsules
-                    </span>
-                    {allDateVideos.map((vid, idx) => (
-                      <div
-                        key={vid.id || idx}
-                        className="rounded-2xl overflow-hidden shadow-sm border border-outline-variant/35 bg-surface-container-low"
-                      >
-                        <div className="px-4 py-2 flex items-center justify-between bg-surface-container-high/60 border-b border-outline-variant/20">
-                          <div className="flex items-center gap-1.5 text-primary text-xs font-semibold uppercase tracking-wider">
-                            <span className="material-symbols-outlined text-[16px]">videocam</span>
-                            <span>{vid.title || 'Video Memory'}</span>
-                          </div>
-                          <span className="text-[10px] text-secondary font-mono">
-                            {vid.durationFormatted || 'HD'}
-                          </span>
-                        </div>
-                        <video
-                          src={vid.url}
-                          controls
-                          className="w-full max-h-[300px] bg-black object-cover"
-                          poster={vid.thumbnailUrl}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* (2026-07-13) Edit in ComposerView button; was toggle inline edit form */}
                 <div className="mt-7 pt-4 border-t border-outline-variant/20 flex items-center justify-end w-full">
                   <button
                     type="button"
                     onClick={() => handleOpenComposerForDate()}
                     className="flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-primary text-on-primary font-['Plus_Jakarta_Sans',sans-serif] text-xs uppercase tracking-wider font-semibold shadow-sm hover:bg-primary/95 transition-all active:scale-95"
                   >
-                    <span className="material-symbols-outlined text-[17px]">
-                      {primaryDateMemory ? 'edit' : 'add_circle'}
-                    </span>
-                    <span>{primaryDateMemory ? 'Edit in Keepsake Box' : 'Write Keepsake for this Date'}</span>
+                    <span className="material-symbols-outlined text-[17px]">add_circle</span>
+                    <span>Write Keepsake for this Date</span>
                   </button>
                 </div>
-            {/* End Editorial Title & Ruled Note Card */}
-          </article>
+              </article>
+            </>
+          )}
           {/* End Date Content Card */}
         </div>
         {/* End Centered Column Wrapper */}

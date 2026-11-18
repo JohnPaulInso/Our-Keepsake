@@ -1,5 +1,6 @@
-// (2026-07-13) Build interactive Date Story Reader view per Stitch & PRD
+// (2026-07-13) Import createPortal for overlay-safe modals; was inline divs
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { CoupleProfile, KeepsakeMemory, PolaroidPhoto } from '../types';
 // (2026-07-13) Import capitalizeFirstLetters to ensure proper case; was missing
 import { formatDuration, formatStandardDate, capitalizeFirstLetters } from '../utils/dateFormat';
@@ -32,6 +33,8 @@ interface StoryReaderViewProps {
   onDeleteMemory: (id: string) => void;
   onAddPartnerNote: (memoryId: string, author: string, text: string) => void;
   onToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
+  // (2026-07-13) Allow embedding directly inside date overlay; was standalone only
+  embeddedInOverlay?: boolean;
 }
 
 export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
@@ -44,6 +47,7 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
   onDeleteMemory,
   onAddPartnerNote,
   onToast,
+  embeddedInOverlay = false,
 }) => {
   const [audioState, setAudioState] = useState(audioEngine.getState());
   const [noteDrawerOpen, setNoteDrawerOpen] = useState(false);
@@ -190,95 +194,118 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
       ? memory.timeFormatted
       : 'Whole Day Note';
 
-  // (2026-07-13) Support left/right swipe to switch dates & 5th pic header; was old
+  // (2026-07-13) Support embeddedInOverlay mode for identical overlay view; was tab only
   return (
     <div
-      onTouchStart={(e) => {
-        if (e.touches.length === 1) {
-          setTouchStartX(e.touches[0].clientX);
-          setIsDragging(true);
-        }
-      }}
-      onTouchMove={(e) => {
-        if (touchStartX !== null && e.touches.length === 1) {
-          const deltaX = e.touches[0].clientX - touchStartX;
-          setDragOffsetX(Math.max(-110, Math.min(110, deltaX * 0.65)));
-        }
-      }}
-      onTouchEnd={() => {
-        setIsDragging(false);
-        if (dragOffsetX < -55 && nextMemory) {
-          onSelectMemory(nextMemory.id);
-        } else if (dragOffsetX > 55 && prevMemory) {
-          onSelectMemory(prevMemory.id);
-        }
-        setDragOffsetX(0);
-        setTouchStartX(null);
-      }}
-      style={{
-        transform: isDismissing
-          ? 'translateX(100%)'
-          : dragOffsetX !== 0
-          ? `translateX(${dragOffsetX}px)`
-          : undefined,
-        transition: isDragging
-          ? 'none'
-          : 'transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease',
-      }}
-      className={`flex flex-col w-full px-margin pb-space-xl max-w-[760px] mx-auto will-change-transform ${
-        isDismissing ? 'envelope-slide-out' : 'envelope-slide-in'
-      }`}
+      onTouchStart={
+        embeddedInOverlay
+          ? undefined
+          : (e) => {
+              if (e.touches.length === 1) {
+                setTouchStartX(e.touches[0].clientX);
+                setIsDragging(true);
+              }
+            }
+      }
+      onTouchMove={
+        embeddedInOverlay
+          ? undefined
+          : (e) => {
+              if (touchStartX !== null && e.touches.length === 1) {
+                const deltaX = e.touches[0].clientX - touchStartX;
+                setDragOffsetX(Math.max(-110, Math.min(110, deltaX * 0.65)));
+              }
+            }
+      }
+      onTouchEnd={
+        embeddedInOverlay
+          ? undefined
+          : () => {
+              setIsDragging(false);
+              if (dragOffsetX < -55 && nextMemory) {
+                onSelectMemory(nextMemory.id);
+              } else if (dragOffsetX > 55 && prevMemory) {
+                onSelectMemory(prevMemory.id);
+              }
+              setDragOffsetX(0);
+              setTouchStartX(null);
+            }
+      }
+      style={
+        embeddedInOverlay
+          ? undefined
+          : {
+              transform: isDismissing
+                ? 'translateX(100%)'
+                : dragOffsetX !== 0
+                ? `translateX(${dragOffsetX}px)`
+                : undefined,
+              transition: isDragging
+                ? 'none'
+                : 'transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease',
+            }
+      }
+      className={
+        embeddedInOverlay
+          ? 'flex flex-col w-full'
+          : `flex flex-col w-full px-margin pb-space-xl max-w-[760px] mx-auto will-change-transform ${
+              isDismissing ? 'envelope-slide-out' : 'envelope-slide-in'
+            }`
+      }
     >
-      {/* (2026-07-13) Unified top bar matching date overlay header; was old Vol slip */}
-      <div className="w-full flex items-center justify-between mb-3 pt-1 pb-2 no-print gap-2">
-        <button
-          type="button"
-          onClick={handleCloseWithAnimation}
-          aria-label="Return to timeline"
-          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high/90 text-primary border border-outline-variant/30 text-[13px] font-medium shadow-sm hover:bg-surface-variant transition-colors active:scale-95 shrink-0"
-        >
-          <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-          <span>Back to Timeline</span>
-        </button>
+      {/* (2026-07-13) Render top bar & swipe hint only when not embedded in overlay */}
+      {!embeddedInOverlay && (
+        <>
+          <div className="w-full flex items-center justify-between mb-3 pt-1 pb-2 no-print gap-2">
+            <button
+              type="button"
+              onClick={handleCloseWithAnimation}
+              aria-label="Return to timeline"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high/90 text-primary border border-outline-variant/30 text-[13px] font-medium shadow-sm hover:bg-surface-variant transition-colors active:scale-95 shrink-0"
+            >
+              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+              <span>Back to Timeline</span>
+            </button>
 
-        <div className="flex items-center gap-1.5 min-w-0">
-          <button
-            type="button"
-            disabled={!prevMemory}
-            onClick={() => prevMemory && onSelectMemory(prevMemory.id)}
-            title={prevMemory ? `Previous: ${prevMemory.title}` : 'No previous date'}
-            className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 disabled:opacity-35 shrink-0"
-          >
-            <span className="material-symbols-outlined text-[18px]">chevron_left</span>
-          </button>
-          <span className="text-[11px] uppercase font-bold tracking-widest text-secondary bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant/30 truncate">
-            {longFormattedDate}
-          </span>
-          <button
-            type="button"
-            disabled={!nextMemory}
-            onClick={() => nextMemory && onSelectMemory(nextMemory.id)}
-            title={nextMemory ? `Next: ${nextMemory.title}` : 'No next date'}
-            className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 disabled:opacity-35 shrink-0"
-          >
-            <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleCloseWithAnimation}
-            title="Close story"
-            className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 ml-0.5 shrink-0"
-          >
-            <span className="material-symbols-outlined text-[18px]">close</span>
-          </button>
-        </div>
-      </div>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <button
+                type="button"
+                disabled={!prevMemory}
+                onClick={() => prevMemory && onSelectMemory(prevMemory.id)}
+                title={prevMemory ? `Previous: ${prevMemory.title}` : 'No previous date'}
+                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 disabled:opacity-35 shrink-0"
+              >
+                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+              </button>
+              <span className="text-[11px] uppercase font-bold tracking-widest text-secondary bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant/30 truncate">
+                {longFormattedDate}
+              </span>
+              <button
+                type="button"
+                disabled={!nextMemory}
+                onClick={() => nextMemory && onSelectMemory(nextMemory.id)}
+                title={nextMemory ? `Next: ${nextMemory.title}` : 'No next date'}
+                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 disabled:opacity-35 shrink-0"
+              >
+                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleCloseWithAnimation}
+                title="Close story"
+                className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-90 ml-0.5 shrink-0"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+          </div>
 
-      {/* Swipe hint */}
-      <div className="flex items-center justify-center gap-1.5 text-[11px] text-secondary/80 font-medium mb-4 select-none no-print">
-        <span className="material-symbols-outlined text-[14px]">swipe</span>
-        <span>Swipe left or right to switch dates</span>
-      </div>
+          <div className="flex items-center justify-center gap-1.5 text-[11px] text-secondary/80 font-medium mb-4 select-none no-print">
+            <span className="material-symbols-outlined text-[14px]">swipe</span>
+            <span>Swipe left or right to switch dates</span>
+          </div>
+        </>
+      )}
 
       {/* Centered Romantic Header with Capybara Emblem */}
       <div className="flex flex-col items-center text-center mb-6">
@@ -823,206 +850,214 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
         </div>
       </div>
 
-      {/* Leave a Note Modal */}
-      {noteDrawerOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setNoteDrawerOpen(false)}
-        >
-          <form
-            onSubmit={handleSavePartnerNote}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-5 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col gap-4"
+      {/* (2026-07-13) Portal modals at z-150 for overlay compatibility & Save Note */}
+      {noteDrawerOpen &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[150] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setNoteDrawerOpen(false)}
           >
-            <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2.5">
-              <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
-                Leave a Margin Note for {profile.partner2Name}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setNoteDrawerOpen(false)}
-                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary"
-              >
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
-            </div>
-            <div>
-              <label className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-1">
-                Signed By
-              </label>
-              <input
-                type="text"
-                value={noteAuthor}
-                onChange={(e) => setNoteAuthor(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
-              />
-            </div>
-            <div>
-              <label className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-1">
-                Your Whispered Note
-              </label>
-              <textarea
-                rows={4}
-                value={noteText}
-                onChange={(e) => setNoteText(e.target.value)}
-                placeholder={`Write something sweet for ${profile.partner2Name} to discover on this page...`}
-                className="w-full p-3 rounded-lg bg-surface-container-low text-primary font-body-md text-body-md border border-outline-variant/40 focus:outline-none"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setNoteDrawerOpen(false)}
-                className="px-4 py-2 rounded-xl bg-surface-container-low text-secondary font-label-md text-label-md uppercase"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-5 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase shadow-md"
-              >
-                Seal Note
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+            <form
+              onSubmit={handleSavePartnerNote}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-5 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col gap-4"
+            >
+              <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2.5">
+                <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                  Leave a Margin Note for {profile.partner2Name}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setNoteDrawerOpen(false)}
+                  className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary"
+                >
+                  <span className="material-symbols-outlined text-[18px]">close</span>
+                </button>
+              </div>
+              <div>
+                <label className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-1">
+                  Signed By
+                </label>
+                <input
+                  type="text"
+                  value={noteAuthor}
+                  onChange={(e) => setNoteAuthor(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40"
+                />
+              </div>
+              <div>
+                <label className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-1">
+                  Your Whispered Note
+                </label>
+                <textarea
+                  rows={4}
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                  placeholder={`Write something sweet for ${profile.partner2Name} to discover on this page...`}
+                  className="w-full p-3 rounded-lg bg-surface-container-low text-primary font-body-md text-body-md border border-outline-variant/40 focus:outline-none"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setNoteDrawerOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-surface-container-low text-secondary font-label-md text-label-md uppercase"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase shadow-md"
+                >
+                  Save Note
+                </button>
+              </div>
+            </form>
+          </div>,
+          document.body
+        )}
 
       {/* Polaroid Lightbox Modal */}
-      {lightboxPhoto && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setLightboxPhoto(null)}
-        >
+      {lightboxPhoto &&
+        createPortal(
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md bg-surface-container-lowest p-4 pb-6 rounded-xl shadow-2xl modal-animate-in flex flex-col gap-3"
+            className="fixed inset-0 z-[150] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setLightboxPhoto(null)}
           >
-            <div className="flex items-center justify-between">
-              <span className="font-label-md text-label-md uppercase tracking-wider text-secondary">
-                {lightboxPhoto.tag || 'INSTANT FILM'} • {formatStandardDate(memory.dateISO)}
-              </span>
-              <button
-                type="button"
-                onClick={() => setLightboxPhoto(null)}
-                className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-primary"
-              >
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md bg-surface-container-lowest p-4 pb-6 rounded-xl shadow-2xl modal-animate-in flex flex-col gap-3"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-label-md text-label-md uppercase tracking-wider text-secondary">
+                  {lightboxPhoto.tag || 'INSTANT FILM'} • {formatStandardDate(memory.dateISO)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setLightboxPhoto(null)}
+                  className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-primary"
+                >
+                  <span className="material-symbols-outlined text-[18px]">close</span>
+                </button>
+              </div>
+              <div className="w-full aspect-square rounded overflow-hidden bg-surface-container">
+                <img
+                  src={lightboxPhoto.url}
+                  alt={lightboxPhoto.caption}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <p className="font-italic-quote text-italic-quote text-primary text-center italic font-serif">
+                “{lightboxPhoto.caption}”
+              </p>
             </div>
-            <div className="w-full aspect-square rounded overflow-hidden bg-surface-container">
-              <img
-                src={lightboxPhoto.url}
-                alt={lightboxPhoto.caption}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <p className="font-italic-quote text-italic-quote text-primary text-center italic font-serif">
-              “{lightboxPhoto.caption}”
-            </p>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
 
       {/* Lockscreen Generator Modal */}
-      {lockscreenModalOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/65 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setLockscreenModalOpen(false)}
-        >
+      {lockscreenModalOpen &&
+        createPortal(
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm bg-surface-container-lowest rounded-2xl p-5 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col items-center text-center gap-4"
+            className="fixed inset-0 z-[150] bg-black/65 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setLockscreenModalOpen(false)}
           >
-            <div className="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center">
-              <span className="material-symbols-outlined text-[24px]">wallpaper</span>
-            </div>
-            <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
-              Keepsake Lockscreen Card
-            </h3>
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Generate a custom 1080×1920 stationery lockscreen wallpaper featuring this date,
-              quote, and polaroid caption for you and {profile.partner2Name}.
-            </p>
-            <div className="w-48 aspect-[9/16] rounded-xl bg-surface-container-low border-2 border-outline-variant/50 p-3 flex flex-col justify-between shadow-inner">
-              <span className="font-label-md text-[9px] uppercase tracking-widest text-secondary">
-                {formatStandardDate(memory.dateISO)}
-              </span>
-              {memory.photos[0] && (
-                <img
-                  src={memory.photos[0].url}
-                  alt={memory.title}
-                  className="w-full h-28 object-cover rounded"
-                />
-              )}
-              <p className="font-serif italic text-[11px] text-primary clamp-3">
-                “{memory.quoteHighlight || memory.snippet}”
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm bg-surface-container-lowest rounded-2xl p-5 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col items-center text-center gap-4"
+            >
+              <div className="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center">
+                <span className="material-symbols-outlined text-[24px]">wallpaper</span>
+              </div>
+              <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                Keepsake Lockscreen Card
+              </h3>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">
+                Generate a custom 1080×1920 stationery lockscreen wallpaper featuring this date,
+                quote, and polaroid caption for you and {profile.partner2Name}.
               </p>
-              <span className="font-label-md text-[8px] uppercase text-outline">
-                {profile.partner1Name} &amp; {profile.partner2Name}
-              </span>
+              <div className="w-48 aspect-[9/16] rounded-xl bg-surface-container-low border-2 border-outline-variant/50 p-3 flex flex-col justify-between shadow-inner">
+                <span className="font-label-md text-[9px] uppercase tracking-widest text-secondary">
+                  {formatStandardDate(memory.dateISO)}
+                </span>
+                {memory.photos[0] && (
+                  <img
+                    src={memory.photos[0].url}
+                    alt={memory.title}
+                    className="w-full h-28 object-cover rounded"
+                  />
+                )}
+                <p className="font-serif italic text-[11px] text-primary clamp-3">
+                  “{memory.quoteHighlight || memory.snippet}”
+                </p>
+                <span className="font-label-md text-[8px] uppercase text-outline">
+                  {profile.partner1Name} &amp; {profile.partner2Name}
+                </span>
+              </div>
+              <div className="flex w-full gap-2">
+                <button
+                  type="button"
+                  onClick={() => setLockscreenModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-surface-container-low text-secondary font-label-md text-label-md uppercase"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadLockscreenWallpaper}
+                  className="flex-1 py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase shadow-md"
+                >
+                  Download PNG
+                </button>
+              </div>
             </div>
-            <div className="flex w-full gap-2">
-              <button
-                type="button"
-                onClick={() => setLockscreenModalOpen(false)}
-                className="flex-1 py-2.5 rounded-xl bg-surface-container-low text-secondary font-label-md text-label-md uppercase"
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                onClick={handleDownloadLockscreenWallpaper}
-                className="flex-1 py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase shadow-md"
-              >
-                Download PNG
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
 
       {/* Delete Confirmation Modal (No Native Confirm per SKILL.md) */}
-      {deleteConfirmOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/65 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setDeleteConfirmOpen(false)}
-        >
+      {deleteConfirmOpen &&
+        createPortal(
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm bg-surface-container-lowest rounded-2xl p-5 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col gap-4 text-center"
+            className="fixed inset-0 z-[150] bg-black/65 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setDeleteConfirmOpen(false)}
           >
-            <div className="w-11 h-11 mx-auto rounded-full bg-error-container text-error flex items-center justify-center">
-              <span className="material-symbols-outlined text-[22px]">delete_forever</span>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm bg-surface-container-lowest rounded-2xl p-5 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col gap-4 text-center"
+            >
+              <div className="w-11 h-11 mx-auto rounded-full bg-error-container text-error flex items-center justify-center">
+                <span className="material-symbols-outlined text-[22px]">delete_forever</span>
+              </div>
+              <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+                Remove This Keepsake?
+              </h3>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">
+                Are you sure you want to remove &ldquo;{memory.title}&rdquo; from your shared archive?
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-surface-container-low text-secondary font-label-md text-label-md uppercase"
+                >
+                  Keep Memory
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteConfirmOpen(false);
+                    onDeleteMemory(memory.id);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-error text-on-error font-label-md text-label-md uppercase shadow-md"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
-            <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
-              Remove This Keepsake?
-            </h3>
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Are you sure you want to remove &ldquo;{memory.title}&rdquo; from your shared archive?
-            </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setDeleteConfirmOpen(false)}
-                className="flex-1 py-2.5 rounded-xl bg-surface-container-low text-secondary font-label-md text-label-md uppercase"
-              >
-                Keep Memory
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setDeleteConfirmOpen(false);
-                  onDeleteMemory(memory.id);
-                }}
-                className="flex-1 py-2.5 rounded-xl bg-error text-on-error font-label-md text-label-md uppercase shadow-md"
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

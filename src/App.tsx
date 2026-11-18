@@ -391,7 +391,8 @@ export const App: React.FC = () => {
       addToast(`Draft "${memory.title}" saved to your desk.`, 'info');
       switchTab('timeline');
     } else {
-      addToast(`"${memory.title}" sealed into your Memory Box!`, 'success');
+      // (2026-07-13) Rename sealed toast to saved; was sealed into Memory Box
+      addToast(`"${memory.title}" saved to your Memory Box!`, 'success');
       switchTab('story');
     }
   };
@@ -1028,8 +1029,11 @@ export const App: React.FC = () => {
                   }
                   switchTab('notepad');
                 }}
-                // (2026-07-13) Pass handleSaveMemory to TimelineView; was omitted
+                // (2026-07-13) Pass delete, note & toast handlers for overlay StoryReader
                 onSaveMemory={handleSaveMemory}
+                onDeleteMemory={handleDeleteMemory}
+                onAddPartnerNote={handleAddPartnerNote}
+                onToast={addToast}
               />
             )}
 
