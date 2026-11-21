@@ -542,12 +542,14 @@ export const App: React.FC = () => {
     const now = Date.now();
     const formattedTitle = capitalizeFirstLetters(memory.title);
     const formattedStory = capitalizeFirstLetters(memory.storyBody);
-    const existingIndex = memories.findIndex(
+    // (2026-07-13) Merge against fullMemories so saving during stream keeps all dates
+    const fullList = DB.getFullMemories();
+    const existingIndex = fullList.findIndex(
       (m) => m.id === memory.id || m.dateISO === memory.dateISO
     );
     const targetId =
-      existingIndex !== -1 && !memories[existingIndex].id.endsWith('-imported')
-        ? memories[existingIndex].id
+      existingIndex !== -1 && !fullList[existingIndex].id.endsWith('-imported')
+        ? fullList[existingIndex].id
         : `mem-${memory.dateISO}-${now}`;
     const finalId = targetId;
 
@@ -561,7 +563,7 @@ export const App: React.FC = () => {
       updatedAt: now,
     };
     // (2026-07-13) Strictly deduplicate by dateISO on save; was partial index swap
-    const remaining = memories.filter(
+    const remaining = fullList.filter(
       (m) => m.id !== finalId && m.dateISO !== memory.dateISO
     );
     const nextList = [formattedMemory, ...remaining].sort((a, b) =>

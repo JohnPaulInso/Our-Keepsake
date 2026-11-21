@@ -41,11 +41,119 @@ export const CLEAN_TIME_CAPSULE: TimeCapsuleItem = {
 
 interface MemCacheShape {
   memories: KeepsakeMemory[];
+  fullMemories: KeepsakeMemory[];
   secretYearNotes: SecretYearNote[];
   digitalLoveLetters: DigitalLoveLetter[];
   coupleProfile: CoupleProfile;
   timeCapsule: TimeCapsuleItem;
   dailyBackups: DailyBackupRecord[];
+}
+
+// (2026-07-13) Index seed memories & conflict rules so real edits never disappear
+const SEED_BY_DATE = new Map<string, KeepsakeMemory>(
+  INITIAL_MEMORIES.map((m) => [m.dateISO, m])
+);
+
+export function isUnmodifiedSeedMemory(m: KeepsakeMemory): boolean {
+  if (!m) return false;
+  const seed = SEED_BY_DATE.get(m.dateISO);
+  if (!seed) return false;
+  const sameBody = (m.storyBody || '').trim() === (seed.storyBody || '').trim();
+  const sameTitle = (m.title || '').trim() === (seed.title || '').trim();
+  const noExtraPhotos = (m.photos?.length || 0) <= (seed.photos?.length || 0);
+  const noExtraNotes = (m.partnerNotes?.length || 0) <= (seed.partnerNotes?.length || 0);
+  return m.id.endsWith('-imported') && sameBody && sameTitle && noExtraPhotos && noExtraNotes;
+}
+
+function getEffectiveMemoryTimestamp(m: KeepsakeMemory): number {
+  if (isUnmodifiedSeedMemory(m)) return 1000;
+  const raw = m.updatedAt || 0;
+  // Clamp fake future timestamps inherited from seedMemories.ts (> now + 1 hour)
+  const now = Date.now();
+  if (raw > now + 3600000) {
+    return 2000;
+  }
+  return raw > 0 ? raw : 2000;
+}
+
+export function mergeTwoMemoriesForDate(
+  localMem: KeepsakeMemory,
+  remoteMem: KeepsakeMemory
+): KeepsakeMemory {
+  const localIsSeed = isUnmodifiedSeedMemory(localMem);
+  const remoteIsSeed = isUnmodifiedSeedMemory(remoteMem);
+
+  // Merge photos preserving resolved data URLs and union by photo ID
+  const localPhotos = localMem.photos || [];
+  const remotePhotos = remoteMem.photos || [];
+  const photoMap = new Map<string, KeepsakeMemory['photos'][0]>();
+  for (const lp of localPhotos) {
+    if (lp && lp.id) photoMap.set(lp.id, lp);
+  }
+  for (const rp of remotePhotos) {
+    if (!rp || !rp.id) continue;
+    const existing = photoMap.get(rp.id);
+    if (!existing) {
+      photoMap.set(rp.id, rp);
+    } else if (
+      (existing.url?.startsWith('split_media://') || !existing.url) &&
+      rp.url &&
+      !rp.url.startsWith('split_media://')
+    ) {
+      photoMap.set(rp.id, rp);
+    } else if (!rp.url?.startsWith('split_media://') && rp.url) {
+      photoMap.set(rp.id, { ...existing, caption: rp.caption || existing.caption });
+    }
+  }
+  const mergedPhotos =
+    photoMap.size > 0
+      ? Array.from(photoMap.values())
+      : localPhotos.length >= remotePhotos.length
+      ? localPhotos
+      : remotePhotos;
+
+  // Merge partner notes by ID union
+  const noteMap = new Map<string, KeepsakeMemory['partnerNotes'][0]>();
+  for (const n of localMem.partnerNotes || []) {
+    if (n && n.id) noteMap.set(n.id, n);
+  }
+  for (const n of remoteMem.partnerNotes || []) {
+    if (n && n.id) noteMap.set(n.id, n);
+  }
+  const mergedNotes = Array.from(noteMap.values());
+
+  // 1. User-modified memory ALWAYS beats unmodified seed memory
+  if (localIsSeed && !remoteIsSeed) {
+    return { ...remoteMem, photos: mergedPhotos, partnerNotes: mergedNotes };
+  }
+  if (remoteIsSeed && !localIsSeed) {
+    return { ...localMem, photos: mergedPhotos, partnerNotes: mergedNotes };
+  }
+
+  // 2. Compare content length & timestamps so newly typed long memories never get overwritten
+  const localLen = (localMem.storyBody || localMem.snippet || '').trim().length;
+  const remoteLen = (remoteMem.storyBody || remoteMem.snippet || '').trim().length;
+  const localTs = getEffectiveMemoryTimestamp(localMem);
+  const remoteTs = getEffectiveMemoryTimestamp(remoteMem);
+
+  // If one version has a significantly longer storyBody and was edited within 15 mins of the other, keep the longer story
+  if (Math.abs(localLen - remoteLen) >= 20 && Math.abs(localTs - remoteTs) < 900000) {
+    const winner = localLen >= remoteLen ? localMem : remoteMem;
+    return {
+      ...winner,
+      photos: mergedPhotos,
+      partnerNotes: mergedNotes,
+      updatedAt: Math.max(localTs, remoteTs),
+    };
+  }
+
+  const winner = localTs >= remoteTs ? localMem : remoteMem;
+  return {
+    ...winner,
+    photos: mergedPhotos,
+    partnerNotes: mergedNotes,
+    updatedAt: Math.max(localTs, remoteTs),
+  };
 }
 
 // (2026-07-13) Partition memories into current/prev months first & background rest
@@ -109,10 +217,14 @@ function partitionMemoriesByPriorityMonths(allMemories: KeepsakeMemory[]): {
   return { priority, deferred };
 }
 
-const initialPartition = partitionMemoriesByPriorityMonths(INITIAL_MEMORIES);
+const initialSortedFull = [...INITIAL_MEMORIES].sort((a, b) =>
+  b.dateISO.localeCompare(a.dateISO)
+);
+const initialPartition = partitionMemoriesByPriorityMonths(initialSortedFull);
 
 const memCache: MemCacheShape = {
   memories: initialPartition.priority,
+  fullMemories: initialSortedFull,
   secretYearNotes: [],
   digitalLoveLetters: INITIAL_DIGITAL_LOVE_LETTERS,
   coupleProfile: DEFAULT_COUPLE_PROFILE,
@@ -236,6 +348,9 @@ function saveLightweightMirror(memories: KeepsakeMemory[]) {
 class LocalDatabase {
   public ready: Promise<void>;
   private listeners: Set<() => void> = new Set();
+  // (2026-07-13) Separate user mutation listeners from passive UI hydration listeners
+  private mutationListeners: Set<() => void> = new Set();
+  private hasCompletedInitialStream = false;
 
   constructor() {
     this.ready = this.hydrateAll();
@@ -260,7 +375,9 @@ class LocalDatabase {
       this.backgroundStreamTimer = null;
     }
     if (deferred.length === 0) {
-      onAllLoaded?.(memCache.memories);
+      this.hasCompletedInitialStream = true;
+      memCache.memories = [...memCache.fullMemories];
+      onAllLoaded?.(memCache.fullMemories);
       return;
     }
 
@@ -272,24 +389,32 @@ class LocalDatabase {
       cursor += CHUNK_SIZE;
 
       if (slice.length > 0) {
-        const existingDates = new Set(memCache.memories.map((m) => m.dateISO));
-        const existingIds = new Set(memCache.memories.map((m) => m.id));
-        const toAdd = slice.filter(
-          (m) => !existingDates.has(m.dateISO) && !existingIds.has(m.id)
-        );
-        if (toAdd.length > 0) {
-          memCache.memories = [...memCache.memories, ...toAdd].sort((a, b) =>
-            b.dateISO.localeCompare(a.dateISO)
-          );
-          this.notify();
+        const existingByDate = new Map(memCache.memories.map((m) => [m.dateISO, m]));
+        for (const item of slice) {
+          // Always pick the latest version from fullMemories in case user edited during stream
+          const latest =
+            memCache.fullMemories.find((fm) => fm.dateISO === item.dateISO) || item;
+          const cur = existingByDate.get(latest.dateISO);
+          if (!cur) {
+            existingByDate.set(latest.dateISO, latest);
+          } else {
+            existingByDate.set(latest.dateISO, mergeTwoMemoriesForDate(cur, latest));
+          }
         }
+        memCache.memories = Array.from(existingByDate.values()).sort((a, b) =>
+          b.dateISO.localeCompare(a.dateISO)
+        );
+        this.notify();
       }
 
       if (cursor < deferred.length) {
         this.backgroundStreamTimer = window.setTimeout(step, 55);
       } else {
         this.backgroundStreamTimer = null;
-        onAllLoaded?.(memCache.memories);
+        this.hasCompletedInitialStream = true;
+        memCache.memories = [...memCache.fullMemories];
+        this.notify();
+        onAllLoaded?.(memCache.fullMemories);
       }
     };
 
@@ -364,7 +489,8 @@ class LocalDatabase {
         }
       }
 
-      // Stage 1: Load ONLY current & previous months immediately for zero-lag first paint
+      // Stage 1: Store full list in fullMemories and load priority months for first paint
+      memCache.fullMemories = cleanedList;
       const { priority, deferred } = partitionMemoriesByPriorityMonths(cleanedList);
       memCache.memories = priority;
 
@@ -516,8 +642,20 @@ class LocalDatabase {
     };
   }
 
+  // (2026-07-13) Subscribe only to explicit local user writes; was all notifications
+  subscribeMutation(cb: () => void): () => void {
+    this.mutationListeners.add(cb);
+    return () => {
+      this.mutationListeners.delete(cb);
+    };
+  }
+
   public notify() {
     this.listeners.forEach((cb) => cb());
+  }
+
+  public notifyMutation() {
+    this.mutationListeners.forEach((cb) => cb());
   }
 
   private signalCrossTab() {
@@ -532,38 +670,59 @@ class LocalDatabase {
     return memCache.memories;
   }
 
+  getFullMemories(): KeepsakeMemory[] {
+    return memCache.fullMemories.length >= memCache.memories.length
+      ? memCache.fullMemories
+      : memCache.memories;
+  }
+
   // (2026-07-13) Add date-indexed memory retrieval; was loading full list
   getMemoriesByDateSync(dateISO: string): KeepsakeMemory[] {
-    return (memCache.memories || []).filter((m) => m.dateISO === dateISO);
+    return (this.getFullMemories() || []).filter((m) => m.dateISO === dateISO);
   }
 
   async getMemoriesByDate(dateISO: string): Promise<KeepsakeMemory[]> {
-    if (memCache.memories && memCache.memories.length > 0) {
-      return memCache.memories.filter((m) => m.dateISO === dateISO);
+    const full = this.getFullMemories();
+    if (full && full.length > 0) {
+      return full.filter((m) => m.dateISO === dateISO);
     }
     const all = await idbGet<KeepsakeMemory[]>('memories');
     return (all || []).filter((m) => m.dateISO === dateISO);
   }
 
-  // (2026-07-13) Deduplicate memories by dateISO on save; was raw array write
+  // (2026-07-13) Smart merge per dateISO against fullMemories on save; was partial list
   async setMemories(memories: KeepsakeMemory[], fromRemote = false): Promise<void> {
     const map = new Map<string, KeepsakeMemory>();
+    const incomingDates = new Set(memories.map((m) => m.dateISO));
+    // Preserve any unstreamed memories from fullMemories if background stream is still active
+    if (!this.hasCompletedInitialStream && memCache.fullMemories.length > memories.length) {
+      for (const fm of memCache.fullMemories) {
+        if (fm && fm.dateISO && !incomingDates.has(fm.dateISO)) {
+          map.set(fm.dateISO, fm);
+        }
+      }
+    }
     for (const m of memories) {
       if (m && m.dateISO) {
         const existing = map.get(m.dateISO);
-        if (!existing || (m.updatedAt || 0) >= (existing.updatedAt || 0)) {
+        if (!existing) {
           map.set(m.dateISO, m);
+        } else {
+          map.set(m.dateISO, mergeTwoMemoriesForDate(existing, m));
         }
       }
     }
     const deduplicated = Array.from(map.values()).sort((a, b) =>
       b.dateISO.localeCompare(a.dateISO)
     );
+    memCache.fullMemories = deduplicated;
     memCache.memories = deduplicated;
+    this.hasCompletedInitialStream = true;
     await idbSet('memories', deduplicated);
     saveLightweightMirror(deduplicated);
     this.notify();
     if (!fromRemote) {
+      this.notifyMutation();
       this.signalCrossTab();
     }
   }
@@ -577,6 +736,7 @@ class LocalDatabase {
     await idbSet('secretYearNotes', notes);
     this.notify();
     if (!fromRemote) {
+      this.notifyMutation();
       this.signalCrossTab();
     }
   }
@@ -594,6 +754,7 @@ class LocalDatabase {
     await idbSet('digitalLoveLetters', letters);
     this.notify();
     if (!fromRemote) {
+      this.notifyMutation();
       this.signalCrossTab();
     }
   }
@@ -607,6 +768,7 @@ class LocalDatabase {
     await idbSet('coupleProfile', profile);
     this.notify();
     if (!fromRemote) {
+      this.notifyMutation();
       this.signalCrossTab();
     }
   }
@@ -620,6 +782,7 @@ class LocalDatabase {
     await idbSet('timeCapsule', capsule);
     this.notify();
     if (!fromRemote) {
+      this.notifyMutation();
       this.signalCrossTab();
     }
   }
@@ -682,13 +845,13 @@ class LocalDatabase {
     }
   }
 
-  // (2026-07-13) Include digitalLoveLetters in snapshot backup/restore vs omitted
+  // (2026-07-13) Export fullMemories in createSnapshot so streaming never drops items
   createSnapshot(): BackupSnapshot {
     return {
       version: '1.0.0',
       exportedAt: Date.now(),
       coupleProfile: memCache.coupleProfile,
-      memories: memCache.memories,
+      memories: this.getFullMemories(),
       secretYearNotes: memCache.secretYearNotes,
       digitalLoveLetters: memCache.digitalLoveLetters,
       timeCapsule: memCache.timeCapsule,
@@ -753,55 +916,46 @@ class LocalDatabase {
       memCache.coupleProfile = snapshot.coupleProfile;
       await idbSet('coupleProfile', snapshot.coupleProfile);
     }
-    // (2026-07-13) Preserve local edits and photos on remote merge; was overwrite
+    // (2026-07-13) Multi-device per-date merge protecting user edits & long memories
     if (Array.isArray(snapshot.memories)) {
-      const existingLocal = memCache.memories || [];
-      const remoteIds = new Set(snapshot.memories.map((m) => m.id));
-      const remoteDates = new Set(snapshot.memories.map((m) => m.dateISO));
-      const localOnly = existingLocal.filter((m) => !remoteIds.has(m.id) && !remoteDates.has(m.dateISO));
+      const existingLocal = this.getFullMemories() || [];
+      const byDate = new Map<string, KeepsakeMemory>();
 
-      const merged = snapshot.memories.map((remoteMem) => {
-        const localMem = existingLocal.find((m) => m.id === remoteMem.id || m.dateISO === remoteMem.dateISO);
-        if (!localMem) return remoteMem;
-
-        const localPhotos = localMem.photos || [];
-        const remotePhotos = remoteMem.photos || [];
-
-        // If local has photos but remote has none, or local was updated more recently: preserve local photos
-        const shouldKeepLocalPhotos =
-          (localPhotos.length > 0 && remotePhotos.length === 0) ||
-          ((localMem.updatedAt || 0) >= (remoteMem.updatedAt || 0) && localPhotos.length > 0);
-
-        // Resolve any split_media:// or missing URLs using local cache
-        const resolvedPhotos = remotePhotos.map((rp) => {
-          if (rp.url?.startsWith('split_media://') || !rp.url) {
-            const matchedLocal = localPhotos.find((lp) => lp.id === rp.id);
-            if (matchedLocal?.url) {
-              return { ...rp, url: matchedLocal.url };
-            }
-          }
-          return rp;
-        });
-
-        const finalPhotos = shouldKeepLocalPhotos
-          ? localPhotos
-          : (resolvedPhotos.length > 0 ? resolvedPhotos : localPhotos);
-
-        if ((localMem.updatedAt || 0) >= (remoteMem.updatedAt || 0)) {
-          return { ...localMem, photos: finalPhotos };
+      for (const localMem of existingLocal) {
+        if (localMem && localMem.dateISO) {
+          byDate.set(localMem.dateISO, localMem);
         }
-        return { ...remoteMem, photos: finalPhotos };
-      });
+      }
 
-      const finalMemories = [...merged, ...localOnly];
-      // (2026-07-13) Apply priority months first & stream older months in background
-      const { priority, deferred } = partitionMemoriesByPriorityMonths(finalMemories);
-      memCache.memories = priority;
-      this.notify();
-      this.streamOlderMemoriesInBackground(deferred, (allLoaded) => {
-        idbSet('memories', allLoaded);
-        saveLightweightMirror(allLoaded);
-      });
+      for (const remoteMem of snapshot.memories) {
+        if (!remoteMem || !remoteMem.dateISO) continue;
+        const localMem = byDate.get(remoteMem.dateISO);
+        if (!localMem) {
+          byDate.set(remoteMem.dateISO, remoteMem);
+        } else {
+          byDate.set(remoteMem.dateISO, mergeTwoMemoriesForDate(localMem, remoteMem));
+        }
+      }
+
+      const finalMemories = Array.from(byDate.values()).sort((a, b) =>
+        b.dateISO.localeCompare(a.dateISO)
+      );
+      memCache.fullMemories = finalMemories;
+
+      if (this.hasCompletedInitialStream) {
+        memCache.memories = finalMemories;
+        this.notify();
+        idbSet('memories', finalMemories);
+        saveLightweightMirror(finalMemories);
+      } else {
+        const { priority, deferred } = partitionMemoriesByPriorityMonths(finalMemories);
+        memCache.memories = priority;
+        this.notify();
+        this.streamOlderMemoriesInBackground(deferred, (allLoaded) => {
+          idbSet('memories', allLoaded);
+          saveLightweightMirror(allLoaded);
+        });
+      }
     }
     // (2026-07-13) Merge remote with unpushed local notes vs hard overwrite
     if (Array.isArray(snapshot.secretYearNotes)) {

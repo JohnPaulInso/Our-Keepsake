@@ -179,26 +179,18 @@ class FirebaseSyncManager {
       }
 
       await DB.ready;
-      // (2026-07-13) Defer cloud pull & backups to background after initial render
+      // (2026-07-13) Pull remote on boot without auto-pushing stale local state
       setTimeout(async () => {
-        await this.pullSnapshot();
-        const initialLocal = DB.getMemories();
-        if (this.db && this.status !== 'permission-denied' && this.status !== 'quota' && initialLocal.length > 4) {
-          this.schedulePush();
-        }
+        await this.pullSnapshot(true);
         this.startRealtimeListener();
       }, 650);
 
       setTimeout(() => {
-        const localBackups = DB.getDailyBackups();
-        for (const b of localBackups.slice(0, 3)) {
-          this.pushDailyBackupToFirestore(b).catch(() => {});
-        }
         this.startDailyBackupsListener();
       }, 3800);
 
-      // Auto-sync local DB mutations to Firestore
-      DB.subscribe(() => {
+      // (2026-07-13) Only push to Firestore on explicit local user mutations
+      DB.subscribeMutation(() => {
         if (!this.isApplyingRemoteSnapshot && this.db && this.status !== 'quota') {
           this.schedulePush();
         }
@@ -272,9 +264,8 @@ class FirebaseSyncManager {
     this.notify();
   }
 
-  // (2026-07-13) Pull and restore live cloud memories on launch; was strict baseline
-  // (2026-07-13) Bind pullSnapshot as arrow method; was unbound class method
-  pullSnapshot = async (force = false): Promise<void> => {
+  // (2026-07-13) Always smart-merge remote snapshot per date without baseline block
+  pullSnapshot = async (_force = false): Promise<void> => {
     if (!this.db || this.status === 'quota') return;
     try {
       this.status = 'syncing';
@@ -284,28 +275,15 @@ class FirebaseSyncManager {
       if (snap.exists()) {
         const remote = snap.data() as BackupSnapshot & { updatedAt?: number };
         const remoteTime = remote.exportedAt || remote.updatedAt || 0;
-        const localBaseline = Number(localStorage.getItem('ok_sync_baseline') || 0);
-        const localMemories = DB.getMemories();
-        const remoteCount = Array.isArray(remote.memories) ? remote.memories.length : 0;
-
-        const shouldRestore =
-          force ||
-          remoteTime > localBaseline ||
-          (remoteCount > 0 && localMemories.length <= 4) ||
-          remoteCount > localMemories.length;
-
-        if (shouldRestore) {
-          this.isApplyingRemoteSnapshot = true;
-          // (2026-07-13) Resolve split media URLs before restoring snapshot; was raw
-          await this.resolveMediaUrls(remote);
-          await DB.restoreSnapshot(remote);
-          this.isApplyingRemoteSnapshot = false;
-          if (remoteTime > 0) {
-            localStorage.setItem('ok_sync_baseline', String(remoteTime));
-          }
+        this.isApplyingRemoteSnapshot = true;
+        await this.resolveMediaUrls(remote);
+        await DB.restoreSnapshot(remote);
+        this.isApplyingRemoteSnapshot = false;
+        if (remoteTime > 0) {
+          localStorage.setItem('ok_sync_baseline', String(remoteTime));
         }
       } else {
-        const localMemories = DB.getMemories();
+        const localMemories = DB.getFullMemories();
         if (localMemories.length > 4) {
           await this.pushSnapshot();
         }
@@ -430,6 +408,7 @@ class FirebaseSyncManager {
     return cloned;
   }
 
+  // (2026-07-13) Fetch & merge remote doc before push so 2 open devices never clobber
   async pushSnapshot(): Promise<void> {
     if (!this.db || this.isSyncing || this.isApplyingRemoteSnapshot || this.status === 'quota') {
       return;
@@ -438,10 +417,25 @@ class FirebaseSyncManager {
     try {
       this.status = 'syncing';
       this.notify();
+      const docRef = doc(this.db, 'couples', 'jp_zea_vault');
+
+      // Pull and merge remote state per-date first so concurrent edits on another device are preserved
+      try {
+        const remoteSnap = await getDoc(docRef);
+        if (remoteSnap.exists()) {
+          const remoteData = remoteSnap.data() as BackupSnapshot;
+          this.isApplyingRemoteSnapshot = true;
+          await this.resolveMediaUrls(remoteData);
+          await DB.restoreSnapshot(remoteData);
+          this.isApplyingRemoteSnapshot = false;
+        }
+      } catch {
+        this.isApplyingRemoteSnapshot = false;
+      }
+
       const snapshot = DB.createSnapshot();
       const cloned = await this.sanitizeSnapshotForFirestore(snapshot);
 
-      const docRef = doc(this.db, 'couples', 'jp_zea_vault');
       // (2026-07-13) Set updatedAt timestamp on Firestore vault push vs missing date
       await setDoc(docRef, { ...cloned, updatedAt: Date.now() }, { merge: true });
 
@@ -554,24 +548,12 @@ class FirebaseSyncManager {
     this.unsubscribeSnapshot = onSnapshot(
       docRef,
       async (snap) => {
-        // (2026-07-13) Ignore local echo writes in onSnapshot; was echoing write
+        // (2026-07-13) Smart-merge live remote snapshot per date across active devices
         if (!snap.exists() || this.isSyncing || snap.metadata.hasPendingWrites) return;
         const data = snap.data() as BackupSnapshot & { updatedAt?: number };
-        // (2026-07-13) Live sync remote memories to cache; was skip on baseline
         const remoteTime = data.exportedAt || data.updatedAt || 0;
-        const localBaseline = Number(localStorage.getItem('ok_sync_baseline') || 0);
-        const localMemories = DB.getMemories();
-        const remoteCount = Array.isArray(data.memories) ? data.memories.length : 0;
-
-        const shouldApply =
-          remoteTime > localBaseline ||
-          remoteCount > localMemories.length ||
-          (remoteCount > 0 && localMemories.length <= 4);
-
-        if (!shouldApply) return;
 
         this.isApplyingRemoteSnapshot = true;
-        // (2026-07-13) Resolve media URLs from cache/subcollection; was loop
         await this.resolveMediaUrls(data);
         await DB.restoreSnapshot(data);
         if (remoteTime > 0) {
