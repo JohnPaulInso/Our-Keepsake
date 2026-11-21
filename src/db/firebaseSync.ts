@@ -179,25 +179,30 @@ class FirebaseSyncManager {
       }
 
       await DB.ready;
-      await this.pullSnapshot();
-      // Only push on startup if local memories exist (> 4) and remote was clean
-      const initialLocal = DB.getMemories();
-      if (this.db && this.status !== 'permission-denied' && this.status !== 'quota' && initialLocal.length > 4) {
-        this.schedulePush();
-      }
-      // Sync local daily backups (including showcase archive) to Firestore daily_backups
-      const localBackups = DB.getDailyBackups();
-      for (const b of localBackups) {
-        this.pushDailyBackupToFirestore(b).catch(() => {});
-      }
+      // (2026-07-13) Defer cloud pull & backups to background after initial render
+      setTimeout(async () => {
+        await this.pullSnapshot();
+        const initialLocal = DB.getMemories();
+        if (this.db && this.status !== 'permission-denied' && this.status !== 'quota' && initialLocal.length > 4) {
+          this.schedulePush();
+        }
+        this.startRealtimeListener();
+      }, 650);
+
+      setTimeout(() => {
+        const localBackups = DB.getDailyBackups();
+        for (const b of localBackups.slice(0, 3)) {
+          this.pushDailyBackupToFirestore(b).catch(() => {});
+        }
+        this.startDailyBackupsListener();
+      }, 3800);
+
       // Auto-sync local DB mutations to Firestore
       DB.subscribe(() => {
         if (!this.isApplyingRemoteSnapshot && this.db && this.status !== 'quota') {
           this.schedulePush();
         }
       });
-      this.startRealtimeListener();
-      this.startDailyBackupsListener();
 
       if (this.auth) {
         onAuthStateChanged(this.auth, (user) => {
@@ -332,40 +337,69 @@ class FirebaseSyncManager {
     }, 900);
   }
 
-  // (2026-07-13) Bind resolveMediaUrls as arrow method; was unbound class method
+  // (2026-07-13) Resolve priority month media first & stream older photos in background
   resolveMediaUrls = async (data: BackupSnapshot): Promise<void> => {
     if (!Array.isArray(data.memories)) return;
-    for (const mem of data.memories) {
-      if (!Array.isArray(mem.photos)) continue;
-      for (const photo of mem.photos) {
-        if (photo.url?.startsWith('split_media://')) {
-          const mediaId = photo.url.replace('split_media://', '');
-          let resolved = await idbGet<string>(mediaId, 'post_media');
-          if (!resolved && this.db) {
-            try {
-              const photoSnap = await getDoc(doc(this.db, 'couples', 'jp_zea_vault', 'photos', mediaId));
-              if (photoSnap.exists()) {
-                resolved = photoSnap.data()?.dataUrl;
-                if (resolved) {
-                  await idbSet(mediaId, resolved, 'post_media');
-                }
+    const sorted = [...data.memories].sort((a, b) => (b.dateISO || '').localeCompare(a.dateISO || ''));
+    const priorityMemories = sorted.slice(0, 32);
+    const olderMemories = sorted.slice(32);
+
+    const resolvePhotoBatch = async (memoriesBatch: typeof sorted) => {
+      let updatedAny = false;
+      for (const mem of memoriesBatch) {
+        if (!Array.isArray(mem.photos)) continue;
+        for (const photo of mem.photos) {
+          if (photo.url?.startsWith('split_media://')) {
+            const mediaId = photo.url.replace('split_media://', '');
+            let resolved = await idbGet<string>(mediaId, 'post_media');
+            if (!resolved) {
+              const existingMem = DB.getMemories().find((m) => m.id === mem.id);
+              const matchedPhoto = existingMem?.photos?.find((p) => p.id === photo.id);
+              if (matchedPhoto?.url && !matchedPhoto.url.startsWith('split_media://')) {
+                resolved = matchedPhoto.url;
               }
-            } catch {
-              // Ignore
             }
-          }
-          if (!resolved) {
-            const existingMem = DB.getMemories().find((m) => m.id === mem.id);
-            const matchedPhoto = existingMem?.photos?.find((p) => p.id === photo.id);
-            if (matchedPhoto?.url && !matchedPhoto.url.startsWith('split_media://')) {
-              resolved = matchedPhoto.url;
+            if (!resolved && this.db) {
+              try {
+                const photoSnap = await getDoc(doc(this.db, 'couples', 'jp_zea_vault', 'photos', mediaId));
+                if (photoSnap.exists()) {
+                  resolved = photoSnap.data()?.dataUrl;
+                  if (resolved) {
+                    await idbSet(mediaId, resolved, 'post_media');
+                  }
+                }
+              } catch {
+                // Ignore
+              }
             }
-          }
-          if (resolved) {
-            photo.url = resolved;
+            if (resolved) {
+              photo.url = resolved;
+              updatedAny = true;
+            }
           }
         }
       }
+      return updatedAny;
+    };
+
+    // Resolve current & previous month photos immediately
+    await resolvePhotoBatch(priorityMemories);
+
+    // Stream older months' split photos in background batches without blocking UI
+    if (olderMemories.length > 0) {
+      setTimeout(async () => {
+        const BATCH_SIZE = 12;
+        for (let i = 0; i < olderMemories.length; i += BATCH_SIZE) {
+          const batch = olderMemories.slice(i, i + BATCH_SIZE);
+          const changed = await resolvePhotoBatch(batch);
+          if (changed) {
+            this.isApplyingRemoteSnapshot = true;
+            await DB.setMemories(DB.getMemories(), true);
+            this.isApplyingRemoteSnapshot = false;
+          }
+          await new Promise((r) => setTimeout(r, 60));
+        }
+      }, 300);
     }
   }
 

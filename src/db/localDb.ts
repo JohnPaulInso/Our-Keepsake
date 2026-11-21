@@ -48,10 +48,73 @@ interface MemCacheShape {
   dailyBackups: DailyBackupRecord[];
 }
 
+// (2026-07-13) Partition memories into current/prev months first & background rest
+function getPriorityMonthPrefixes(allMemories: KeepsakeMemory[]): Set<string> {
+  const prefixes = new Set<string>();
+  const now = new Date();
+  const curY = now.getFullYear();
+  const curM = now.getMonth() + 1;
+  const prevY = curM === 1 ? curY - 1 : curY;
+  const prevM = curM === 1 ? 12 : curM - 1;
+  prefixes.add(`${curY}-${String(curM).padStart(2, '0')}`);
+  prefixes.add(`${prevY}-${String(prevM).padStart(2, '0')}`);
+
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem('ok_calendar_view_state') : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed.year === 'number' && typeof parsed.month === 'number') {
+        const cy = parsed.year;
+        const cm = parsed.month + 1;
+        const py = cm === 1 ? cy - 1 : cy;
+        const pm = cm === 1 ? 12 : cm - 1;
+        prefixes.add(`${cy}-${String(cm).padStart(2, '0')}`);
+        prefixes.add(`${py}-${String(pm).padStart(2, '0')}`);
+      }
+    }
+  } catch {
+    // Ignore
+  }
+
+  // Also include the 2 most recent distinct months present in the memories list
+  const recentMonths = new Set<string>();
+  for (let i = 0; i < allMemories.length; i++) {
+    const ym = (allMemories[i].dateISO || '').slice(0, 7);
+    if (ym.length === 7) {
+      recentMonths.add(ym);
+      prefixes.add(ym);
+      if (recentMonths.size >= 2) break;
+    }
+  }
+  return prefixes;
+}
+
+function partitionMemoriesByPriorityMonths(allMemories: KeepsakeMemory[]): {
+  priority: KeepsakeMemory[];
+  deferred: KeepsakeMemory[];
+} {
+  const sorted = [...allMemories].sort((a, b) => b.dateISO.localeCompare(a.dateISO));
+  const priorityPrefixes = getPriorityMonthPrefixes(sorted);
+  const priority: KeepsakeMemory[] = [];
+  const deferred: KeepsakeMemory[] = [];
+  for (let i = 0; i < sorted.length; i++) {
+    const m = sorted[i];
+    const ym = (m.dateISO || '').slice(0, 7);
+    if (priorityPrefixes.has(ym) || m.dateISO === '2025-11-07') {
+      priority.push(m);
+    } else {
+      deferred.push(m);
+    }
+  }
+  return { priority, deferred };
+}
+
+const initialPartition = partitionMemoriesByPriorityMonths(INITIAL_MEMORIES);
+
 const memCache: MemCacheShape = {
-  memories: [],
+  memories: initialPartition.priority,
   secretYearNotes: [],
-  digitalLoveLetters: [],
+  digitalLoveLetters: INITIAL_DIGITAL_LOVE_LETTERS,
   coupleProfile: DEFAULT_COUPLE_PROFILE,
   timeCapsule: CLEAN_TIME_CAPSULE,
   dailyBackups: [],
@@ -185,7 +248,55 @@ class LocalDatabase {
     }
   }
 
-  // (2026-07-13) Clean slate initialization without sample data vs seeded entries
+  private backgroundStreamTimer: number | null = null;
+
+  // (2026-07-13) Stream older months in background chunks after priority months load
+  private streamOlderMemoriesInBackground(
+    deferred: KeepsakeMemory[],
+    onAllLoaded?: (fullList: KeepsakeMemory[]) => void
+  ): void {
+    if (this.backgroundStreamTimer !== null) {
+      clearTimeout(this.backgroundStreamTimer);
+      this.backgroundStreamTimer = null;
+    }
+    if (deferred.length === 0) {
+      onAllLoaded?.(memCache.memories);
+      return;
+    }
+
+    let cursor = 0;
+    const CHUNK_SIZE = 16;
+
+    const step = () => {
+      const slice = deferred.slice(cursor, cursor + CHUNK_SIZE);
+      cursor += CHUNK_SIZE;
+
+      if (slice.length > 0) {
+        const existingDates = new Set(memCache.memories.map((m) => m.dateISO));
+        const existingIds = new Set(memCache.memories.map((m) => m.id));
+        const toAdd = slice.filter(
+          (m) => !existingDates.has(m.dateISO) && !existingIds.has(m.id)
+        );
+        if (toAdd.length > 0) {
+          memCache.memories = [...memCache.memories, ...toAdd].sort((a, b) =>
+            b.dateISO.localeCompare(a.dateISO)
+          );
+          this.notify();
+        }
+      }
+
+      if (cursor < deferred.length) {
+        this.backgroundStreamTimer = window.setTimeout(step, 55);
+      } else {
+        this.backgroundStreamTimer = null;
+        onAllLoaded?.(memCache.memories);
+      }
+    };
+
+    this.backgroundStreamTimer = window.setTimeout(step, 55);
+  }
+
+  // (2026-07-13) Fast 2-stage boot: current/prev months first, background rest
   private async hydrateAll(): Promise<void> {
     const [savedMemories, savedNotes, savedLetters, savedProfile, savedCapsule] =
       await Promise.all([
@@ -202,11 +313,14 @@ class LocalDatabase {
       savedNotes?.some((n) => n.id.startsWith('syn-')) ||
       savedLetters?.some((l) => l.id.startsWith('dll-'));
 
+    let fullMemoriesToPersist: KeepsakeMemory[] | null = null;
+    let lettersUpdated = false;
+
     if (hasSampleData) {
       memCache.memories = [];
       memCache.secretYearNotes = [];
       memCache.digitalLoveLetters = [];
-      await Promise.all([
+      Promise.all([
         idbSet('memories', []),
         idbSet('secretYearNotes', []),
         idbSet('digitalLoveLetters', []),
@@ -217,9 +331,8 @@ class LocalDatabase {
         // Ignore
       }
     } else {
-      // (2026-07-13) Purge mock audio memos from cache; was retaining mock audio
       const rawList = savedMemories && Array.isArray(savedMemories) ? savedMemories : [];
-      memCache.memories = rawList.map((m) => {
+      const cleanedList = rawList.map((m) => {
         if (m.audioMemo && (!m.audioMemo.url || m.audioMemo.url.startsWith('mock-') || !m.audioMemo.url.trim())) {
           const { audioMemo, ...clean } = m;
           return clean as KeepsakeMemory;
@@ -229,22 +342,20 @@ class LocalDatabase {
       memCache.secretYearNotes = savedNotes && Array.isArray(savedNotes) ? savedNotes : [];
       memCache.digitalLoveLetters = savedLetters && Array.isArray(savedLetters) ? savedLetters : [];
 
-      // (2026-07-13) Only seed missing dates; was overwriting -imported memories
       let memoriesUpdated = false;
+      const existingDates = new Set(cleanedList.map((m) => m.dateISO));
       for (const item of INITIAL_MEMORIES) {
-        const existingIdx = memCache.memories.findIndex((m) => m.dateISO === item.dateISO);
-        if (existingIdx === -1) {
-          memCache.memories.push(item);
+        if (!existingDates.has(item.dateISO)) {
+          cleanedList.push(item);
+          existingDates.add(item.dateISO);
           memoriesUpdated = true;
         }
       }
+      cleanedList.sort((a, b) => b.dateISO.localeCompare(a.dateISO));
       if (memoriesUpdated) {
-        memCache.memories.sort((a, b) => b.dateISO.localeCompare(a.dateISO));
-        await idbSet('memories', memCache.memories);
+        fullMemoriesToPersist = cleanedList;
       }
 
-      // (2026-07-13) Only seed missing letters; was overwriting -penelope letters
-      let lettersUpdated = false;
       for (const letter of INITIAL_DIGITAL_LOVE_LETTERS) {
         const existingIdx = memCache.digitalLoveLetters.findIndex((l) => l.id === letter.id);
         if (existingIdx === -1) {
@@ -252,14 +363,21 @@ class LocalDatabase {
           lettersUpdated = true;
         }
       }
-      if (lettersUpdated) {
-        await idbSet('digitalLoveLetters', memCache.digitalLoveLetters);
-      }
+
+      // Stage 1: Load ONLY current & previous months immediately for zero-lag first paint
+      const { priority, deferred } = partitionMemoriesByPriorityMonths(cleanedList);
+      memCache.memories = priority;
+
+      // Stage 2: Stream remaining older months in non-blocking background chunks
+      this.streamOlderMemoriesInBackground(deferred, (allLoaded) => {
+        if (fullMemoriesToPersist) {
+          idbSet('memories', allLoaded);
+        }
+        saveLightweightMirror(allLoaded);
+      });
     }
 
-    // (2026-07-13) Upgrade saved avatar to COUPLE_AVATAR_URL; was root string
     if (savedProfile && savedProfile.partner1Name) {
-      // (2026-07-13) Normalize avatar to COUPLE_AVATAR_URL; was localhost/raw path
       if (
         !savedProfile.avatarUrl ||
         savedProfile.avatarUrl.includes('googleusercontent.com') ||
@@ -268,14 +386,10 @@ class LocalDatabase {
         savedProfile.avatarUrl.startsWith('/assets/')
       ) {
         savedProfile.avatarUrl = COUPLE_AVATAR_URL;
-        await idbSet('coupleProfile', savedProfile);
       }
-      // (2026-07-13) Upgrade saved heroQuote in profile; was old heart quote
       if (!savedProfile.heroQuote || savedProfile.heroQuote.includes('no heart for me like yours')) {
         savedProfile.heroQuote = "You're an answered prayer, baby.";
-        await idbSet('coupleProfile', savedProfile);
       }
-      // (2026-07-13) Upgrade saved milestone to Nov 7, 2025; was Sep 14 first hangout
       if (
         savedProfile.showNextRendezvous === undefined ||
         savedProfile.milestoneDateLabel === 'Sep 14, 2025' ||
@@ -286,71 +400,59 @@ class LocalDatabase {
         savedProfile.milestoneTitle = 'The Day I Courted Her';
         savedProfile.milestoneDateLabel = 'Nov 7, 2025';
         savedProfile.milestoneTag = 'Milestone';
-        await idbSet('coupleProfile', savedProfile);
       }
-      // (2026-07-13) Upgrade saved heroQuote in profile; was old heart quote
-      if (!savedProfile.heroQuote || savedProfile.heroQuote.includes('no heart for me like yours')) {
-        savedProfile.heroQuote = "You're an answered prayer, baby.";
-        await idbSet('coupleProfile', savedProfile);
-      }
-      // (2026-07-13) Upgrade saved milestone to Nov 7, 2025; was Sep 14 first hangout
-      if (
-        savedProfile.showNextRendezvous === undefined ||
-        savedProfile.milestoneDateLabel === 'Sep 14, 2025' ||
-        !savedProfile.milestoneTitle ||
-        savedProfile.milestoneTitle.includes('First Chapter')
-      ) {
-        savedProfile.showNextRendezvous = false;
-        savedProfile.milestoneTitle = 'The Day I Courted Her';
-        savedProfile.milestoneDateLabel = 'Nov 7, 2025';
-        savedProfile.milestoneTag = 'Milestone';
-        await idbSet('coupleProfile', savedProfile);
-      }
-      // (2026-07-13) Set meeting Sep 14, courting Nov 7, blank anniversary; was Sep 14
       savedProfile.meetingDateISO = '2025-09-14';
       savedProfile.courtingDateISO = '2025-11-07';
       savedProfile.anniversaryDateISO = '';
       savedProfile.relationshipStartDateISO = '2025-11-07';
-      // (2026-07-13) Migrate legacy Chapter II to dynamic Chapter 2; was Chapter II
       if (!savedProfile.chapterTitle || savedProfile.chapterTitle.includes('Chapter II') || savedProfile.chapterTitle.includes('Chapter 11')) {
         savedProfile.chapterTitle = 'Chapter 2 • JP & Zea';
       }
-      await idbSet('coupleProfile', savedProfile);
       memCache.coupleProfile = savedProfile;
-    } else {
-      await idbSet('coupleProfile', DEFAULT_COUPLE_PROFILE);
     }
 
     if (savedCapsule && savedCapsule.id) {
       memCache.timeCapsule = savedCapsule;
-    } else {
-      await idbSet('timeCapsule', CLEAN_TIME_CAPSULE);
     }
 
-    // Ensure today's automated daily backup exists
-    const todayISO = new Date().toISOString().slice(0, 10);
-    const todayId = `daily_auto_${todayISO}`;
-    const existingToday = await idbGet<DailyBackupRecord>(todayId, STORE_BACKUPS);
-    if (!existingToday) {
-      const autoSnap = this.createSnapshot();
-      const autoRecord: DailyBackupRecord = {
-        id: todayId,
-        dateISO: todayISO,
-        label: `Automated Daily Snapshot (${todayISO})`,
-        createdAt: Date.now(),
-        trigger: 'AUTO_DAILY',
-        syncedToFirestore: false,
-        memoriesCount: memCache.memories.length,
-        lettersCount: memCache.digitalLoveLetters.length,
-        notesCount: memCache.secretYearNotes.length,
-        snapshot: autoSnap,
-      };
-      await idbSet(todayId, autoRecord, STORE_BACKUPS);
-    }
-
-    memCache.dailyBackups = await idbGetAllBackups();
-    saveLightweightMirror(memCache.memories);
+    // Notify listeners right away so first paint happens immediately
     this.notify();
+
+    // Stage 3: Defer heavy IDB writes and daily backup checks to idle background
+    setTimeout(async () => {
+      try {
+        if (lettersUpdated) {
+          await idbSet('digitalLoveLetters', memCache.digitalLoveLetters);
+        }
+        await idbSet('coupleProfile', memCache.coupleProfile);
+        if (!savedCapsule || !savedCapsule.id) {
+          await idbSet('timeCapsule', CLEAN_TIME_CAPSULE);
+        }
+        const todayISO = new Date().toISOString().slice(0, 10);
+        const todayId = `daily_auto_${todayISO}`;
+        const existingToday = await idbGet<DailyBackupRecord>(todayId, STORE_BACKUPS);
+        if (!existingToday && memCache.memories.length > 0) {
+          const autoSnap = this.createSnapshot();
+          const autoRecord: DailyBackupRecord = {
+            id: todayId,
+            dateISO: todayISO,
+            label: `Automated Daily Snapshot (${todayISO})`,
+            createdAt: Date.now(),
+            trigger: 'AUTO_DAILY',
+            syncedToFirestore: false,
+            memoriesCount: memCache.memories.length,
+            lettersCount: memCache.digitalLoveLetters.length,
+            notesCount: memCache.secretYearNotes.length,
+            snapshot: autoSnap,
+          };
+          await idbSet(todayId, autoRecord, STORE_BACKUPS);
+        }
+        memCache.dailyBackups = await idbGetAllBackups();
+        this.notify();
+      } catch {
+        // Ignore background maintenance error
+      }
+    }, 2400);
   }
 
   async resetToCleanSlate(): Promise<void> {
@@ -692,9 +794,14 @@ class LocalDatabase {
       });
 
       const finalMemories = [...merged, ...localOnly];
-      memCache.memories = finalMemories;
-      await idbSet('memories', finalMemories);
-      saveLightweightMirror(finalMemories);
+      // (2026-07-13) Apply priority months first & stream older months in background
+      const { priority, deferred } = partitionMemoriesByPriorityMonths(finalMemories);
+      memCache.memories = priority;
+      this.notify();
+      this.streamOlderMemoriesInBackground(deferred, (allLoaded) => {
+        idbSet('memories', allLoaded);
+        saveLightweightMirror(allLoaded);
+      });
     }
     // (2026-07-13) Merge remote with unpushed local notes vs hard overwrite
     if (Array.isArray(snapshot.secretYearNotes)) {

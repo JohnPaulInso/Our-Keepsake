@@ -37,7 +37,8 @@ import { pushModal, popModal, closeAllModals, getOpenModalCount } from './utils/
 export const App: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isHydrating, setIsHydrating] = useState(true);
+  // (2026-07-13) Render priority months immediately on first frame; was blocking skeleton
+  const [isHydrating, setIsHydrating] = useState(false);
   const [isSkeletonRefreshing, setIsSkeletonRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => DB.getActiveTab());
   const [selectedMemoryId, setSelectedMemoryId] = useState<string>(() =>
@@ -160,8 +161,6 @@ export const App: React.FC = () => {
       setDailyBackups(DB.getDailyBackups());
       setSelectedMemoryId(DB.getSelectedMemoryId());
       setIsHydrating(false);
-      // (2026-07-13) Pull live Firestore memories on startup; was local cache only
-      syncManager.pullSnapshot();
     });
 
     const unsub = DB.subscribe(() => {

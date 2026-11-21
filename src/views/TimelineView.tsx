@@ -428,8 +428,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const [calendarYear, setCalendarYear] = useState<number>(() => getInitialCalendarState().year);
   const [calendarMonth, setCalendarMonth] = useState<number>(() => getInitialCalendarState().month);
   const [selectedDay, setSelectedDay] = useState<number | null>(() => getInitialCalendarState().selectedDay);
-  // (2026-07-13) Batch 6 memories for snappy initial load; was heavy 10-card lag
-  const [visibleMemoriesCount, setVisibleMemoriesCount] = useState<number>(6);
+  // (2026-07-13) Render 3 cards on first paint & expand in background; was 6 at once
+  const [visibleMemoriesCount, setVisibleMemoriesCount] = useState<number>(3);
   // (2026-07-13) Slide animation and vertical scroll support; was instant fade
   const [isFullscreenDateOpen, setIsFullscreenDateOpen] = useState<boolean>(false);
   const [isOverlayVisible, setIsOverlayVisible] = useState<boolean>(false);
