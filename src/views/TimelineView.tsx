@@ -58,6 +58,8 @@ interface TimelineViewProps {
   onDeleteMemory?: (id: string) => void;
   onAddPartnerNote?: (memoryId: string, author: string, text: string) => void;
   onUpdateMemoryDots?: (memoryId: string, dots: DotIndicator[]) => void;
+  // (2026-07-13) Support polaroid photo sorting callback; was omitted
+  onUpdateMemoryPhotos?: (memoryId: string, photos: PolaroidPhoto[]) => void;
   onToast?: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
   initialOpenDateISO?: string | null;
   onConsumedOpenDate?: () => void;
@@ -409,6 +411,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   onDeleteMemory,
   onAddPartnerNote,
   onUpdateMemoryDots,
+  onUpdateMemoryPhotos,
   onToast,
   initialOpenDateISO,
   onConsumedOpenDate,
@@ -451,14 +454,26 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const [overlayEditMemory, setOverlayEditMemory] = useState<KeepsakeMemory | null>(null);
   const [overlayComposerDirty, setOverlayComposerDirty] = useState(false);
   const [overlayUnsavedConfirmOpen, setOverlayUnsavedConfirmOpen] = useState(false);
+  // (2026-07-13) Slide-right closing state for stacked composer; was instant hide
+  const [isStackedComposerClosing, setIsStackedComposerClosing] = useState(false);
   // (2026-07-13) Auto-open date gallery on photo edit intent; was manual only
   const [stackedComposerAutoOpenGallery, setStackedComposerAutoOpenGallery] = useState(false);
   // (2026-07-13) Guard ghost-click close & expose header Save ref; was unguarded
   const stackedComposerOpenedAtRef = useRef<number>(0);
   const stackedComposerSubmitRef = useRef<(() => void) | null>(null);
 
+  const closeStackedComposerWithSlide = useCallback(() => {
+    setIsStackedComposerClosing(true);
+    setTimeout(() => {
+      setOverlayEditMemory(null);
+      setOverlayComposerDirty(false);
+      setIsStackedComposerClosing(false);
+    }, 240);
+  }, []);
+
   const openStackedComposerForMemory = (mem: KeepsakeMemory, autoOpenGallery = false) => {
     stackedComposerOpenedAtRef.current = Date.now();
+    setIsStackedComposerClosing(false);
     setStackedComposerAutoOpenGallery(autoOpenGallery);
     setOverlayComposerDirty(false);
     setOverlayUnsavedConfirmOpen(false);
@@ -509,8 +524,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     if (overlayComposerDirty) {
       setOverlayUnsavedConfirmOpen(true);
     } else {
-      setOverlayEditMemory(null);
-      setOverlayComposerDirty(false);
+      closeStackedComposerWithSlide();
     }
   };
 
@@ -542,7 +556,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     onConsumedOpenDate?.();
   }, [initialOpenDateISO, onConsumedOpenDate]);
 
-  // (2026-07-13) Dismiss date overlay immediately on back; was 280ms lag
+  // (2026-07-13) Keep date overlay mounted during 260ms slide-right; was instant unmount
   const closeDateOverlay = (callback?: () => void) => {
     if (!isFullscreenDateOpen) {
       if (callback) callback();
@@ -550,11 +564,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     }
     setIsOverlayClosing(true);
     setIsOverlayVisible(false);
-    setIsFullscreenDateOpen(false);
     setTimeout(() => {
+      setIsFullscreenDateOpen(false);
       setIsOverlayClosing(false);
       if (callback) callback();
-    }, 120);
+    }, 260);
   };
 
   // (2026-07-13) Register overlays in global modal manager for LIFO dismissal
@@ -569,10 +583,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   useEffect(() => {
     if (overlayEditMemory) {
       return pushModal('overlay-edit-memory', () => {
-        setOverlayEditMemory(null);
+        if (overlayComposerDirty) {
+          setOverlayUnsavedConfirmOpen(true);
+        } else {
+          closeStackedComposerWithSlide();
+        }
       });
     }
-  }, [overlayEditMemory]);
+  }, [overlayEditMemory, overlayComposerDirty, closeStackedComposerWithSlide]);
 
   useEffect(() => {
     if (overlayDeleteConfirmOpen) {
@@ -586,30 +604,15 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     }
   }, [overlayUnsavedConfirmOpen]);
 
-  // (2026-07-13) Handle Escape per top-most modal layer; was always closing overlay
+  // (2026-07-13) Lock body scroll on overlay without overriding LIFO Escape; was duplicate Escape
   useEffect(() => {
     if (!isFullscreenDateOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (overlayUnsavedConfirmOpen) {
-          setOverlayUnsavedConfirmOpen(false);
-        } else if (overlayEditMemory) {
-          requestCloseStackedComposer();
-        } else if (overlayDeleteConfirmOpen) {
-          setOverlayDeleteConfirmOpen(false);
-        } else {
-          closeDateOverlay();
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = prevOverflow;
     };
-  }, [isFullscreenDateOpen, overlayEditMemory, overlayComposerDirty, overlayUnsavedConfirmOpen, overlayDeleteConfirmOpen]);
+  }, [isFullscreenDateOpen]);
 
   // (2026-07-13) Persist opened calendar state to storage; was unpersisted
   useEffect(() => {
@@ -2505,6 +2508,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   onAddPartnerNote?.(memoryId, author, text);
                 }}
                 onUpdateMemoryDots={onUpdateMemoryDots}
+                onUpdateMemoryPhotos={onUpdateMemoryPhotos}
                 onToast={(msg, type) => {
                   onToast?.(msg, type);
                 }}
@@ -2679,7 +2683,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           </div>,
           document.body
         )}
-      {/* (2026-07-13) Render stacked Composer modal on top of open date overlay; was closing overlay */}
+      {/* (2026-07-13) Add slide-right closing animation on stacked composer; was fade */}
       {overlayEditMemory &&
         createPortal(
           <div
@@ -2688,7 +2692,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               WebkitOverflowScrolling: 'touch',
               paddingBottom: 'max(24px, env(safe-area-inset-bottom, 36px))',
             }}
-            className="fixed inset-0 z-[120] bg-background text-on-surface overflow-y-auto overscroll-y-contain pt-0 pb-8 select-text no-print modal-animate-in"
+            className={`fixed inset-0 z-[120] bg-background text-on-surface overflow-y-auto overscroll-y-contain pt-0 pb-8 select-text no-print ${
+              isStackedComposerClosing ? 'envelope-slide-out pointer-events-none' : 'envelope-slide-in'
+            }`}
           >
             <div className="fixed inset-0 pointer-events-none opacity-[0.035] bg-[radial-gradient(#4a3b32_1px,transparent_1px)] [background-size:20px_20px] -z-10" />
 

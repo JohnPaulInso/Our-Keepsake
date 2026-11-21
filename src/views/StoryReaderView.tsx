@@ -36,6 +36,8 @@ interface StoryReaderViewProps {
   onDeleteMemory: (id: string) => void;
   onAddPartnerNote: (memoryId: string, author: string, text: string) => void;
   onUpdateMemoryDots?: (memoryId: string, dots: DotIndicator[]) => void;
+  // (2026-07-13) Add polaroid sorting callback & slide-right close; was static
+  onUpdateMemoryPhotos?: (memoryId: string, photos: PolaroidPhoto[]) => void;
   onToast: (msg: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
   // (2026-07-13) Allow embedding directly inside date overlay; was standalone only
   embeddedInOverlay?: boolean;
@@ -52,16 +54,19 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
   onDeleteMemory,
   onAddPartnerNote,
   onUpdateMemoryDots,
+  onUpdateMemoryPhotos,
   onToast,
   embeddedInOverlay = false,
   digitalLoveLetters,
 }) => {
   const [activeReadingLetter, setActiveReadingLetter] = useState<DigitalLoveLetter | null>(null);
+  const [isLetterClosing, setIsLetterClosing] = useState(false);
   const [audioState, setAudioState] = useState(audioEngine.getState());
   const [noteDrawerOpen, setNoteDrawerOpen] = useState(false);
   const [noteAuthor, setNoteAuthor] = useState(profile.partner1Name);
   const [noteText, setNoteText] = useState('');
   const [lightboxPhoto, setLightboxPhoto] = useState<PolaroidPhoto | null>(null);
+  const [isLightboxClosing, setIsLightboxClosing] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [lockscreenModalOpen, setLockscreenModalOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -70,6 +75,31 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [dragOffsetX, setDragOffsetX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+
+  const closeLightbox = () => {
+    setIsLightboxClosing(true);
+    setTimeout(() => {
+      setLightboxPhoto(null);
+      setIsLightboxClosing(false);
+    }, 220);
+  };
+
+  const closeReadingLetterModal = () => {
+    setIsLetterClosing(true);
+    setTimeout(() => {
+      setActiveReadingLetter(null);
+      setIsLetterClosing(false);
+    }, 220);
+  };
+
+  const handleMovePolaroid = (index: number, dir: -1 | 1) => {
+    const targetIdx = index + dir;
+    if (targetIdx < 0 || targetIdx >= memory.photos.length) return;
+    const next = [...memory.photos];
+    const [moved] = next.splice(index, 1);
+    next.splice(targetIdx, 0, moved);
+    onUpdateMemoryPhotos?.(memory.id, next);
+  };
 
   const handleCloseWithAnimation = () => {
     if (isDismissing) return;
@@ -85,16 +115,22 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
     });
   }, []);
 
-  // (2026-07-13) Register StoryReader modals for back dismissal; was unhandled
+  // (2026-07-13) Register standalone story reader & modals for slide-right back
+  useEffect(() => {
+    if (!embeddedInOverlay) {
+      return pushModal('standalone-story-reader', handleCloseWithAnimation);
+    }
+  }, [embeddedInOverlay, isDismissing]);
+
   useEffect(() => {
     if (lightboxPhoto) {
-      return pushModal('reader-lightbox', () => setLightboxPhoto(null));
+      return pushModal('reader-lightbox', closeLightbox);
     }
   }, [lightboxPhoto]);
 
   useEffect(() => {
     if (activeReadingLetter) {
-      return pushModal('reader-letter', () => setActiveReadingLetter(null));
+      return pushModal('reader-letter', closeReadingLetterModal);
     }
   }, [activeReadingLetter]);
 
@@ -730,12 +766,41 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                 ) : (
                   <div className="absolute -top-2 right-8 w-14 h-4 bg-secondary-fixed/70 backdrop-blur-sm rounded-xs rotate-3 shadow-xs" />
                 )}
-                <div className="aspect-square w-full rounded-sm overflow-hidden bg-surface-container mb-3 shadow-inner">
+                <div className="aspect-square w-full rounded-sm overflow-hidden bg-surface-container mb-3 shadow-inner relative">
                   <img
                     className="w-full h-full object-cover"
                     alt={photo.caption}
                     src={photo.url}
                   />
+                  {/* (2026-07-13) Add polaroid sorting buttons when multiple frames exist */}
+                  {memory.photos.length > 1 && onUpdateMemoryPhotos && (
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute bottom-2 right-2 flex items-center gap-1 bg-surface-container-lowest/90 backdrop-blur-xs px-1.5 py-0.5 rounded-full shadow-xs border border-outline-variant/30"
+                    >
+                      <button
+                        type="button"
+                        disabled={idx === 0}
+                        onClick={() => handleMovePolaroid(idx, -1)}
+                        title="Move polaroid earlier"
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-primary disabled:opacity-30 hover:bg-surface-container-high"
+                      >
+                        <span className="material-symbols-outlined text-[13px]">chevron_left</span>
+                      </button>
+                      <span className="text-[10px] font-mono text-secondary font-semibold">
+                        {idx + 1}/{memory.photos.length}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={idx === memory.photos.length - 1}
+                        onClick={() => handleMovePolaroid(idx, 1)}
+                        title="Move polaroid later"
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-primary disabled:opacity-30 hover:bg-surface-container-high"
+                      >
+                        <span className="material-symbols-outlined text-[13px]">chevron_right</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
                 {/* (2026-07-13) Set default with my bb bambam; was raw photo.caption */}
                 <p className="font-italic-quote text-body-sm text-secondary text-center italic tracking-wide font-serif">
@@ -965,16 +1030,18 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
           document.body
         )}
 
-      {/* Polaroid Lightbox Modal */}
+      {/* (2026-07-13) Slide-right closing animation on Polaroid Lightbox Modal */}
       {lightboxPhoto &&
         createPortal(
           <div
             className="fixed inset-0 z-[150] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={() => setLightboxPhoto(null)}
+            onClick={closeLightbox}
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md bg-surface-container-lowest p-4 pb-6 rounded-xl shadow-2xl modal-animate-in flex flex-col gap-3"
+              className={`w-full max-w-md bg-surface-container-lowest p-4 pb-6 rounded-xl shadow-2xl flex flex-col gap-3 ${
+                isLightboxClosing ? 'envelope-slide-out pointer-events-none' : 'modal-animate-in'
+              }`}
             >
               <div className="flex items-center justify-between">
                 <span className="font-label-md text-label-md uppercase tracking-wider text-secondary">
@@ -982,7 +1049,7 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                 </span>
                 <button
                   type="button"
-                  onClick={() => setLightboxPhoto(null)}
+                  onClick={closeLightbox}
                   className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-primary"
                 >
                   <span className="material-symbols-outlined text-[18px]">close</span>
@@ -996,7 +1063,7 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                 />
               </div>
               <p className="font-italic-quote text-italic-quote text-primary text-center italic font-serif">
-                “{lightboxPhoto.caption}”
+                “{lightboxPhoto.caption && !lightboxPhoto.caption.startsWith('download') && !lightboxPhoto.caption.startsWith('Photo ') ? lightboxPhoto.caption : 'with my bb bambam'}”
               </p>
             </div>
           </div>,
@@ -1107,16 +1174,18 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
           document.body
         )}
 
-      {/* (2026-07-13) Modal reader for attached love letter; was missing */}
+      {/* (2026-07-13) Slide-right close animation for attached love letter modal */}
       {activeReadingLetter &&
         createPortal(
           <div
             className="fixed inset-0 z-[140] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 select-text"
-            onClick={() => setActiveReadingLetter(null)}
+            onClick={closeReadingLetterModal}
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-2xl max-h-[90dvh] overflow-y-auto bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-outline-variant/50 modal-animate-in flex flex-col gap-4 relative"
+              className={`w-full max-w-2xl max-h-[90dvh] overflow-y-auto bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-2xl border border-outline-variant/50 flex flex-col gap-4 relative ${
+                isLetterClosing ? 'envelope-slide-out pointer-events-none' : 'modal-animate-in'
+              }`}
             >
               <div className="flex items-center justify-between border-b border-outline-variant/30 pb-3">
                 <div>
@@ -1131,7 +1200,7 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                 </div>
                 <button
                   type="button"
-                  onClick={() => setActiveReadingLetter(null)}
+                  onClick={closeReadingLetterModal}
                   className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors"
                 >
                   <span className="material-symbols-outlined text-[18px]">close</span>

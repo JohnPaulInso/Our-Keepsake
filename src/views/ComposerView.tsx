@@ -14,6 +14,8 @@ import {
 import { capitalizeFirstLetters, detectAutoDotIndicators, formatDuration, formatStandardDate, getChapterNumber, getTodayISO } from '../utils/dateFormat';
 import { audioEngine } from '../utils/audioEngine';
 import { ImageCropperModal } from '../components/ImageCropperModal';
+// (2026-07-13) Register cropper and metadata modals in LIFO modal stack; was none
+import { pushModal } from '../utils/modalManager';
 
 interface ComposerViewProps {
   profile: CoupleProfile;
@@ -329,6 +331,22 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     }
   }, [editingMemory?.id]);
 
+  // (2026-07-13) Register Composer modals with pushModal for universal back
+  useEffect(() => {
+    if (pendingCropSrc) {
+      return pushModal('composer-cropper', () => {
+        setPendingCropSrc(null);
+        setEditingPhotoId(null);
+      });
+    }
+  }, [pendingCropSrc]);
+
+  useEffect(() => {
+    if (metaModalOpen) {
+      return pushModal('composer-meta-modal', () => setMetaModalOpen(false));
+    }
+  }, [metaModalOpen]);
+
   useEffect(() => {
     if (metaModalOpen || Boolean(pendingCropSrc)) {
       document.body.classList.add('overflow-hidden');
@@ -428,11 +446,28 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     onToast(`Voice note captured (${formatDuration(res.durationSeconds)})!`, 'success');
   };
 
-  // (2026-07-13) Set 1:1 cropper on select & with my bb bambam; was raw filename
+  // (2026-07-13) Max 10 polaroids per date & reorder helper; was max 5 photos
+  const handleMovePhoto = (index: number, dir: -1 | 1) => {
+    setPhotos((prev) => {
+      const targetIdx = index + dir;
+      if (targetIdx < 0 || targetIdx >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(index, 1);
+      next.splice(targetIdx, 0, moved);
+      return next;
+    });
+  };
+
   const handleSelectPhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
     if (!fileList || fileList.length === 0) return;
-    const files = Array.from(fileList).slice(0, 5);
+    const remainingSlots = Math.max(0, 10 - photos.length);
+    if (remainingSlots <= 0) {
+      e.target.value = '';
+      onToast('Maximum of 10 polaroid photos per date reached.', 'warning');
+      return;
+    }
+    const files = Array.from(fileList).slice(0, remainingSlots);
     e.target.value = '';
 
     if (files.length === 1) {
@@ -468,7 +503,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
       }
     }
     if (newPolaroids.length > 0) {
-      setPhotos((prev) => [...prev, ...newPolaroids]);
+      setPhotos((prev) => [...prev, ...newPolaroids].slice(0, 10));
       onToast(`Attached ${newPolaroids.length} polaroids! Tap "Crop 1:1" to position.`, 'success');
     }
   };
@@ -735,18 +770,24 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
               id="memory-title"
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
+              onFocus={(e) => {
+                setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+              }}
               placeholder={
                 suggestedTitle
                   ? `Suggested: "${suggestedTitle}"`
                   : 'E.g., Sunday morning pastries and warm coffee...'
               }
-              className="w-full bg-transparent font-headline-sm text-headline-sm text-primary placeholder:text-outline-variant focus:outline-none pb-space-xs font-serif"
+              className="w-full bg-transparent font-headline-sm text-base sm:text-lg text-primary placeholder:text-outline-variant focus:outline-none pb-space-xs font-serif"
             />
             <div className="w-full h-px bg-surface-container-high" />
           </div>
 
-          {/* (2026-07-13) Set Google font & auto-expanding textarea; was ruled-notebook */}
+          {/* (2026-07-13) Smaller font & auto-center when typing on mobile; was 15px */}
           <div className="relative">
             <label
               className="font-label-md text-label-md uppercase tracking-wider text-outline block mb-space-xs"
@@ -754,17 +795,21 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
             >
               The Heartfelt Note
             </label>
-            <div className="relative rounded-xl bg-surface-container-low/40 p-4 border border-outline-variant/20">
+            <div className="relative rounded-xl bg-surface-container-low/40 p-3 border border-outline-variant/20">
               <textarea
                 ref={storyTextareaRef}
                 id="memory-narrative"
                 value={storyBody}
+                onFocus={(e) => {
+                  setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+                }}
                 onChange={(e) => {
                   setStoryBody(e.target.value);
                   adjustTextareaHeight(e.target);
+                  e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }}
                 placeholder={`Write down how ${profile.partner2Name} smiled, what she said, the quiet moments you never want to forget...`}
-                className="w-full bg-transparent font-['Plus_Jakarta_Sans',sans-serif] text-[15px] sm:text-base text-primary placeholder:text-outline-variant/80 focus:outline-none resize-none leading-relaxed"
+                className="w-full bg-transparent font-['Plus_Jakarta_Sans',sans-serif] text-[13px] sm:text-sm text-primary placeholder:text-outline-variant/80 focus:outline-none resize-none leading-relaxed"
               />
             </div>
           </div>
@@ -782,15 +827,20 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                 Optional
               </span>
             </div>
-            {/* (2026-07-13) Update placeholder to memorable quote summary vs whispered */}
+            {/* (2026-07-13) Smaller quote font & auto-center on mobile keyboard */}
             <input
               id="memory-quote"
               type="text"
               value={quoteHighlight}
-              onChange={(e) => setQuoteHighlight(e.target.value)}
+              onFocus={(e) => {
+                setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+              }}
+              onChange={(e) => {
+                setQuoteHighlight(e.target.value);
+                e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
               placeholder="E.g., A memorable quote, phrase, or heartfelt summary of this day (leave blank if none)..."
-              // (2026-07-13) Darken quote input text color; was faded text-secondary
-              className="w-full bg-transparent font-italic-quote text-body-md italic font-medium text-primary placeholder:text-outline/50 placeholder:font-normal focus:outline-none pb-space-xs font-serif"
+              className="w-full bg-transparent font-italic-quote text-[13px] sm:text-sm italic font-medium text-primary placeholder:text-outline/50 placeholder:font-normal focus:outline-none pb-space-xs font-serif"
             />
             <div className="w-full h-px bg-surface-container-high" />
           </div>
@@ -1026,13 +1076,19 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                 </div>
               </div>
               <span className="text-xs uppercase tracking-wider text-secondary font-semibold">
-                {photos.length} Attached
+                {photos.length} / 10 Attached
               </span>
             </div>
 
-            {/* (2026-07-13) Open native phone gallery directly; was in-app modal */}
+            {/* (2026-07-13) Max 10 polaroids & sort buttons; was max 5 without sorting */}
             <div
-              onClick={() => photoInputRef.current?.click()}
+              onClick={() => {
+                if (photos.length >= 10) {
+                  onToast('Maximum of 10 polaroid photos per date reached.', 'warning');
+                  return;
+                }
+                photoInputRef.current?.click();
+              }}
               className="border-2 border-dashed border-primary/45 hover:border-primary bg-primary/5 hover:bg-primary/10 rounded-xl p-4 sm:p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 group active:scale-[0.99]"
             >
               <div className="w-12 h-12 rounded-full bg-primary/15 text-primary group-hover:scale-105 transition-all flex items-center justify-center mb-0.5 shadow-xs">
@@ -1042,7 +1098,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                 Choose from Date Gallery
               </span>
               <span className="text-xs text-outline font-medium">
-                Select up to 5 photos from your phone • Auto-compressed to ~50KB
+                Select up to 10 photos from your phone • Auto-compressed to ~50KB
               </span>
             </div>
 
@@ -1096,8 +1152,30 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                         placeholder="with my bb bambam"
                         className="w-full bg-transparent font-['Cormorant_Garamond',serif] italic text-sm text-primary placeholder:text-outline/60 focus:outline-none border-b border-outline-variant/30 pb-0.5 text-center"
                       />
-                      <div className="flex items-center justify-between text-[10px] text-secondary font-mono">
+                      <div className="flex items-center justify-between text-[10px] text-secondary font-mono pt-0.5">
                         <span>Polaroid #{index + 1}</span>
+                        {photos.length > 1 && (
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              disabled={index === 0}
+                              onClick={() => handleMovePhoto(index, -1)}
+                              title="Move earlier"
+                              className="px-1.5 py-0.5 rounded bg-surface-container-low text-primary disabled:opacity-30 hover:bg-surface-container-high flex items-center"
+                            >
+                              <span className="material-symbols-outlined text-[12px]">arrow_back</span>
+                            </button>
+                            <button
+                              type="button"
+                              disabled={index === photos.length - 1}
+                              onClick={() => handleMovePhoto(index, 1)}
+                              title="Move later"
+                              className="px-1.5 py-0.5 rounded bg-surface-container-low text-primary disabled:opacity-30 hover:bg-surface-container-high flex items-center"
+                            >
+                              <span className="material-symbols-outlined text-[12px]">arrow_forward</span>
+                            </button>
+                          </div>
+                        )}
                         <span>{photo.tag || 'MEMO'}</span>
                       </div>
                     </div>

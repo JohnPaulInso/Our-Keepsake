@@ -82,18 +82,55 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
     'Drafted digitally first, then handwritten onto cream cotton paper.'
   );
 
-  // (2026-07-13) Register overlays in global modal manager for LIFO back dismissal
+  // (2026-07-13) Add slide-right closing states for letter & note overlays; was instant
+  const [isReadingClosing, setIsReadingClosing] = useState(false);
+  const [isLetterComposerClosing, setIsLetterComposerClosing] = useState(false);
+  const [isNoteComposerClosing, setIsNoteComposerClosing] = useState(false);
+
+  const closeReadingLetter = () => {
+    setIsReadingClosing(true);
+    setTimeout(() => {
+      setReadingLetter(null);
+      setIsReadingClosing(false);
+    }, 240);
+  };
+
+  const closeLetterComposer = () => {
+    setIsLetterComposerClosing(true);
+    setTimeout(() => {
+      setLetterComposerOpen(false);
+      setIsLetterComposerClosing(false);
+    }, 240);
+  };
+
+  const closeNoteComposer = () => {
+    setIsNoteComposerClosing(true);
+    setTimeout(() => {
+      setNoteComposerOpen(false);
+      setIsNoteComposerClosing(false);
+    }, 240);
+  };
+
+  // (2026-07-13) Register overlays in global modal manager with slide-right close
   useEffect(() => {
-    if (readingLetter) return pushModal('reading-letter', () => setReadingLetter(null));
+    if (readingLetter) return pushModal('reading-letter', closeReadingLetter);
   }, [readingLetter]);
 
   useEffect(() => {
-    if (letterComposerOpen) return pushModal('letter-composer', () => setLetterComposerOpen(false));
+    if (letterComposerOpen) return pushModal('letter-composer', closeLetterComposer);
   }, [letterComposerOpen]);
 
   useEffect(() => {
-    if (noteComposerOpen) return pushModal('note-composer', () => setNoteComposerOpen(false));
+    if (noteComposerOpen) return pushModal('note-composer', closeNoteComposer);
   }, [noteComposerOpen]);
+
+  useEffect(() => {
+    if (deleteLetterTargetId) return pushModal('delete-letter-confirm', () => setDeleteLetterTargetId(null));
+  }, [deleteLetterTargetId]);
+
+  useEffect(() => {
+    if (deleteNoteTargetId) return pushModal('delete-note-confirm', () => setDeleteNoteTargetId(null));
+  }, [deleteNoteTargetId]);
 
   useEffect(() => {
     const anyModal =
@@ -269,65 +306,20 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
           </span>
         </div>
 
-        {/* (2026-07-13) Simplify header & remove quote; was verbose title and quote */}
+        {/* (2026-07-13) Unify love letters and past-year notes into one view; was 2 tabs */}
         <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary font-serif mb-1">
-          {activeMode === 'DIGITAL_LETTERS'
-            ? `Love Letters for ${profile.partner2Name}`
-            : `Past-Year Notes for ${profile.partner2Name}`}
+          Love Letters for {profile.partner2Name}
         </h1>
 
-        {/* Segmented Mode Switcher: Digital Love Letters vs Past-Year Secret Notes */}
-        <div
-          id="letters-mode-switcher" // Switch between love letters & year notes
-          className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-surface-container-low border border-outline-variant/40 w-full max-w-md mt-4"
-        >
-          <button
-            type="button"
-            onClick={() => setActiveMode('DIGITAL_LETTERS')}
-            className={`py-2 px-3 rounded-lg font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all ${
-              activeMode === 'DIGITAL_LETTERS'
-                ? 'bg-primary text-on-primary shadow-sm'
-                : 'text-secondary hover:text-primary'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[16px]">history_edu</span>
-            <span>Love Letters ({digitalLoveLetters.length})</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveMode('SECRET_YEAR_NOTES')}
-            className={`py-2 px-3 rounded-lg font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all ${
-              activeMode === 'SECRET_YEAR_NOTES'
-                ? 'bg-primary text-on-primary shadow-sm'
-                : 'text-secondary hover:text-primary'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
-            <span>Past-Year Notes ({secretNotes.length})</span>
-          </button>
-        </div>
-
         <div className="flex flex-wrap items-center justify-center gap-2.5 mt-4">
-          {activeMode === 'DIGITAL_LETTERS' ? (
-            <button
-              type="button"
-              onClick={openNewLetterModal}
-              className="px-4 py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform"
-            >
-              <span className="material-symbols-outlined text-[17px]">post_add</span>
-              {/* (2026-07-13) Simplify button label; was Add / Paste Digital Love Letter */}
-              <span>Add Love Letter</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={openNewNoteModal}
-              className="px-4 py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform"
-            >
-              <span className="material-symbols-outlined text-[17px]">add_circle</span>
-              <span>Add Secret Year Note</span>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={openNewLetterModal}
+            className="px-4 py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform"
+          >
+            <span className="material-symbols-outlined text-[17px]">post_add</span>
+            <span>Add Love Letter</span>
+          </button>
 
           <button
             type="button"
@@ -360,11 +352,7 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={
-              activeMode === 'DIGITAL_LETTERS'
-                ? `Search digital copies of love letters written for ${profile.partner2Name}...`
-                : `Search ${profile.partner1Name}'s secret notes from the past year...`
-            }
+            placeholder={`Search love letters and notes written for ${profile.partner2Name}...`}
             className="w-full pl-10 pr-8 py-2.5 rounded-xl bg-surface-container-low text-primary font-body-sm text-body-sm border border-outline-variant/40 focus:outline-none"
           />
           {search && (
@@ -377,58 +365,25 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
             </button>
           )}
         </div>
-
-        {activeMode === 'SECRET_YEAR_NOTES' && (
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            {[
-              { id: 'ALL', label: 'All Secret Notes' },
-              { id: 'LITTLE_HABIT', label: 'Her Little Habits' },
-              { id: 'FUNNY_MOMENT', label: 'Funny Moments' },
-              { id: 'QUIET_LOVE', label: 'Quiet Love' },
-              { id: 'FAVORITE_THING', label: 'Her Favorites' },
-              { id: 'MILESTONE', label: 'Milestones' },
-            ].map((tab) => {
-              const active = categoryFilter === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() =>
-                    setCategoryFilter(tab.id as 'ALL' | SecretYearNote['category'])
-                  }
-                  className={`px-3.5 py-1.5 rounded-full font-label-md text-label-md whitespace-nowrap transition-colors ${
-                    active
-                      ? 'bg-primary text-on-primary shadow-xs'
-                      : 'bg-surface-container-high text-on-surface-variant'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
       </section>
 
-      {/* VIEW 1: DIGITAL COPIES OF LOVE LETTERS (WRITTEN BEFORE PAPER) */}
-      {/* (2026-07-13) Clean slate empty card for letters vs empty white space */}
-      {activeMode === 'DIGITAL_LETTERS' && (
-        <div className="flex flex-col gap-space-lg">
-          {filteredLetters.length === 0 ? (
-            <div className="bg-surface-container-lowest rounded-2xl p-8 text-center shadow-sm border border-outline-variant/35 flex flex-col items-center gap-3">
-              <span className="material-symbols-outlined text-[32px] text-secondary">
-                history_edu
-              </span>
-              <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
-                No Digital Love Letters Yet
-              </h3>
-              <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm">
-                A clean slate is ready for you. Tap &ldquo;Add / Paste Digital Love Letter&rdquo; above to record the digital drafts of your love letters for {profile.partner2Name}.
-              </p>
-            </div>
-          ) : (
-            // (2026-07-13) Envelope peek shows only big title; was body and salutation
-            filteredLetters.map((letter) => (
+      {/* (2026-07-13) Unified Love Letters and Notes list; was segmented tabs */}
+      <div className="flex flex-col gap-space-lg">
+        {filteredLetters.length === 0 && filteredNotes.length === 0 ? (
+          <div className="bg-surface-container-lowest rounded-2xl p-8 text-center shadow-sm border border-outline-variant/35 flex flex-col items-center gap-3">
+            <span className="material-symbols-outlined text-[32px] text-secondary">
+              history_edu
+            </span>
+            <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
+              No Digital Love Letters Yet
+            </h3>
+            <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm">
+              A clean slate is ready for you. Tap &ldquo;Add Love Letter&rdquo; above to record the digital drafts of your love letters for {profile.partner2Name}.
+            </p>
+          </div>
+        ) : (
+          <>
+            {filteredLetters.map((letter) => (
               <div key={letter.id} className="flex flex-col gap-1.5 mb-3">
                 {/* Outside the envelope drawing: date and small title */}
                 <div className="flex items-center justify-between px-2 pt-1 text-primary">
@@ -516,29 +471,9 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                   </div>
                 </article>
               </div>
-            ))
-          )}
-        </div>
-      )}
+            ))}
 
-      {/* VIEW 2: SECRET PAST-YEAR NOTES FOR ZEA */}
-      {/* (2026-07-13) Clean slate empty card for notes vs empty white space */}
-      {activeMode === 'SECRET_YEAR_NOTES' && (
-        <div className="flex flex-col gap-space-md">
-          {filteredNotes.length === 0 ? (
-            <div className="bg-surface-container-lowest rounded-2xl p-8 text-center shadow-sm border border-outline-variant/35 flex flex-col items-center gap-3">
-              <span className="material-symbols-outlined text-[32px] text-secondary">
-                auto_awesome
-              </span>
-              <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
-                No Secret Year Notes Yet
-              </h3>
-              <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm">
-                Tap &ldquo;Add Secret Year Note&rdquo; above to record private memories, thoughts, and little things you noticed about {profile.partner2Name}.
-              </p>
-            </div>
-          ) : (
-            filteredNotes.map((note, idx) => (
+            {filteredNotes.map((note, idx) => (
             <article
               key={note.id}
               className="relative bg-surface-container-lowest rounded-xl p-space-md shadow-md border border-outline-variant/30 overflow-hidden hover-lift"
@@ -631,15 +566,18 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
                 </div>
               )}
             </article>
-          )))}
-        </div>
-      )}
+            ))}
+          </>
+        )}
+      </div>
 
-      {/* (2026-07-13) Love letter full screen overlay; was floating modal */}
+      {/* (2026-07-13) Slide-right closing animation on love letter reader overlay */}
       {readingLetter && typeof document !== 'undefined' && createPortal(
         <div
           id="love-letter-reader-overlay"
-          className="fixed inset-0 z-[120] bg-[#fbf8f4] text-primary w-full h-full min-h-screen flex flex-col select-text no-print"
+          className={`fixed inset-0 z-[120] bg-[#fbf8f4] text-primary w-full h-full min-h-screen flex flex-col select-text no-print ${
+            isReadingClosing ? 'envelope-slide-out pointer-events-none' : 'envelope-slide-in'
+          }`}
         >
           {/* Top navigation bar */}
           <div
@@ -661,7 +599,7 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
             </div>
             <button
               type="button"
-              onClick={() => setReadingLetter(null)}
+              onClick={closeReadingLetter}
               className="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-95"
               aria-label="Close letter reader"
             >
@@ -732,7 +670,7 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
             </div>
             <button
               type="button"
-              onClick={() => setReadingLetter(null)}
+              onClick={closeReadingLetter}
               className="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-xs uppercase tracking-wider font-semibold shadow-xs hover:bg-primary/95 transition-all active:scale-95"
             >
               Close
@@ -742,11 +680,13 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
         document.body
       )}
 
-      {/* (2026-07-13) Add safe insets to overlay top/bottom navbars; was flush edges */}
+      {/* (2026-07-13) Slide-right closing animation on love letter composer overlay */}
       {letterComposerOpen && typeof document !== 'undefined' && createPortal(
         <div
           id="love-letter-composer-overlay"
-          className="fixed inset-0 z-[120] bg-[#fbf8f4] text-primary w-full h-full min-h-screen flex flex-col select-text no-print"
+          className={`fixed inset-0 z-[120] bg-[#fbf8f4] text-primary w-full h-full min-h-screen flex flex-col select-text no-print ${
+            isLetterComposerClosing ? 'envelope-slide-out pointer-events-none' : 'envelope-slide-in'
+          }`}
         >
           {/* Top navigation bar */}
           <div
@@ -765,7 +705,7 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
             </div>
             <button
               type="button"
-              onClick={() => setLetterComposerOpen(false)}
+              onClick={closeLetterComposer}
               className="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center text-secondary hover:text-primary transition-colors active:scale-95"
               aria-label="Close composer"
             >
@@ -858,7 +798,7 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
             >
               <button
                 type="button"
-                onClick={() => setLetterComposerOpen(false)}
+                onClick={closeLetterComposer}
                 className="px-5 py-2.5 rounded-xl bg-surface-container-low text-secondary text-xs uppercase font-semibold hover:bg-surface-container transition-colors active:scale-95"
               >
                 Cancel
@@ -879,12 +819,14 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
       {noteComposerOpen && (
         <div
           className="fixed inset-0 z-[100] bg-black/65 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setNoteComposerOpen(false)}
+          onClick={closeNoteComposer}
         >
           <form
             onSubmit={handleSaveNoteSubmit}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg max-h-[90dvh] overflow-y-auto bg-surface-container-lowest rounded-2xl p-5 shadow-2xl border border-outline-variant/40 modal-animate-in flex flex-col gap-3.5"
+            className={`w-full max-w-lg max-h-[90dvh] overflow-y-auto bg-surface-container-lowest rounded-2xl p-5 shadow-2xl border border-outline-variant/40 flex flex-col gap-3.5 ${
+              isNoteComposerClosing ? 'envelope-slide-out pointer-events-none' : 'modal-animate-in'
+            }`}
           >
             <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2.5">
               <h3 className="font-headline-sm text-headline-sm text-primary font-serif">
@@ -894,7 +836,7 @@ export const SecretYearLettersView: React.FC<SecretYearLettersViewProps> = ({
               </h3>
               <button
                 type="button"
-                onClick={() => setNoteComposerOpen(false)}
+                onClick={closeNoteComposer}
                 className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-secondary"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>

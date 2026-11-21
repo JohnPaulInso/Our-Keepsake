@@ -250,6 +250,89 @@ export const App: React.FC = () => {
   };
 
   const [openModalsCount, setOpenModalsCount] = useState<number>(0);
+  // (2026-07-13) Detect active keyboard to hide bottom nav & center input; was none
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    const isEditableField = (el: Element | null): el is HTMLElement => {
+      if (!el || !(el instanceof HTMLElement)) return false;
+      const tag = el.tagName;
+      if (tag === 'TEXTAREA' || el.isContentEditable) return true;
+      if (tag === 'INPUT') {
+        const type = ((el as HTMLInputElement).type || 'text').toLowerCase();
+        return !['button', 'checkbox', 'radio', 'range', 'file', 'submit', 'reset', 'color', 'hidden'].includes(type);
+      }
+      return false;
+    };
+
+    const centerEditableElement = (el: HTMLElement) => {
+      setTimeout(() => {
+        try {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch {
+          // Ignore scroll error
+        }
+      }, 120);
+    };
+
+    let focusOutTimer: number | null = null;
+
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as Element | null;
+      if (isEditableField(target)) {
+        if (focusOutTimer) window.clearTimeout(focusOutTimer);
+        setIsKeyboardOpen(true);
+        centerEditableElement(target);
+      }
+    };
+
+    const handleFocusOut = () => {
+      if (focusOutTimer) window.clearTimeout(focusOutTimer);
+      focusOutTimer = window.setTimeout(() => {
+        if (!isEditableField(document.activeElement)) {
+          setIsKeyboardOpen(false);
+        }
+      }, 140);
+    };
+
+    const handleInput = (e: Event) => {
+      const target = e.target as Element | null;
+      if (isEditableField(target)) {
+        try {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch {
+          // Ignore
+        }
+      }
+    };
+
+    const baseHeight = window.innerHeight;
+    const handleViewportResize = () => {
+      const vv = window.visualViewport;
+      if (!vv) return;
+      const shrunk = vv.height < baseHeight * 0.78;
+      if (shrunk || isEditableField(document.activeElement)) {
+        setIsKeyboardOpen(shrunk || isEditableField(document.activeElement));
+        if (shrunk && isEditableField(document.activeElement)) {
+          centerEditableElement(document.activeElement);
+        }
+      } else {
+        setIsKeyboardOpen(false);
+      }
+    };
+
+    document.addEventListener('focusin', handleFocusIn);
+    document.addEventListener('focusout', handleFocusOut);
+    document.addEventListener('input', handleInput);
+    window.visualViewport?.addEventListener('resize', handleViewportResize);
+    return () => {
+      if (focusOutTimer) window.clearTimeout(focusOutTimer);
+      document.removeEventListener('focusin', handleFocusIn);
+      document.removeEventListener('focusout', handleFocusOut);
+      document.removeEventListener('input', handleInput);
+      window.visualViewport?.removeEventListener('resize', handleViewportResize);
+    };
+  }, []);
 
   useEffect(() => {
     const handleStackChange = (e: Event) => {
@@ -278,10 +361,10 @@ export const App: React.FC = () => {
     }
   }, [storyHeaderDeleteConfirmOpen]);
 
-  // (2026-07-13) Universal back: close modals & subviews; was popstate only
+  // (2026-07-13) Pop top modal LIFO on universal back; was closeAllModals
   const handleUniversalBack = useCallback(() => {
-    // 1. Close all open modals & overlays in application stack
-    if (closeAllModals()) {
+    // 1. Pop top-most open modal (e.g. polaroid lightbox) in LIFO order
+    if (popModal()) {
       return;
     }
     if (showUnsavedModal) {
@@ -561,6 +644,19 @@ export const App: React.FC = () => {
         updatedAt: Date.now(),
       };
     });
+    setMemories(nextList);
+    await DB.setMemories(nextList);
+    syncManager.schedulePush();
+  };
+
+  // (2026-07-13) Sort polaroid photos in-place; was static photo order
+  const handleUpdateMemoryPhotos = async (
+    memoryId: string,
+    nextPhotos: KeepsakeMemory['photos']
+  ) => {
+    const nextList = memories.map((m) =>
+      m.id === memoryId ? { ...m, photos: nextPhotos, updatedAt: Date.now() } : m
+    );
     setMemories(nextList);
     await DB.setMemories(nextList);
     syncManager.schedulePush();
@@ -1230,6 +1326,7 @@ export const App: React.FC = () => {
                 onDeleteMemory={handleDeleteMemory}
                 onAddPartnerNote={handleAddPartnerNote}
                 onUpdateMemoryDots={handleUpdateMemoryDots}
+                onUpdateMemoryPhotos={handleUpdateMemoryPhotos}
                 onToast={addToast}
                 initialOpenDateISO={pendingOverlayDateISO}
                 onConsumedOpenDate={() => setPendingOverlayDateISO(null)}
@@ -1259,6 +1356,7 @@ export const App: React.FC = () => {
                   onDeleteMemory={handleDeleteMemory}
                   onAddPartnerNote={handleAddPartnerNote}
                   onUpdateMemoryDots={handleUpdateMemoryDots}
+                  onUpdateMemoryPhotos={handleUpdateMemoryPhotos}
                   onToast={addToast}
                 />
               ) : (
@@ -1356,8 +1454,12 @@ export const App: React.FC = () => {
       {/* Global Toast Container above Bottom Navigation */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-      {/* (2026-07-13) Compact bottom nav to reduce bottom blank space; was h-16 */}
-      <nav className="md:hidden fixed bottom-0 w-full z-50 pb-safe frosted-glass-bar border-t border-outline-variant/35 rounded-t-2xl shadow-[0_-6px_24px_rgba(51,37,29,0.08),inset_0_1px_0_rgba(255,255,255,0.75)] no-print">
+      {/* (2026-07-13) Hide bottom nav when mobile keyboard is open; was always shown */}
+      <nav
+        className={`md:hidden fixed bottom-0 w-full z-50 pb-safe frosted-glass-bar border-t border-outline-variant/35 rounded-t-2xl shadow-[0_-6px_24px_rgba(51,37,29,0.08),inset_0_1px_0_rgba(255,255,255,0.75)] no-print transition-transform duration-200 ${
+          isKeyboardOpen ? 'hidden translate-y-full pointer-events-none' : 'translate-y-0'
+        }`}
+      >
         <div className="h-14 px-gutter max-w-[760px] mx-auto flex items-center justify-around">
           <button
             type="button"
