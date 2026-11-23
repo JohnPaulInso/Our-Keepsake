@@ -458,19 +458,41 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     });
   };
 
+  // (2026-07-13) Support both photos and videos in polaroid uploader; was images only
+  const isVideoFile = (file: File) =>
+    file.type.startsWith('video/') || /\.(mp4|webm|mov|m4v|ogg)$/i.test(file.name);
+
+  const isVideoPolaroid = (photo: PolaroidPhoto) =>
+    photo.mediaType === 'video' ||
+    photo.url?.startsWith('data:video/') ||
+    /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(photo.url || '');
+
+  const readVideoAsUrl = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      if (file.size <= 14 * 1024 * 1024) {
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve((ev.target?.result as string) || URL.createObjectURL(file));
+        reader.onerror = () => resolve(URL.createObjectURL(file));
+        reader.readAsDataURL(file);
+      } else {
+        resolve(URL.createObjectURL(file));
+      }
+    });
+  };
+
   const handleSelectPhotoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
     if (!fileList || fileList.length === 0) return;
     const remainingSlots = Math.max(0, 10 - photos.length);
     if (remainingSlots <= 0) {
       e.target.value = '';
-      onToast('Maximum of 10 polaroid photos per date reached.', 'warning');
+      onToast('Maximum of 10 polaroids per date reached.', 'warning');
       return;
     }
     const files = Array.from(fileList).slice(0, remainingSlots);
     e.target.value = '';
 
-    if (files.length === 1) {
+    if (files.length === 1 && !isVideoFile(files[0])) {
       const reader = new FileReader();
       reader.onload = (ev) => {
         const dataUrl = ev.target?.result as string;
@@ -489,22 +511,36 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       try {
-        const compressedUrl = await compressImageFile(file);
-        if (compressedUrl) {
-          newPolaroids.push({
-            id: `ph-${now}-${i}`,
-            url: compressedUrl,
-            caption: 'with my bb bambam',
-            tag: 'POLAROID',
-          });
+        if (isVideoFile(file)) {
+          const videoDataUrl = await readVideoAsUrl(file);
+          if (videoDataUrl) {
+            newPolaroids.push({
+              id: `ph-${now}-${i}`,
+              url: videoDataUrl,
+              caption: 'with my bb bambam',
+              tag: 'VIDEO',
+              mediaType: 'video',
+            });
+          }
+        } else {
+          const compressedUrl = await compressImageFile(file);
+          if (compressedUrl) {
+            newPolaroids.push({
+              id: `ph-${now}-${i}`,
+              url: compressedUrl,
+              caption: 'with my bb bambam',
+              tag: 'POLAROID',
+              mediaType: 'image',
+            });
+          }
         }
       } catch (err) {
-        console.error('Failed to process image:', err);
+        console.error('Failed to process media file:', err);
       }
     }
     if (newPolaroids.length > 0) {
       setPhotos((prev) => [...prev, ...newPolaroids].slice(0, 10));
-      onToast(`Attached ${newPolaroids.length} polaroids! Tap "Crop 1:1" to position.`, 'success');
+      onToast(`Attached ${newPolaroids.length} polaroid${newPolaroids.length > 1 ? 's' : ''}!`, 'success');
     }
   };
 
@@ -1098,37 +1134,58 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                 Choose from Date Gallery
               </span>
               <span className="text-xs text-outline font-medium">
-                Select up to 10 photos from your phone • Auto-compressed to ~50KB
+                Select up to 10 photos or videos from your phone
               </span>
             </div>
 
             {photos.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-1">
-                {photos.map((photo, index) => (
+                {photos.map((photo, index) => {
+                  const isVid = isVideoPolaroid(photo);
+                  return (
                   <div
                     key={photo.id}
                     className="bg-[#ffffff] p-3 rounded-xl shadow-xs border border-[#e2dcd5] flex flex-col items-center gap-2"
                   >
-                    {/* (2026-07-13) Add Crop 1:1 button & square aspect ratio; was uncropped 4:3 */}
-                    <div className="w-full aspect-square rounded-lg overflow-hidden bg-surface-container relative group">
-                      <img
-                        className="w-full h-full object-cover"
-                        alt={photo.caption || 'with my bb bambam'}
-                        src={photo.url}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingPhotoId(photo.id);
-                          setPendingCropCaption(photo.caption || 'with my bb bambam');
-                          setPendingCropSrc(photo.url);
-                        }}
-                        title="Adjust 1:1 ratio crop"
-                        className="absolute top-2 left-2 px-2.5 py-1 rounded-md bg-surface-container-lowest/95 hover:bg-surface-container-lowest text-primary text-[11px] font-semibold backdrop-blur-sm shadow-xs flex items-center gap-1 transition-transform active:scale-95"
-                      >
-                        <span className="material-symbols-outlined text-[13px]">crop</span>
-                        <span>Crop 1:1</span>
-                      </button>
+                    {/* (2026-07-13) Render responsive video polaroid or 1:1 photo; was image only */}
+                    <div
+                      className={`w-full rounded-lg overflow-hidden relative group ${
+                        isVid
+                          ? 'bg-black/90 flex items-center justify-center max-h-[55vh] sm:max-h-[260px]'
+                          : 'aspect-square bg-surface-container'
+                      }`}
+                    >
+                      {isVid ? (
+                        <video
+                          src={photo.url}
+                          controls
+                          playsInline
+                          muted
+                          preload="metadata"
+                          className="w-full h-auto max-h-[55vh] sm:max-h-[260px] object-contain"
+                        />
+                      ) : (
+                        <img
+                          className="w-full h-full object-cover"
+                          alt={photo.caption || 'with my bb bambam'}
+                          src={photo.url}
+                        />
+                      )}
+                      {!isVid && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingPhotoId(photo.id);
+                            setPendingCropCaption(photo.caption || 'with my bb bambam');
+                            setPendingCropSrc(photo.url);
+                          }}
+                          title="Adjust 1:1 ratio crop"
+                          className="absolute top-2 left-2 px-2.5 py-1 rounded-md bg-surface-container-lowest/95 hover:bg-surface-container-lowest text-primary text-[11px] font-semibold backdrop-blur-sm shadow-xs flex items-center gap-1 transition-transform active:scale-95"
+                        >
+                          <span className="material-symbols-outlined text-[13px]">crop</span>
+                          <span>Crop 1:1</span>
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() =>
@@ -1153,7 +1210,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                         className="w-full bg-transparent font-['Cormorant_Garamond',serif] italic text-sm text-primary placeholder:text-outline/60 focus:outline-none border-b border-outline-variant/30 pb-0.5 text-center"
                       />
                       <div className="flex items-center justify-between text-[10px] text-secondary font-mono pt-0.5">
-                        <span>Polaroid #{index + 1}</span>
+                        <span>{isVid ? `Video #${index + 1}` : `Polaroid #${index + 1}`}</span>
                         {photos.length > 1 && (
                           <div className="flex items-center gap-1">
                             <button
@@ -1176,20 +1233,21 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                             </button>
                           </div>
                         )}
-                        <span>{photo.tag || 'MEMO'}</span>
+                        <span>{photo.tag || (isVid ? 'VIDEO' : 'MEMO')}</span>
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
-            {/* (2026-07-13) Set explicit image formats & id; was plain image/* */}
+            {/* (2026-07-13) Allow selecting both images and videos; was images only */}
             <input
               id="composer-photo-input"
               ref={photoInputRef}
               type="file"
-              accept="image/png,image/jpeg,image/jpg,image/webp,image/*"
+              accept="image/png,image/jpeg,image/jpg,image/webp,image/*,video/mp4,video/webm,video/quicktime,video/*"
               multiple
               onChange={handleSelectPhotoFile}
               className="hidden"

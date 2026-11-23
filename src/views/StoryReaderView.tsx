@@ -76,6 +76,15 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
   const [dragOffsetX, setDragOffsetX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
+  // (2026-07-13) Detect video polaroid items; was image-only polaroid cards
+  const isVideoPolaroid = (photo?: PolaroidPhoto | null) =>
+    Boolean(
+      photo &&
+        (photo.mediaType === 'video' ||
+          photo.url?.startsWith('data:video/') ||
+          /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(photo.url || ''))
+    );
+
   const closeLightbox = () => {
     setIsLightboxClosing(true);
     setTimeout(() => {
@@ -766,12 +775,36 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                 ) : (
                   <div className="absolute -top-2 right-8 w-14 h-4 bg-secondary-fixed/70 backdrop-blur-sm rounded-xs rotate-3 shadow-xs" />
                 )}
-                <div className="aspect-square w-full rounded-sm overflow-hidden bg-surface-container mb-3 shadow-inner relative">
-                  <img
-                    className="w-full h-full object-cover"
-                    alt={photo.caption}
-                    src={photo.url}
-                  />
+                {/* (2026-07-13) Responsive video polaroid frame depending on screen size */}
+                <div
+                  className={`w-full rounded-sm overflow-hidden mb-3 shadow-inner relative ${
+                    isVideoPolaroid(photo)
+                      ? 'bg-black/90 flex items-center justify-center max-h-[60vh] sm:max-h-[300px] md:max-h-[340px]'
+                      : 'aspect-square bg-surface-container'
+                  }`}
+                >
+                  {isVideoPolaroid(photo) ? (
+                    <>
+                      <video
+                        src={photo.url}
+                        playsInline
+                        muted
+                        preload="metadata"
+                        className="w-full h-auto max-h-[60vh] sm:max-h-[300px] md:max-h-[340px] object-contain pointer-events-none"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
+                        <div className="w-11 h-11 rounded-full bg-surface-container-lowest/90 text-primary flex items-center justify-center shadow-md">
+                          <span className="material-symbols-outlined text-[24px] ml-0.5">play_arrow</span>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <img
+                      className="w-full h-full object-cover"
+                      alt={photo.caption}
+                      src={photo.url}
+                    />
+                  )}
                   {/* (2026-07-13) Add polaroid sorting buttons when multiple frames exist */}
                   {memory.photos.length > 1 && onUpdateMemoryPhotos && (
                     <div
@@ -1030,22 +1063,26 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
           document.body
         )}
 
-      {/* (2026-07-13) Slide-right closing animation on Polaroid Lightbox Modal */}
+      {/* (2026-07-13) Screen-responsive video & image Polaroid Lightbox Modal */}
       {lightboxPhoto &&
         createPortal(
           <div
-            className="fixed inset-0 z-[150] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-[150] bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4"
             onClick={closeLightbox}
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className={`w-full max-w-md bg-surface-container-lowest p-4 pb-6 rounded-xl shadow-2xl flex flex-col gap-3 ${
+              className={`w-full ${
+                isVideoPolaroid(lightboxPhoto)
+                  ? 'max-w-[94vw] sm:max-w-lg md:max-w-2xl'
+                  : 'max-w-md'
+              } bg-surface-container-lowest p-3.5 sm:p-4 pb-5 sm:pb-6 rounded-xl shadow-2xl flex flex-col gap-3 max-h-[92dvh] ${
                 isLightboxClosing ? 'envelope-slide-out pointer-events-none' : 'modal-animate-in'
               }`}
             >
               <div className="flex items-center justify-between">
                 <span className="font-label-md text-label-md uppercase tracking-wider text-secondary">
-                  {lightboxPhoto.tag || 'INSTANT FILM'} • {formatStandardDate(memory.dateISO)}
+                  {lightboxPhoto.tag || (isVideoPolaroid(lightboxPhoto) ? 'VIDEO FILM' : 'INSTANT FILM')} • {formatStandardDate(memory.dateISO)}
                 </span>
                 <button
                   type="button"
@@ -1055,13 +1092,25 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                   <span className="material-symbols-outlined text-[18px]">close</span>
                 </button>
               </div>
-              <div className="w-full aspect-square rounded overflow-hidden bg-surface-container">
-                <img
-                  src={lightboxPhoto.url}
-                  alt={lightboxPhoto.caption}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              {isVideoPolaroid(lightboxPhoto) ? (
+                <div className="w-full rounded overflow-hidden bg-black flex items-center justify-center max-h-[68dvh] sm:max-h-[72dvh]">
+                  <video
+                    src={lightboxPhoto.url}
+                    controls
+                    autoPlay
+                    playsInline
+                    className="w-full h-auto max-h-[68dvh] sm:max-h-[72dvh] object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="w-full aspect-square rounded overflow-hidden bg-surface-container">
+                  <img
+                    src={lightboxPhoto.url}
+                    alt={lightboxPhoto.caption}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
               <p className="font-italic-quote text-italic-quote text-primary text-center italic font-serif">
                 “{lightboxPhoto.caption && !lightboxPhoto.caption.startsWith('download') && !lightboxPhoto.caption.startsWith('Photo ') ? lightboxPhoto.caption : 'with my bb bambam'}”
               </p>

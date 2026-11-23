@@ -391,7 +391,8 @@ class FirebaseSyncManager {
             if (photo.url && photo.url.length > 80000) {
               const mediaDocId = `${mem.id}_${photo.id}`;
               await idbSet(mediaDocId, photo.url, 'post_media');
-              if (this.db) {
+              // (2026-07-13) Guard Firestore 1MB doc limit for large video polaroids
+              if (this.db && photo.url.length < 900000) {
                 try {
                   const mediaRef = doc(this.db, 'couples', 'jp_zea_vault', 'photos', mediaDocId);
                   await setDoc(mediaRef, { id: mediaDocId, dataUrl: photo.url, updatedAt: Date.now() });

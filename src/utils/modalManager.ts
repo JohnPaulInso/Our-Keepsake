@@ -5,6 +5,8 @@ export interface ModalEntry {
 }
 
 const modalStack: ModalEntry[] = [];
+// (2026-07-13) Debounce duplicate hardware back + popstate events; was double-pop
+let lastPopAt = 0;
 
 export function pushModal(id: string, close: () => void): () => void {
   // Remove if already exists to avoid duplicates
@@ -14,6 +16,13 @@ export function pushModal(id: string, close: () => void): () => void {
   }
   const entry = { id, close };
   modalStack.push(entry);
+  try {
+    if (typeof window !== 'undefined' && window.history) {
+      window.history.pushState({ keepsakeModal: id }, '');
+    }
+  } catch {
+    // Ignore history API errors
+  }
   window.dispatchEvent(new CustomEvent('keepsake:modal-stack-changed', { detail: { count: modalStack.length } }));
 
   return () => {
@@ -26,7 +35,12 @@ export function pushModal(id: string, close: () => void): () => void {
 }
 
 export function popModal(): boolean {
+  const now = Date.now();
+  if (now - lastPopAt < 220) {
+    return true;
+  }
   if (modalStack.length === 0) return false;
+  lastPopAt = now;
   const top = modalStack.pop();
   if (top) {
     top.close();

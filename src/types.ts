@@ -3,12 +3,14 @@ export type MemoryCategory = 'EVENT' | 'VOICE_MEMO' | 'PHOTO' | 'VIDEO' | 'ANNIV
 // (2026-07-13) Add BURGUNDY indicator for milestone & ROSE for intimacy; was 3 dots
 export type DotIndicator = 'GOLD' | 'MOCHA' | 'ROSE' | 'BURGUNDY';
 
+// (2026-07-13) Support video polaroid items via mediaType; was image only
 export interface PolaroidPhoto {
   id: string;
   url: string;
   caption: string;
   aspectRatio?: string;
   tag?: string;
+  mediaType?: 'image' | 'video';
 }
 
 export interface AudioMemo {
