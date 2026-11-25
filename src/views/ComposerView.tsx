@@ -458,7 +458,10 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     });
   };
 
-  // (2026-07-13) Support both photos and videos in polaroid uploader; was images only
+  // (2026-07-13) Extract video poster frame & clean SVG fallback to kill gray play icon
+  const VIDEO_CLEAN_POSTER =
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect width='1' height='1' fill='%231c1816'/%3E%3C/svg%3E";
+
   const isVideoFile = (file: File) =>
     file.type.startsWith('video/') || /\.(mp4|webm|mov|m4v|ogg)$/i.test(file.name);
 
@@ -466,6 +469,67 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
     photo.mediaType === 'video' ||
     photo.url?.startsWith('data:video/') ||
     /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(photo.url || '');
+
+  const extractVideoPoster = (videoUrl: string): Promise<string | undefined> => {
+    return new Promise((resolve) => {
+      try {
+        const video = document.createElement('video');
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = 'metadata';
+        let settled = false;
+        const finish = (res?: string) => {
+          if (settled) return;
+          settled = true;
+          resolve(res);
+        };
+        const timer = window.setTimeout(() => finish(undefined), 2500);
+        video.onloadeddata = () => {
+          try {
+            video.currentTime = Math.min(0.15, video.duration ? video.duration * 0.1 : 0.1);
+          } catch {
+            // Fall through to capture frame 0
+          }
+        };
+        video.onseeked = () => {
+          try {
+            window.clearTimeout(timer);
+            const canvas = document.createElement('canvas');
+            const maxDim = 640;
+            let w = video.videoWidth || 480;
+            let h = video.videoHeight || 480;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              } else {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(video, 0, 0, w, h);
+              finish(canvas.toDataURL('image/jpeg', 0.72));
+              return;
+            }
+          } catch {
+            // Ignore
+          }
+          finish(undefined);
+        };
+        video.onerror = () => {
+          window.clearTimeout(timer);
+          finish(undefined);
+        };
+        video.src = videoUrl;
+      } catch {
+        resolve(undefined);
+      }
+    });
+  };
 
   const readVideoAsUrl = (file: File): Promise<string> => {
     return new Promise((resolve) => {
@@ -514,12 +578,14 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
         if (isVideoFile(file)) {
           const videoDataUrl = await readVideoAsUrl(file);
           if (videoDataUrl) {
+            const posterUrl = await extractVideoPoster(videoDataUrl);
             newPolaroids.push({
               id: `ph-${now}-${i}`,
               url: videoDataUrl,
               caption: 'with my bb bambam',
               tag: 'VIDEO',
               mediaType: 'video',
+              posterUrl,
             });
           }
         } else {
@@ -1158,6 +1224,7 @@ export const ComposerView: React.FC<ComposerViewProps> = ({
                       {isVid ? (
                         <video
                           src={photo.url}
+                          poster={photo.posterUrl || VIDEO_CLEAN_POSTER}
                           controls
                           playsInline
                           muted

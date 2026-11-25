@@ -76,6 +76,10 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
   const [dragOffsetX, setDragOffsetX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
+  // (2026-07-13) Clean fallback poster to eliminate Android WebView gray play icon
+  const VIDEO_CLEAN_POSTER =
+    "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'%3E%3Crect width='16' height='9' fill='%231c1714'/%3E%3C/svg%3E";
+
   // (2026-07-13) Detect video polaroid items; was image-only polaroid cards
   const isVideoPolaroid = (photo?: PolaroidPhoto | null) =>
     Boolean(
@@ -775,11 +779,11 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                 ) : (
                   <div className="absolute -top-2 right-8 w-14 h-4 bg-secondary-fixed/70 backdrop-blur-sm rounded-xs rotate-3 shadow-xs" />
                 )}
-                {/* (2026-07-13) Responsive video polaroid frame depending on screen size */}
+                {/* (2026-07-13) Smooth live-photo video polaroid without gray play icon */}
                 <div
                   className={`w-full rounded-sm overflow-hidden mb-3 shadow-inner relative ${
                     isVideoPolaroid(photo)
-                      ? 'bg-black/90 flex items-center justify-center max-h-[60vh] sm:max-h-[300px] md:max-h-[340px]'
+                      ? 'bg-[#1c1816] flex items-center justify-center max-h-[60vh] sm:max-h-[300px] md:max-h-[340px]'
                       : 'aspect-square bg-surface-container'
                   }`}
                 >
@@ -787,15 +791,17 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                     <>
                       <video
                         src={photo.url}
-                        playsInline
+                        poster={photo.posterUrl || VIDEO_CLEAN_POSTER}
+                        autoPlay
+                        loop
                         muted
-                        preload="metadata"
-                        className="w-full h-auto max-h-[60vh] sm:max-h-[300px] md:max-h-[340px] object-contain pointer-events-none"
+                        playsInline
+                        preload="auto"
+                        className="w-full h-auto max-h-[60vh] sm:max-h-[300px] md:max-h-[340px] object-contain pointer-events-none block"
                       />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
-                        <div className="w-11 h-11 rounded-full bg-surface-container-lowest/90 text-primary flex items-center justify-center shadow-md">
-                          <span className="material-symbols-outlined text-[24px] ml-0.5">play_arrow</span>
-                        </div>
+                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-md text-white/95 text-[10px] font-medium tracking-wider uppercase flex items-center gap-1 pointer-events-none shadow-xs">
+                        <span className="material-symbols-outlined text-[12px]">videocam</span>
+                        <span>Tap to Play</span>
                       </div>
                     </>
                   ) : (
@@ -805,22 +811,22 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                       src={photo.url}
                     />
                   )}
-                  {/* (2026-07-13) Add polaroid sorting buttons when multiple frames exist */}
+                  {/* (2026-07-13) High-contrast polaroid sorting pill; was dim on dark videos */}
                   {memory.photos.length > 1 && onUpdateMemoryPhotos && (
                     <div
                       onClick={(e) => e.stopPropagation()}
-                      className="absolute bottom-2 right-2 flex items-center gap-1 bg-surface-container-lowest/90 backdrop-blur-xs px-1.5 py-0.5 rounded-full shadow-xs border border-outline-variant/30"
+                      className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded-full shadow-md border border-black/10"
                     >
                       <button
                         type="button"
                         disabled={idx === 0}
                         onClick={() => handleMovePolaroid(idx, -1)}
                         title="Move polaroid earlier"
-                        className="w-5 h-5 rounded-full flex items-center justify-center text-primary disabled:opacity-30 hover:bg-surface-container-high"
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-[#3b2d24] disabled:opacity-30 hover:bg-black/10"
                       >
                         <span className="material-symbols-outlined text-[13px]">chevron_left</span>
                       </button>
-                      <span className="text-[10px] font-mono text-secondary font-semibold">
+                      <span className="text-[10px] font-mono text-[#3b2d24] font-bold">
                         {idx + 1}/{memory.photos.length}
                       </span>
                       <button
@@ -828,7 +834,7 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                         disabled={idx === memory.photos.length - 1}
                         onClick={() => handleMovePolaroid(idx, 1)}
                         title="Move polaroid later"
-                        className="w-5 h-5 rounded-full flex items-center justify-center text-primary disabled:opacity-30 hover:bg-surface-container-high"
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-[#3b2d24] disabled:opacity-30 hover:bg-black/10"
                       >
                         <span className="material-symbols-outlined text-[13px]">chevron_right</span>
                       </button>
@@ -1093,9 +1099,10 @@ export const StoryReaderView: React.FC<StoryReaderViewProps> = ({
                 </button>
               </div>
               {isVideoPolaroid(lightboxPhoto) ? (
-                <div className="w-full rounded overflow-hidden bg-black flex items-center justify-center max-h-[68dvh] sm:max-h-[72dvh]">
+                <div className="w-full rounded overflow-hidden bg-[#1c1816] flex items-center justify-center max-h-[68dvh] sm:max-h-[72dvh]">
                   <video
                     src={lightboxPhoto.url}
+                    poster={lightboxPhoto.posterUrl || VIDEO_CLEAN_POSTER}
                     controls
                     autoPlay
                     playsInline

@@ -217,13 +217,62 @@ function partitionMemoriesByPriorityMonths(allMemories: KeepsakeMemory[]): {
   return { priority, deferred };
 }
 
-const initialSortedFull = [...INITIAL_MEMORIES].sort((a, b) =>
-  b.dateISO.localeCompare(a.dateISO)
-);
-const initialPartition = partitionMemoriesByPriorityMonths(initialSortedFull);
+// (2026-07-13) Synchronously hydrate calendar dots & metadata from localStorage on boot
+function loadInstantCachedMemories(): KeepsakeMemory[] {
+  const byDate = new Map<string, KeepsakeMemory>();
+  for (const m of INITIAL_MEMORIES) {
+    if (m && m.dateISO) byDate.set(m.dateISO, m);
+  }
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const raw = localStorage.getItem('ok_memories_instant_cache');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          for (const item of parsed) {
+            if (item && item.dateISO) {
+              const existing = byDate.get(item.dateISO);
+              const hydrated: KeepsakeMemory = {
+                keepsakeNumber: item.keepsakeNumber ?? existing?.keepsakeNumber ?? 1,
+                volumeNumber: item.volumeNumber ?? existing?.volumeNumber ?? 1,
+                timeFormatted: item.timeFormatted || existing?.timeFormatted || 'All Day',
+                letterHeading: item.letterHeading || item.title || existing?.letterHeading || '',
+                snippet: item.snippet || existing?.snippet || '',
+                storyBody: existing?.storyBody || item.snippet || '',
+                quoteHighlight: item.quoteHighlight || existing?.quoteHighlight || '',
+                signOffAuthor: item.signOffAuthor || existing?.signOffAuthor || 'bb John Paul',
+                location: item.location || existing?.location || 'Bogo City, Cebu',
+                weatherTemp: existing?.weatherTemp || '',
+                weatherConditions: existing?.weatherConditions || '',
+                moodVibe: existing?.moodVibe || '',
+                vibeTags: Array.isArray(item.vibeTags) ? item.vibeTags : existing?.vibeTags || [],
+                categories: Array.isArray(item.categories) ? item.categories : existing?.categories || ['EVENT'],
+                dotIndicators: Array.isArray(item.dotIndicators) ? item.dotIndicators : existing?.dotIndicators || ['MOCHA'],
+                photos: existing?.photos || [],
+                partnerNotes: existing?.partnerNotes || [],
+                isSealed: item.isSealed ?? existing?.isSealed ?? true,
+                isDraft: item.isDraft ?? existing?.isDraft ?? false,
+                sealLabel: item.sealLabel || existing?.sealLabel || 'Sealed Keepsake',
+                sealIcon: item.sealIcon || existing?.sealIcon || 'favorite',
+                sortOrder: item.sortOrder ?? existing?.sortOrder ?? 0,
+                ...item,
+              };
+              byDate.set(item.dateISO, hydrated);
+            }
+          }
+        }
+      }
+    }
+  } catch {
+    // Ignore localStorage parse errors
+  }
+  return Array.from(byDate.values()).sort((a, b) => b.dateISO.localeCompare(a.dateISO));
+}
+
+const initialSortedFull = loadInstantCachedMemories();
 
 const memCache: MemCacheShape = {
-  memories: initialPartition.priority,
+  memories: initialSortedFull,
   fullMemories: initialSortedFull,
   secretYearNotes: [],
   digitalLoveLetters: INITIAL_DIGITAL_LOVE_LETTERS,
@@ -330,16 +379,27 @@ export async function idbDeleteBackup(id: string): Promise<void> {
   }
 }
 
+// (2026-07-13) Cache lightweight dots & metadata in localStorage for 0ms APK boot
 function saveLightweightMirror(memories: KeepsakeMemory[]) {
   try {
-    const lightweight = memories.slice(0, 150).map((m) => ({
+    const instantCache = memories.slice(0, 400).map((m) => ({
       id: m.id,
-      title: m.title,
       dateISO: m.dateISO,
+      title: m.title,
+      letterHeading: m.letterHeading,
+      snippet: m.snippet,
+      quoteHighlight: m.quoteHighlight,
       location: m.location,
+      timeFormatted: m.timeFormatted,
+      dotIndicators: m.dotIndicators,
+      categories: m.categories,
+      vibeTags: m.vibeTags,
+      isSealed: m.isSealed,
+      isDraft: m.isDraft,
+      sortOrder: m.sortOrder,
       updatedAt: m.updatedAt,
     }));
-    localStorage.setItem('ok_memories_mirror', JSON.stringify(lightweight));
+    localStorage.setItem('ok_memories_instant_cache', JSON.stringify(instantCache));
   } catch {
     // Never throw QuotaExceededError
   }
@@ -489,18 +549,14 @@ class LocalDatabase {
         }
       }
 
-      // Stage 1: Store full list in fullMemories and load priority months for first paint
+      // Stage 1: Store full list in fullMemories and preserve instant calendar dots immediately
       memCache.fullMemories = cleanedList;
-      const { priority, deferred } = partitionMemoriesByPriorityMonths(cleanedList);
-      memCache.memories = priority;
-
-      // Stage 2: Stream remaining older months in non-blocking background chunks
-      this.streamOlderMemoriesInBackground(deferred, (allLoaded) => {
-        if (fullMemoriesToPersist) {
-          idbSet('memories', allLoaded);
-        }
-        saveLightweightMirror(allLoaded);
-      });
+      memCache.memories = cleanedList;
+      this.hasCompletedInitialStream = true;
+      if (fullMemoriesToPersist) {
+        idbSet('memories', cleanedList);
+      }
+      saveLightweightMirror(cleanedList);
     }
 
     if (savedProfile && savedProfile.partner1Name) {

@@ -556,7 +556,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     onConsumedOpenDate?.();
   }, [initialOpenDateISO, onConsumedOpenDate]);
 
-  // (2026-07-13) Keep date overlay mounted during 260ms slide-right; was instant unmount
+  // (2026-07-13) Clear selectedDay when overlay closes so brown pill doesn't stick
   const closeDateOverlay = (callback?: () => void) => {
     if (!isFullscreenDateOpen) {
       if (callback) callback();
@@ -567,6 +567,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     setTimeout(() => {
       setIsFullscreenDateOpen(false);
       setIsOverlayClosing(false);
+      setSelectedDay(null);
       if (callback) callback();
     }, 260);
   };
@@ -1695,8 +1696,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               );
             }
             const isSelected = selectedDay === cell.day;
+            const nowDate = new Date();
+            const isToday =
+              calendarYear === nowDate.getFullYear() &&
+              calendarMonth === nowDate.getMonth() &&
+              cell.day === nowDate.getDate();
             const hasDots = cell.dots.length > 0;
-            // (2026-07-13) Highlight filtered dot in cell and legend filter; was static
+            // (2026-07-13) Add subtle gray indicator for today's date; was brown selected only
             const matchesDotFilter = dotFilter === 'ALL' || cell.dots.includes(dotFilter);
             return (
               <button
@@ -1705,22 +1711,34 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 onClick={() => openDateOverlay(cell.day)}
                 className={`flex flex-col items-center justify-center h-12 sm:h-14 mx-auto w-10 sm:w-11 rounded-xl transition-all relative ${
                   isSelected
-                    ? 'bg-primary text-on-primary font-bold shadow-sm active:scale-95'
-                    : dotFilter !== 'ALL'
-                      ? matchesDotFilter && hasDots
-                        ? dotFilter === 'GOLD'
-                          ? 'bg-[#E5A93C]/15 border border-[#E5A93C]/50 text-[#543b12] font-bold shadow-2xs'
-                          : dotFilter === 'MOCHA'
-                            ? 'bg-[#5C4033]/15 border border-[#5C4033]/50 text-[#3b2416] font-bold shadow-2xs'
-                            : dotFilter === 'ROSE'
-                              ? 'bg-[#C96B78]/15 border border-[#C96B78]/50 text-[#571f28] font-bold shadow-2xs'
-                              : 'bg-[#8B263E]/15 border border-[#8B263E]/50 text-[#4c1220] font-bold shadow-2xs'
-                        : 'opacity-35 text-on-surface-variant font-normal hover:opacity-75'
-                      : hasDots
-                        ? 'bg-secondary-container/35 text-primary font-semibold hover:bg-secondary-container/60'
-                        : 'hover:bg-surface-container text-primary font-medium'
+                    ? `bg-primary text-on-primary font-bold shadow-sm active:scale-95 ${
+                        isToday ? 'ring-2 ring-[#9ca3af]' : ''
+                      }`
+                    : isToday
+                      ? 'bg-[#e5e5e5] dark:bg-white/15 text-primary font-bold ring-1 ring-[#a3a3a3]/70 shadow-2xs'
+                      : dotFilter !== 'ALL'
+                        ? matchesDotFilter && hasDots
+                          ? dotFilter === 'GOLD'
+                            ? 'bg-[#E5A93C]/15 border border-[#E5A93C]/50 text-[#543b12] font-bold shadow-2xs'
+                            : dotFilter === 'MOCHA'
+                              ? 'bg-[#5C4033]/15 border border-[#5C4033]/50 text-[#3b2416] font-bold shadow-2xs'
+                              : dotFilter === 'ROSE'
+                                ? 'bg-[#C96B78]/15 border border-[#C96B78]/50 text-[#571f28] font-bold shadow-2xs'
+                                : 'bg-[#8B263E]/15 border border-[#8B263E]/50 text-[#4c1220] font-bold shadow-2xs'
+                          : 'opacity-35 text-on-surface-variant font-normal hover:opacity-75'
+                        : hasDots
+                          ? 'bg-secondary-container/35 text-primary font-semibold hover:bg-secondary-container/60'
+                          : 'hover:bg-surface-container text-primary font-medium'
                 }`}
               >
+                {isToday && (
+                  <span
+                    className={`absolute top-1 right-1 w-1.5 h-1.5 rounded-full ${
+                      isSelected ? 'bg-[#d4d4d4]' : 'bg-[#737373]'
+                    }`}
+                    aria-hidden="true"
+                  />
+                )}
                 <span className="leading-none text-[14px] sm:text-[15px]">{cell.day}</span>
                 {hasDots && (
                   <div className="flex items-center gap-1 mt-1.5">
@@ -1836,6 +1854,23 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#8B263E' }} />
               <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
                 Milestone
+              </span>
+            </button>
+            {/* (2026-07-13) Add Today subtle gray legend button; was Selected only */}
+            <button
+              type="button"
+              onClick={() => {
+                const now = new Date();
+                setCalendarYear(now.getFullYear());
+                setCalendarMonth(now.getMonth());
+                setSelectedDay(null);
+              }}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all active:scale-95 hover:bg-surface-container-low"
+              title="Jump to today"
+            >
+              <span className="w-2.5 h-2.5 rounded-sm bg-neutral-300 border border-neutral-400/70" />
+              <span className="text-on-surface-variant calendar-legend-font text-[13px] sm:text-[14px]">
+                Today
               </span>
             </button>
             <button
