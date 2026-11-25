@@ -492,72 +492,53 @@ class LocalDatabase {
         idbGet<TimeCapsuleItem>('timeCapsule'),
       ]);
 
-    // Purge any legacy sample mock data from local cache
-    const hasSampleData =
-      savedMemories?.some((m) => m.id.startsWith('mem-baker-beach')) ||
-      savedNotes?.some((n) => n.id.startsWith('syn-')) ||
-      savedLetters?.some((l) => l.id.startsWith('dll-'));
-
+    // (2026-07-13) Never wipe real user vault on dll-/syn- IDs; was wiping on every boot
     let fullMemoriesToPersist: KeepsakeMemory[] | null = null;
     let lettersUpdated = false;
 
-    if (hasSampleData) {
-      memCache.memories = [];
-      memCache.secretYearNotes = [];
-      memCache.digitalLoveLetters = [];
-      Promise.all([
-        idbSet('memories', []),
-        idbSet('secretYearNotes', []),
-        idbSet('digitalLoveLetters', []),
-      ]);
-      try {
-        localStorage.removeItem('ok_memories_mirror');
-      } catch {
-        // Ignore
+    const rawList = (savedMemories && Array.isArray(savedMemories) ? savedMemories : []).filter(
+      (m) => m && !m.id.startsWith('mem-baker-beach')
+    );
+    const cleanedList = rawList.map((m) => {
+      if (m.audioMemo && (!m.audioMemo.url || m.audioMemo.url.startsWith('mock-') || !m.audioMemo.url.trim())) {
+        const { audioMemo, ...clean } = m;
+        return clean as KeepsakeMemory;
       }
-    } else {
-      const rawList = savedMemories && Array.isArray(savedMemories) ? savedMemories : [];
-      const cleanedList = rawList.map((m) => {
-        if (m.audioMemo && (!m.audioMemo.url || m.audioMemo.url.startsWith('mock-') || !m.audioMemo.url.trim())) {
-          const { audioMemo, ...clean } = m;
-          return clean as KeepsakeMemory;
-        }
-        return m;
-      });
-      memCache.secretYearNotes = savedNotes && Array.isArray(savedNotes) ? savedNotes : [];
-      memCache.digitalLoveLetters = savedLetters && Array.isArray(savedLetters) ? savedLetters : [];
+      return m;
+    });
+    memCache.secretYearNotes = savedNotes && Array.isArray(savedNotes) ? savedNotes : [];
+    memCache.digitalLoveLetters = savedLetters && Array.isArray(savedLetters) ? savedLetters : [];
 
-      let memoriesUpdated = false;
-      const existingDates = new Set(cleanedList.map((m) => m.dateISO));
-      for (const item of INITIAL_MEMORIES) {
-        if (!existingDates.has(item.dateISO)) {
-          cleanedList.push(item);
-          existingDates.add(item.dateISO);
-          memoriesUpdated = true;
-        }
+    let memoriesUpdated = false;
+    const existingDates = new Set(cleanedList.map((m) => m.dateISO));
+    for (const item of INITIAL_MEMORIES) {
+      if (!existingDates.has(item.dateISO)) {
+        cleanedList.push(item);
+        existingDates.add(item.dateISO);
+        memoriesUpdated = true;
       }
-      cleanedList.sort((a, b) => b.dateISO.localeCompare(a.dateISO));
-      if (memoriesUpdated) {
-        fullMemoriesToPersist = cleanedList;
-      }
-
-      for (const letter of INITIAL_DIGITAL_LOVE_LETTERS) {
-        const existingIdx = memCache.digitalLoveLetters.findIndex((l) => l.id === letter.id);
-        if (existingIdx === -1) {
-          memCache.digitalLoveLetters.push(letter);
-          lettersUpdated = true;
-        }
-      }
-
-      // Stage 1: Store full list in fullMemories and preserve instant calendar dots immediately
-      memCache.fullMemories = cleanedList;
-      memCache.memories = cleanedList;
-      this.hasCompletedInitialStream = true;
-      if (fullMemoriesToPersist) {
-        idbSet('memories', cleanedList);
-      }
-      saveLightweightMirror(cleanedList);
     }
+    cleanedList.sort((a, b) => b.dateISO.localeCompare(a.dateISO));
+    if (memoriesUpdated) {
+      fullMemoriesToPersist = cleanedList;
+    }
+
+    for (const letter of INITIAL_DIGITAL_LOVE_LETTERS) {
+      const existingIdx = memCache.digitalLoveLetters.findIndex((l) => l.id === letter.id);
+      if (existingIdx === -1) {
+        memCache.digitalLoveLetters.push(letter);
+        lettersUpdated = true;
+      }
+    }
+
+    // Store full list in fullMemories and preserve instant calendar dots immediately
+    memCache.fullMemories = cleanedList;
+    memCache.memories = cleanedList;
+    this.hasCompletedInitialStream = true;
+    if (fullMemoriesToPersist) {
+      idbSet('memories', cleanedList);
+    }
+    saveLightweightMirror(cleanedList);
 
     if (savedProfile && savedProfile.partner1Name) {
       if (
